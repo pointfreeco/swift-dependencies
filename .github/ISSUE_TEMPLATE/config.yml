@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Discussion
+    url: https://github.com/pointfreeco/swift-dependencies/discussions
+    about: Dependencies Q&A, ideas, and more
+  - name: Documentation
+    url: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/
+    about: Read documentation for Dependencies
+  - name: Videos
+    url: https://www.pointfree.co/collections/composable-architecture/reducer-protocol/ep205-reducer-protocol-dependencies-part-1
+    about: Watch videos to get a behind-the-scenes look at how Dependencies was motivated and built

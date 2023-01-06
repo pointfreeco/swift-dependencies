@@ -9,8 +9,9 @@ systems that you do not control. Classic examples of this are API clients that m
 requests to servers, but also seemingly innocuous things such as `UUID` and `Date` initializers,
 file access, user defaults, and even clocks and timers, can all be thought of as dependencies.
 
-You can get really far in application development without ever thinking about dependencies, but
-eventually they can cause many problems in your code base and development cycle:
+You can get really far in application development without ever thinking about dependency management 
+(or, as some like to call it, "dependency injection”), but eventually uncontrolled dependencies can 
+cause many problems in your code base and development cycle
 
   * Uncontrolled dependencies make it **difficult to write fast, deterministic tests** because you 
     are susceptible to the vagaries of the outside world, such as file systems, network 

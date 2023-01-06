@@ -30,8 +30,9 @@ systems that you do not control. Classic examples of this are API clients that m
 requests to servers, but also seemingly innocuous things such as `UUID` and `Date` initializers,
 file access, user defaults, and even clocks and timers, can all be thought of as dependencies.
 
-You can get really far in application development without ever thinking about dependencies, but
-eventually they can cause many problems in your code base and development cycle:
+You can get really far in application development without ever thinking about dependency management 
+(or, as some like to call it, "dependency injection”), but eventually uncontrolled dependencies can 
+cause many problems in your code base and development cycle
 
   * Uncontrolled dependencies make it **difficult to write fast, deterministic tests** because you 
     are susceptible to the vagaries of the outside world, such as file systems, network 
@@ -49,9 +50,8 @@ eventually they can cause many problems in your code base and development cycle:
 For these reasons, and a lot more, it is highly encouraged for you to take control of your
 dependencies rather than letting them control you.
 
-But, controlling a dependency (some people like to call this "dependency injection") is only the
-beginning. Once you have controlled your dependencies, you are faced with a whole set of new
-problems:
+But, controlling a dependency is only the beginning. Once you have controlled your dependencies, 
+you are faced with a whole set of new problems:
 
   * How can you **propagate dependencies** throughout your entire application that is more ergonomic
     than explicitly passing them around everywhere, but safer than having a global dependency?

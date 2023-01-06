@@ -11,7 +11,7 @@ file access, user defaults, and even clocks and timers, can all be thought of as
 
 You can get really far in application development without ever thinking about dependency management 
 (or, as some like to call it, "dependency injection”), but eventually uncontrolled dependencies can 
-cause many problems in your code base and development cycle
+cause many problems in your code base and development cycle:
 
   * Uncontrolled dependencies make it **difficult to write fast, deterministic tests** because you 
     are susceptible to the vagaries of the outside world, such as file systems, network 

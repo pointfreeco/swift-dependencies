@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - build-platforms
   pull_request:
     branches:
       - '*'

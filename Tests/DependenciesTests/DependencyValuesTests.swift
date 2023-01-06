@@ -103,7 +103,7 @@ final class DependencyValuesTests: XCTestCase {
 
           withDependencies {
             $0.context = .preview
-          } operation: {
+          } operation: { () -> Void in
             XCTAssertEqual(reuseClient.count(), 0)
             reuseClient.setCount(1729)
             XCTAssertEqual(reuseClient.count(), 1729)
@@ -451,7 +451,7 @@ final class DependencyValuesTests: XCTestCase {
   func testTaskPropagation() async throws {
     let task = withDependencies {
       $0.date.now = Date(timeIntervalSinceReferenceDate: 1_234_567_890)
-    } operation: {
+    } operation: { () -> Task<Void, Never> in
       @Dependency(\.date.now) var now: Date
       XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
       return Task {
@@ -483,7 +483,7 @@ final class DependencyValuesTests: XCTestCase {
   func testAsyncStreamUnfoldingWithoutEscapedDependencies() async {
     let stream = withDependencies {
       $0.fullDependency.value = 42
-    } operation: {
+    } operation: { () -> AsyncStream<Int> in
       var isDone = false
       return AsyncStream(unfolding: {
         defer { isDone = true }
@@ -499,7 +499,7 @@ final class DependencyValuesTests: XCTestCase {
   func testAsyncStreamUnfoldingWithEscapedDependencies() async {
     let stream = withDependencies {
       $0.fullDependency.value = 42
-    } operation: {
+    } operation: { () -> AsyncStream<Int> in
       var isDone = false
       return withEscapedDependencies { continuation in
         AsyncStream(unfolding: {

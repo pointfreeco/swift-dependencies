@@ -102,7 +102,7 @@ final class DependencyTests: XCTestCase {
       await withDependencies {
         await Task.yield()
         $0.string = "howdy"
-      } operation: {
+      } operation: { () -> Model in
         await Task.yield()
         return Model()
       }

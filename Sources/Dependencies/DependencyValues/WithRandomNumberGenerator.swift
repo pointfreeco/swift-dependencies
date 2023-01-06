@@ -65,16 +65,28 @@ extension DependencyValues {
 ///
 /// See ``DependencyValues/withRandomNumberGenerator`` for more information.
 public final class WithRandomNumberGenerator: @unchecked Sendable {
-  private var generator: RandomNumberGenerator
+  private var generator: _AnyRandomNumberGenerator
   private let lock = NSLock()
 
   public init<T: RandomNumberGenerator & Sendable>(_ generator: T) {
-    self.generator = generator
+    self.generator = _AnyRandomNumberGenerator(generator)
   }
 
-  public func callAsFunction<R>(_ work: (inout RandomNumberGenerator) -> R) -> R {
+  public func callAsFunction<R>(_ work: (inout _AnyRandomNumberGenerator) -> R) -> R {
     self.lock.lock()
     defer { self.lock.unlock() }
     return work(&self.generator)
+  }
+
+  public class _AnyRandomNumberGenerator: RandomNumberGenerator {
+    private(set) public var base: RandomNumberGenerator
+
+    public init(_ base: RandomNumberGenerator) {
+      self.base = base
+    }
+
+    public func next() -> UInt64 {
+      self.base.next()
+    }
   }
 }

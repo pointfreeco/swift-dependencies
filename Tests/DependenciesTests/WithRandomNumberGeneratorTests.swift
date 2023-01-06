@@ -10,11 +10,11 @@ final class WithRandomNumberGeneratorDependencyTests: XCTestCase {
       $0.withRandomNumberGenerator = .init(LCRNG(seed: 0))
     } operation: {
       self.withRandomNumberGenerator { generator -> Void in
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 1)
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 3)
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 6)
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 3)
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 2)
+        XCTAssertEqual(Int.random(in: 1...6, using: &generator), 1)
+        XCTAssertEqual(Int.random(in: 1...6, using: &generator), 3)
+        XCTAssertEqual(Int.random(in: 1...6, using: &generator), 6)
+        XCTAssertEqual(Int.random(in: 1...6, using: &generator), 3)
+        XCTAssertEqual(Int.random(in: 1...6, using: &generator), 2)
       }
     }
   }

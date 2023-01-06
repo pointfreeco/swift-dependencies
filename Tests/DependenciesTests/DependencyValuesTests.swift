@@ -449,22 +449,18 @@ final class DependencyValuesTests: XCTestCase {
   }
 
   func testTaskPropagation() async throws {
-    let expectation = self.expectation(description: "escape")
-
-    withDependencies {
+    let task = withDependencies {
       $0.date.now = Date(timeIntervalSinceReferenceDate: 1_234_567_890)
     } operation: {
       @Dependency(\.date.now) var now: Date
       XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
-      Task {
+      return Task {
         XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
         @Dependency(\.date.now) var now: Date
         XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
-        expectation.fulfill()
       }
     }
-
-    self.wait(for: [expectation], timeout: 1)
+    await task.value
   }
 
   func testTaskGroupPropagation() async {

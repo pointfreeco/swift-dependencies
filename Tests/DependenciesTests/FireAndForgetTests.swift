@@ -8,7 +8,7 @@ final class FireAndForgetTests: XCTestCase {
     let didExecute = ActorIsolated(false)
 
     await self.fireAndForget {
-      try await Task.sleep(nanoseconds: 100 * NSEC_PER_MSEC)
+      try await Task.sleep(nanoseconds: 100_000_000)
       await didExecute.setValue(true)
     }
 
@@ -23,14 +23,14 @@ final class FireAndForgetTests: XCTestCase {
       let didExecute = ActorIsolated(false)
 
       await self.fireAndForget {
-        try await Task.sleep(nanoseconds: 100 * NSEC_PER_MSEC)
+        try await Task.sleep(nanoseconds: 100_000_000)
         await didExecute.setValue(true)
       }
 
       var value = await didExecute.value
       XCTAssertEqual(value, false)
 
-      try await Task.sleep(nanoseconds: 200 * NSEC_PER_MSEC)
+      try await Task.sleep(nanoseconds: 200_000_000)
       value = await didExecute.value
       XCTAssertEqual(value, true)
     }

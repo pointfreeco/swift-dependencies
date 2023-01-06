@@ -118,8 +118,8 @@ final class DependencyValuesTests: XCTestCase {
               XCTExpectFailure {
                 $0.compactDescription.contains(
                   """
-                  @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a live \
-                  context.
+                  @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a \
+                  live context.
                   """
                 )
               }
@@ -308,11 +308,9 @@ final class DependencyValuesTests: XCTestCase {
     self.wait(for: [expectation], timeout: 1)
   }
 
-  @MainActor
   func testEscapingInFeatureModel_InstanceVariablePropagated() {
     let expectation = self.expectation(description: "escape")
 
-    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       @Dependency(\.fullDependency) var fullDependency
       func doSomething(expectation: XCTestExpectation) {
@@ -333,8 +331,7 @@ final class DependencyValuesTests: XCTestCase {
     self.wait(for: [expectation], timeout: 1)
   }
 
-  @MainActor
-  func testEscapingInFeatureModel_NotPropagated() {
+  func testEscapingInFeatureModel_NotPropagated() async {
     let expectation = self.expectation(description: "escape")
 
     @MainActor
@@ -349,19 +346,19 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
 
-    let model = withDependencies {
+    let model = await withDependencies {
       $0.fullDependency.value = 42
     } operation: {
-      FeatureModel()
+      await FeatureModel()
     }
 
-    model.doSomething(expectation: expectation)
+    await model.doSomething(expectation: expectation)
     self.wait(for: [expectation], timeout: 1)
-    XCTAssertEqual(model.value, 3)
+    let newValue = await model.value
+    XCTAssertEqual(newValue, 3)
   }
 
-  @MainActor
-  func testEscapingInFeatureModelWithOverride() {
+  func testEscapingInFeatureModelWithOverride() async {
     let expectation = self.expectation(description: "escape")
 
     @MainActor
@@ -379,18 +376,17 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
 
-    let model = FeatureModel()
+    let model = await FeatureModel()
 
-    withDependencies {
+    await withDependencies {
       $0.fullDependency.value = 42
     } operation: {
-      model.doSomething(expectation: expectation)
+      await model.doSomething(expectation: expectation)
     }
     self.wait(for: [expectation], timeout: 1)
   }
 
-  @MainActor
-  func testEscapingInFeatureModelWithOverride_OverideEscaped() {
+  func testEscapingInFeatureModelWithOverride_OverrideEscaped() async {
     let expectation = self.expectation(description: "escape")
 
     @MainActor
@@ -413,19 +409,19 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
 
-    let model = FeatureModel()
+    let model = await FeatureModel()
 
-    withDependencies {
+    await withDependencies {
       $0.fullDependency.value = 42
     } operation: {
-      model.doSomething(expectation: expectation)
+      await model.doSomething(expectation: expectation)
     }
     self.wait(for: [expectation], timeout: 1)
-    XCTAssertEqual(model.value, 999)
+    let newValue = await model.value
+    XCTAssertEqual(newValue, 999)
   }
 
-  @MainActor
-  func testEscapingInFeatureModelWithOverride_NotPropagated() {
+  func testEscapingInFeatureModelWithOverride_NotPropagated() async {
     let expectation = self.expectation(description: "escape")
 
     @MainActor
@@ -440,34 +436,31 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
 
-    let model = FeatureModel()
+    let model = await FeatureModel()
 
-    withDependencies {
+    await withDependencies {
       $0.fullDependency.value = 42
     } operation: {
-      model.doSomething(expectation: expectation)
+      await model.doSomething(expectation: expectation)
     }
     self.wait(for: [expectation], timeout: 1)
-    XCTAssertEqual(model.value, 3)
+    let newValue = await model.value
+    XCTAssertEqual(newValue, 3)
   }
 
   func testTaskPropagation() async throws {
-    let expectation = self.expectation(description: "escape")
-
-    withDependencies {
+    let task = withDependencies {
       $0.date.now = Date(timeIntervalSinceReferenceDate: 1_234_567_890)
     } operation: {
       @Dependency(\.date.now) var now: Date
       XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
-      Task {
+      return Task {
         XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
         @Dependency(\.date.now) var now: Date
         XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
-        expectation.fulfill()
       }
     }
-
-    self.wait(for: [expectation], timeout: 0)
+    await task.value
   }
 
   func testTaskGroupPropagation() async {

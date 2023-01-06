@@ -3,10 +3,8 @@
 A dependency management library inspired by SwiftUI's “environment.”
 
 [![CI](https://github.com/pointfreeco/swift-dependencies/actions/workflows/ci.yml/badge.svg)](https://github.com/pointfreeco/swift-dependencies/actions/workflows/ci.yml)
-<!--
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-dependencies%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/pointfreeco/swift-dependencies)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-dependencies%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/pointfreeco/swift-dependencies)
--->
 
   * [Learn More](#learn-more)
   * [Overview](#overview)

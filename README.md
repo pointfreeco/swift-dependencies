@@ -115,7 +115,7 @@ library comes with by checking out the [documentation][docs], and reading these 
 
 We rebuilt Apple's [Scrumdinger][scrumdinger] demo application using modern, best practices for
 SwiftUI development, including using this library to control dependencies on file system access,
-timers and speech recognition APIs. That [demo can be found][TODO: ] in our 
+timers and speech recognition APIs. That [demo can be found][standups-demo] in our 
 [SwiftUINavigation][swiftui-nav-gh] library.
 
 ## Documentation
@@ -160,4 +160,5 @@ This library is released under the MIT license. See [LICENSE](LICENSE) for detai
 [quick-start-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/quickstart
 [registering-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/registeringdependencies 
 [scrumdinger]: https://developer.apple.com/tutorials/app-dev-training/getting-started-with-scrumdinger
+[standups-demo]: https://github.com/pointfreeco/swiftui-navigation/tree/main/Examples/Standups
 [swiftui-nav-gh]: http://github.com/pointfreeco/swiftui-navigation

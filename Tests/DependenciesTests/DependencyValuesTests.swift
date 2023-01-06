@@ -331,9 +331,10 @@ final class DependencyValuesTests: XCTestCase {
     self.wait(for: [expectation], timeout: 1)
   }
 
-  func testEscapingInFeatureModel_NotPropagated() {
+  func testEscapingInFeatureModel_NotPropagated() async {
     let expectation = self.expectation(description: "escape")
 
+    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       /*@Published */var value = 0
       func doSomething(expectation: XCTestExpectation) {
@@ -345,20 +346,22 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
 
-    let model = withDependencies {
+    let model = await withDependencies {
       $0.fullDependency.value = 42
     } operation: {
-      FeatureModel()
+      await FeatureModel()
     }
 
-    model.doSomething(expectation: expectation)
+    await model.doSomething(expectation: expectation)
     self.wait(for: [expectation], timeout: 1)
-    XCTAssertEqual(model.value, 3)
+    let newValue = await model.value
+    XCTAssertEqual(newValue, 3)
   }
 
-  func testEscapingInFeatureModelWithOverride() {
+  func testEscapingInFeatureModelWithOverride() async {
     let expectation = self.expectation(description: "escape")
 
+    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       @Dependency(\.fullDependency) var fullDependency
       func doSomething(expectation: XCTestExpectation) {
@@ -373,19 +376,20 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
 
-    let model = FeatureModel()
+    let model = await FeatureModel()
 
-    withDependencies {
+    await withDependencies {
       $0.fullDependency.value = 42
     } operation: {
-      model.doSomething(expectation: expectation)
+      await model.doSomething(expectation: expectation)
     }
     self.wait(for: [expectation], timeout: 1)
   }
 
-  func testEscapingInFeatureModelWithOverride_OverrideEscaped() {
+  func testEscapingInFeatureModelWithOverride_OverrideEscaped() async {
     let expectation = self.expectation(description: "escape")
 
+    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       /*@Published */var value = 0
       @Dependency(\.fullDependency) var fullDependency
@@ -405,20 +409,22 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
 
-    let model = FeatureModel()
+    let model = await FeatureModel()
 
-    withDependencies {
+    await withDependencies {
       $0.fullDependency.value = 42
     } operation: {
-      model.doSomething(expectation: expectation)
+      await model.doSomething(expectation: expectation)
     }
     self.wait(for: [expectation], timeout: 1)
-    XCTAssertEqual(model.value, 999)
+    let newValue = await model.value
+    XCTAssertEqual(newValue, 999)
   }
 
-  func testEscapingInFeatureModelWithOverride_NotPropagated() {
+  func testEscapingInFeatureModelWithOverride_NotPropagated() async {
     let expectation = self.expectation(description: "escape")
 
+    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       /*@Published */var value = 0
       @Dependency(\.fullDependency) var fullDependency
@@ -430,15 +436,16 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
 
-    let model = FeatureModel()
+    let model = await FeatureModel()
 
-    withDependencies {
+    await withDependencies {
       $0.fullDependency.value = 42
     } operation: {
-      model.doSomething(expectation: expectation)
+      await model.doSomething(expectation: expectation)
     }
     self.wait(for: [expectation], timeout: 1)
-    XCTAssertEqual(model.value, 3)
+    let newValue = await model.value
+    XCTAssertEqual(newValue, 3)
   }
 
   func testTaskPropagation() async throws {

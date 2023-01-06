@@ -175,7 +175,7 @@ public func withDependencies<Model: AnyObject, R>(
   /// - Parameters:
   ///   - model: An object with dependencies. The given model should have at least one `@Dependency`
   ///     property, or should have been initialized and returned from a `withDependencies`
-///       operation.
+  ///       operation.
   ///   - updateValuesForOperation: A closure for updating the current dependency values for the
   ///     duration of the operation.
   ///   - operation: The operation to run with the updated dependencies.

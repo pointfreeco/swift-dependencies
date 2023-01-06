@@ -8,7 +8,7 @@ CONFIG = debug
 
 default: test
 
-test:
+build-all-platforms:
 	for platform in \
 	  "$(PLATFORM_IOS)" \
 	  "$(PLATFORM_MACOS)" \
@@ -16,7 +16,7 @@ test:
 	  "$(PLATFORM_TVOS)" \
 	  "$(PLATFORM_WATCHOS)"; \
 	do \
-		xcodebuild test \
+		xcodebuild build \
 			-workspace Dependencies.xcworkspace \
 			-scheme Dependencies \
 			-configuration $(CONFIG) \

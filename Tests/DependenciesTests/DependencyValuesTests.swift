@@ -118,8 +118,8 @@ final class DependencyValuesTests: XCTestCase {
               XCTExpectFailure {
                 $0.compactDescription.contains(
                   """
-                  @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a live \
-                  context.
+                  @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a \
+                  live context.
                   """
                 )
               }
@@ -308,11 +308,9 @@ final class DependencyValuesTests: XCTestCase {
     self.wait(for: [expectation], timeout: 1)
   }
 
-  @MainActor
   func testEscapingInFeatureModel_InstanceVariablePropagated() {
     let expectation = self.expectation(description: "escape")
 
-    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       @Dependency(\.fullDependency) var fullDependency
       func doSomething(expectation: XCTestExpectation) {
@@ -333,11 +331,9 @@ final class DependencyValuesTests: XCTestCase {
     self.wait(for: [expectation], timeout: 1)
   }
 
-  @MainActor
   func testEscapingInFeatureModel_NotPropagated() {
     let expectation = self.expectation(description: "escape")
 
-    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       /*@Published */var value = 0
       func doSomething(expectation: XCTestExpectation) {
@@ -360,11 +356,9 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(model.value, 3)
   }
 
-  @MainActor
   func testEscapingInFeatureModelWithOverride() {
     let expectation = self.expectation(description: "escape")
 
-    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       @Dependency(\.fullDependency) var fullDependency
       func doSomething(expectation: XCTestExpectation) {
@@ -389,11 +383,9 @@ final class DependencyValuesTests: XCTestCase {
     self.wait(for: [expectation], timeout: 1)
   }
 
-  @MainActor
-  func testEscapingInFeatureModelWithOverride_OverideEscaped() {
+  func testEscapingInFeatureModelWithOverride_OverrideEscaped() {
     let expectation = self.expectation(description: "escape")
 
-    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       /*@Published */var value = 0
       @Dependency(\.fullDependency) var fullDependency
@@ -424,11 +416,9 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(model.value, 999)
   }
 
-  @MainActor
   func testEscapingInFeatureModelWithOverride_NotPropagated() {
     let expectation = self.expectation(description: "escape")
 
-    @MainActor
     class FeatureModel /*: ObservableObject*/ {
       /*@Published */var value = 0
       @Dependency(\.fullDependency) var fullDependency
@@ -467,7 +457,7 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
 
-    self.wait(for: [expectation], timeout: 0)
+    self.wait(for: [expectation], timeout: 1)
   }
 
   func testTaskGroupPropagation() async {

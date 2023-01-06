@@ -6,7 +6,9 @@ final class DependencyValuesTests: XCTestCase {
     #if DEBUG && !os(Linux)
       var line = 0
       XCTExpectFailure {
-        withDependencies { $0.context = .live } operation: {
+        withDependencies {
+          $0.context = .live
+        } operation: {
           line = #line + 1
           @Dependency(\.missingLiveDependency) var missingLiveDependency: Int
           _ = missingLiveDependency
@@ -54,8 +56,12 @@ final class DependencyValuesTests: XCTestCase {
   }
 
   func testWithValue() {
-    withDependencies { $0.context = .live } operation: {
-      let date = withDependencies { $0.date = .constant(someDate) } operation: { () -> Date in
+    withDependencies {
+      $0.context = .live
+    } operation: {
+      let date = withDependencies {
+        $0.date = .constant(someDate)
+      } operation: { () -> Date in
         @Dependency(\.date) var date
         return date.now
       }
@@ -66,8 +72,12 @@ final class DependencyValuesTests: XCTestCase {
   }
 
   func testDependencyDefaultIsReused() {
-    withDependencies { $0 = .init() } operation: {
-      withDependencies { $0.context = .test } operation: {
+    withDependencies {
+      $0 = .init()
+    } operation: {
+      withDependencies {
+        $0.context = .test
+      } operation: {
         @Dependency(\.reuseClient) var reuseClient: ReuseClient
 
         XCTAssertEqual(reuseClient.count(), 0)
@@ -79,15 +89,21 @@ final class DependencyValuesTests: XCTestCase {
 
   #if !os(Linux)
     func testDependencyDefaultIsReused_SegmentedByContext() {
-      withDependencies { $0 = .init() } operation: {
-        withDependencies { $0.context = .test } operation: {
+      withDependencies {
+        $0 = .init()
+      } operation: {
+        withDependencies {
+          $0.context = .test
+        } operation: {
           @Dependency(\.reuseClient) var reuseClient: ReuseClient
 
           XCTAssertEqual(reuseClient.count(), 0)
           reuseClient.setCount(42)
           XCTAssertEqual(reuseClient.count(), 42)
 
-          withDependencies { $0.context = .preview } operation: {
+          withDependencies {
+            $0.context = .preview
+          } operation: {
             XCTAssertEqual(reuseClient.count(), 0)
             reuseClient.setCount(1729)
             XCTAssertEqual(reuseClient.count(), 1729)
@@ -95,7 +111,9 @@ final class DependencyValuesTests: XCTestCase {
 
           XCTAssertEqual(reuseClient.count(), 42)
 
-          withDependencies { $0.context = .live } operation: {
+          withDependencies {
+            $0.context = .live
+          } operation: {
             #if DEBUG
               XCTExpectFailure {
                 $0.compactDescription.contains(
@@ -125,7 +143,9 @@ final class DependencyValuesTests: XCTestCase {
     @Dependency(\.reuseClient) var reuseClient: ReuseClient
 
     #if !os(Linux)
-      withDependencies { $0.context = .live } operation: {
+      withDependencies {
+        $0.context = .live
+      } operation: {
         withDependencies {
           XCTAssertEqual($0.reuseClient.count(), 0)
           XCTAssertEqual(reuseClient.count(), 0)
@@ -147,7 +167,9 @@ final class DependencyValuesTests: XCTestCase {
   }
 
   func testBinding() {
-    withDependencies { $0.context = .test } operation: {
+    withDependencies {
+      $0.context = .test
+    } operation: {
       @Dependency(\.childDependencyEarlyBinding) var childDependencyEarlyBinding:
         ChildDependencyEarlyBinding
       @Dependency(\.childDependencyLateBinding) var childDependencyLateBinding:
@@ -156,7 +178,9 @@ final class DependencyValuesTests: XCTestCase {
       XCTAssertEqual(childDependencyEarlyBinding.fetch(), 42)
       XCTAssertEqual(childDependencyLateBinding.fetch(), 42)
 
-      withDependencies { $0.someDependency.fetch = { 1729 } } operation: {
+      withDependencies {
+        $0.someDependency.fetch = { 1729 }
+      } operation: {
         XCTAssertEqual(childDependencyEarlyBinding.fetch(), 1729)
         XCTAssertEqual(childDependencyLateBinding.fetch(), 1729)
       }
@@ -164,7 +188,9 @@ final class DependencyValuesTests: XCTestCase {
       var childDependencyEarlyBindingEscaped: ChildDependencyEarlyBinding!
       var childDependencyLateBindingEscaped: ChildDependencyLateBinding!
 
-      withDependencies { $0.someDependency.fetch = { 999 } } operation: {
+      withDependencies {
+        $0.someDependency.fetch = { 999 }
+      } operation: {
         @Dependency(\.childDependencyEarlyBinding) var childDependencyEarlyBinding2:
           ChildDependencyEarlyBinding
         @Dependency(\.childDependencyLateBinding) var childDependencyLateBinding2:
@@ -180,7 +206,9 @@ final class DependencyValuesTests: XCTestCase {
       XCTAssertEqual(childDependencyEarlyBindingEscaped.fetch(), 42)
       XCTAssertEqual(childDependencyLateBindingEscaped.fetch(), 42)
 
-      withDependencies { $0.someDependency.fetch = { 1_000 } } operation: {
+      withDependencies {
+        $0.someDependency.fetch = { 1_000 }
+      } operation: {
         XCTAssertEqual(childDependencyEarlyBindingEscaped.fetch(), 1_000)
         XCTAssertEqual(childDependencyLateBindingEscaped.fetch(), 1_000)
       }
@@ -196,13 +224,19 @@ final class DependencyValuesTests: XCTestCase {
 
     XCTAssertEqual(model.fullDependency.value, 3)
 
-    withDependencies { $0.context = .preview } operation: {
+    withDependencies {
+      $0.context = .preview
+    } operation: {
       XCTAssertEqual(model.fullDependency.value, 2)
     }
-    withDependencies { $0.context = .live } operation: {
+    withDependencies {
+      $0.context = .live
+    } operation: {
       XCTAssertEqual(model.fullDependency.value, 1)
     }
-    withDependencies { $0.fullDependency.value = -1 } operation: {
+    withDependencies {
+      $0.fullDependency.value = -1
+    } operation: {
       XCTAssertEqual(model.fullDependency.value, -1)
     }
   }
@@ -347,7 +381,9 @@ final class DependencyValuesTests: XCTestCase {
 
     let model = FeatureModel()
 
-    withDependencies { $0.fullDependency.value = 42 } operation: {
+    withDependencies {
+      $0.fullDependency.value = 42
+    } operation: {
       model.doSomething(expectation: expectation)
     }
     self.wait(for: [expectation], timeout: 1)
@@ -379,7 +415,9 @@ final class DependencyValuesTests: XCTestCase {
 
     let model = FeatureModel()
 
-    withDependencies { $0.fullDependency.value = 42 } operation: {
+    withDependencies {
+      $0.fullDependency.value = 42
+    } operation: {
       model.doSomething(expectation: expectation)
     }
     self.wait(for: [expectation], timeout: 1)
@@ -404,7 +442,9 @@ final class DependencyValuesTests: XCTestCase {
 
     let model = FeatureModel()
 
-    withDependencies { $0.fullDependency.value = 42 } operation: {
+    withDependencies {
+      $0.fullDependency.value = 42
+    } operation: {
       model.doSomething(expectation: expectation)
     }
     self.wait(for: [expectation], timeout: 1)
@@ -415,14 +455,14 @@ final class DependencyValuesTests: XCTestCase {
     let expectation = self.expectation(description: "escape")
 
     withDependencies {
-      $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
+      $0.date.now = Date(timeIntervalSinceReferenceDate: 1_234_567_890)
     } operation: {
       @Dependency(\.date.now) var now: Date
-      XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1234567890)
+      XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
       Task {
-        XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1234567890)
+        XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
         @Dependency(\.date.now) var now: Date
-        XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1234567890)
+        XCTAssertEqual(now.timeIntervalSinceReferenceDate, 1_234_567_890)
         expectation.fulfill()
       }
     }
@@ -496,28 +536,28 @@ final class DependencyValuesTests: XCTestCase {
     }
 
     let parent = withDependencies {
-      $0.date.now = Date(timeIntervalSince1970: 1234567890)
+      $0.date.now = Date(timeIntervalSince1970: 1_234_567_890)
     } operation: {
       Parent()
     }
 
     let child = parent.child()
 
-    XCTAssertEqual(child.date.now, Date(timeIntervalSince1970: 1234567890))
+    XCTAssertEqual(child.date.now, Date(timeIntervalSince1970: 1_234_567_890))
   }
 
   #if DEBUG
-  func testCachePollution1() async {
-    @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
-    let value = await cachedDependency.increment()
-    XCTAssertEqual(value, 1)
-  }
+    func testCachePollution1() async {
+      @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+      let value = await cachedDependency.increment()
+      XCTAssertEqual(value, 1)
+    }
 
-  func testCachePollution2() async {
-    @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
-    let value = await cachedDependency.increment()
-    XCTAssertEqual(value, 1)
-  }
+    func testCachePollution2() async {
+      @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+      let value = await cachedDependency.increment()
+      XCTAssertEqual(value, 1)
+    }
   #endif
 }
 

@@ -9,8 +9,12 @@ final class DependencyTests: XCTestCase {
     XCTAssertEqual(42, Model().int)
     XCTAssertEqual("goodbye", Model().string)
 
-    let model = withDependencies { $0.int = 1729 } operation: {
-      withDependencies { $0.string = "howdy" } operation: {
+    let model = withDependencies {
+      $0.int = 1729
+    } operation: {
+      withDependencies {
+        $0.string = "howdy"
+      } operation: {
         Model()
       }
     }

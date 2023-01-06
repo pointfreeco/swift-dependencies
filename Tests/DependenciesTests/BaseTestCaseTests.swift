@@ -64,9 +64,9 @@ class BaseTestCase: XCTestCase {
   }
 }
 
-private extension UUID {
-  static let deadbeef = Self(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef")!
+extension UUID {
+  fileprivate static let deadbeef = Self(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef")!
 }
-private extension Date {
-  static let mock = Self(timeIntervalSince1970: 1_234_567_890)
+extension Date {
+  fileprivate static let mock = Self(timeIntervalSince1970: 1_234_567_890)
 }

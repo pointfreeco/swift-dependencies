@@ -79,12 +79,12 @@ final class ResolutionTests: XCTestCase {
   }
 
   // TODO: investigate using callstack to find dependency cycles
-//  func testCyclic() {
-//    @Dependency(\.cyclic1) var cyclic1: CyclicDependency1
-//    @Dependency(\.cyclic2) var cyclic2: CyclicDependency2
-//
-//    XCTAssertEqual(cyclic1.value(), 3)
-//  }
+  //  func testCyclic() {
+  //    @Dependency(\.cyclic1) var cyclic1: CyclicDependency1
+  //    @Dependency(\.cyclic2) var cyclic2: CyclicDependency2
+  //
+  //    XCTAssertEqual(cyclic1.value(), 3)
+  //  }
 }
 
 private struct EagerParentDependency: TestDependencyKey {
@@ -194,4 +194,3 @@ extension DependencyValues {
     set { self[CyclicDependency2.self] = newValue }
   }
 }
-

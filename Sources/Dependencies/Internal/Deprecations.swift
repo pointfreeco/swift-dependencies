@@ -1,8 +1,8 @@
 extension ActorIsolated {
   @available(
     *,
-     deprecated,
-     message: "Use the non-async version of 'withValue'."
+    deprecated,
+    message: "Use the non-async version of 'withValue'."
   )
   public func withValue<T>(
     _ operation: @Sendable (inout Value) async throws -> T
@@ -78,7 +78,9 @@ extension DependencyValues {
     _ value: @autoclosure () -> Value,
     operation: () throws -> R
   ) rethrows -> R {
-    try withDependencies { $0[keyPath: keyPath] = value() } operation: {
+    try withDependencies {
+      $0[keyPath: keyPath] = value()
+    } operation: {
       try operation()
     }
   }
@@ -89,7 +91,9 @@ extension DependencyValues {
     _ value: @autoclosure () -> Value,
     operation: () async throws -> R
   ) async rethrows -> R {
-    try await withDependencies { $0[keyPath: keyPath] = value() } operation: {
+    try await withDependencies {
+      $0[keyPath: keyPath] = value()
+    } operation: {
       try await operation()
     }
   }

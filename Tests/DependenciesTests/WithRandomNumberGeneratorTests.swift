@@ -6,7 +6,9 @@ final class WithRandomNumberGeneratorDependencyTests: XCTestCase {
   @Dependency(\.withRandomNumberGenerator) var withRandomNumberGenerator
 
   func testWithRandomNumberGenerator() {
-    withDependencies { $0.withRandomNumberGenerator = .init(LCRNG(seed: 0)) } operation: {
+    withDependencies {
+      $0.withRandomNumberGenerator = .init(LCRNG(seed: 0))
+    } operation: {
       self.withRandomNumberGenerator {
         XCTAssertEqual(.random(in: 1...6, using: &$0), 1)
         XCTAssertEqual(.random(in: 1...6, using: &$0), 3)

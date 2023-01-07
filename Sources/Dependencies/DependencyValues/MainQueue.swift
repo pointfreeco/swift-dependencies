@@ -13,7 +13,7 @@
     /// counts the number of seconds it's onscreen:
     ///
     /// ```
-    /// class TimerModel: ObservableObject {
+    /// final class TimerModel: ObservableObject {
     ///   @Published var elapsed = 0
     ///
     ///   @Dependency(\.mainQueue) var mainQueue

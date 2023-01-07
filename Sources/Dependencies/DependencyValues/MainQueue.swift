@@ -33,7 +33,7 @@
     /// func testFeature() {
     ///   let mainQueue = DispatchQueue.test
     ///   let model = withDependencies {
-    ///     $0.mainQueue = mainQueue
+    ///     $0.mainQueue = mainQueue.eraseToAnyScheduler()
     ///   } operation: {
     ///     TimerModel()
     ///   }

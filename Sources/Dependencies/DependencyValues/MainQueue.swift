@@ -13,7 +13,7 @@
     /// counts the number of seconds it's onscreen:
     ///
     /// ```
-    /// struct TimerModel: ObservableObject {
+    /// final class TimerModel: ObservableObject {
     ///   @Published var elapsed = 0
     ///
     ///   @Dependency(\.mainQueue) var mainQueue
@@ -33,7 +33,7 @@
     /// func testFeature() {
     ///   let mainQueue = DispatchQueue.test
     ///   let model = withDependencies {
-    ///     $0.mainQueue = mainQueue
+    ///     $0.mainQueue = mainQueue.eraseToAnyScheduler()
     ///   } operation: {
     ///     TimerModel()
     ///   }

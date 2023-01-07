@@ -29,9 +29,8 @@ cause many problems in your code base and development cycle:
 For these reasons, and a lot more, it is highly encouraged for you to take control of your
 dependencies rather than letting them control you.
 
-But, controlling a dependency (some people like to call this "dependency injection") is only the
-beginning. Once you have controlled your dependencies, you are faced with a whole set of new
-problems:
+But, controlling a dependency is only the beginning. Once you have controlled your dependencies,
+you are faced with a whole set of new problems:
 
   * How can you **propagate dependencies** throughout your entire application that is more ergonomic
     than explicitly passing them around everywhere, but safer than having a global dependency?

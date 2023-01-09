@@ -100,9 +100,11 @@ func testAdd() async throws {
 ```
 
 Here we controlled the `date` dependency to always return the same date, and we controlled the
-`uuid` dependency to return an auto-incrementing UUID every time it is invoked. If we did not
-control these dependencies this test would be very difficult to write since there is no way to
-accurately predict what will be returned by `Date()` and `UUID()`.
+`uuid` dependency to return an auto-incrementing UUID every time it is invoked, and we even 
+controlled the `clock` dependency using an [`ImmediateClock`][immediate-clock-docs] to squash all
+of time into a single instant. If we did not control these dependencies this test would be very 
+difficult to write since there is no way to accurately predict what will be returned by `Date()` 
+and `UUID()`, and we'd have to wait for real world time to pass, making the test slow.
 
 But, controllable dependencies aren't only useful for tests. They can also be used in Xcode
 previews. Suppose the feature above makes use of a clock to sleep for an amount of time before
@@ -134,3 +136,5 @@ can do. You can learn more in depth about <doc:WhatAreDependencies> as well as
 <doc:RegisteringDependencies> as well as how to best leverage <doc:LivePreviewTest>. And finally,
 there are more advanced topics to explore, such as <doc:DesigningDependencies>,
 <doc:OverridingDependencies>, <doc:Lifetimes> and <doc:SingleEntryPointSystems>.
+
+[immediate-clock-docs]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/immediateclock

@@ -144,6 +144,24 @@ And then adding the product to any target that needs access to the library:
 .product(name: "Dependencies", package: "swift-dependencies"),
 ```
 
+## Extensions
+
+This library controls a number of dependencies out of the box, but is also open to extension. The
+following projects all build on top of Dependencies:
+
+  * [Dependencies Additions](https://github.com/tgrapperon/swift-dependencies-additions): A
+    companion library that provides higher-level dependencies.
+
+## Alternatives
+
+There are also many dependency injection libraries in the Swift and iOS community. Each one of these
+has their own set of priorities and trade-offs that differ from Dependencies.
+
+  * [Cleanse](https://github.com/square/Cleanse)
+  * [Factory](https://github.com/hmlongco/Factory)
+  * [Needle](https://github.com/uber/needle)
+  * [Swinject](https://github.com/Swinject/Swinject)
+
 ## License
 
 This library is released under the MIT license. See [LICENSE](LICENSE) for details.

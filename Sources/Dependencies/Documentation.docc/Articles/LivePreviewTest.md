@@ -147,8 +147,8 @@ extension APIClient: TestDependencyKey {
     fetchUsers: {
       [
         User(id: 1, name: "Blob"),
-        User(id: 1, name: "Blob Jr."),
-        User(id: 1, name: "Blob Sr."),
+        User(id: 2, name: "Blob Jr."),
+        User(id: 3, name: "Blob Sr."),
       ]
     },
     fetchUser: { id in

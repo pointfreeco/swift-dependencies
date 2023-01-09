@@ -10,6 +10,8 @@ A dependency management library inspired by SwiftUI's "environment."
   * [Overview](#overview)
   * [Documentation](#documentation)
   * [Installation](#installation)
+  * [Extensions](#extensions)
+  * [Alternatives](#alternatives)
   * [License](#license)
 
 ## Learn More

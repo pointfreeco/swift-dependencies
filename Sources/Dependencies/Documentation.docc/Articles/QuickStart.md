@@ -45,20 +45,20 @@ final class FeatureModel: ObservableObject {
 }
 ```
 
-Once your dependencies are declared, rather than reaching out to the `Date()`, `UUID()`, etc.
-directly, you can use the dependency that is defined directly on your feature's model:
+Once your dependencies are declared, rather than reaching out to the `Date()`, `UUID()`, etc.,
+directly, you can use the dependency that is defined on your feature's model:
 
 ```swift
 final class FeatureModel: ObservableObject {
   // ...
 
   func addButtonTapped() async throws {
-    try await self.clock.sleep(for: .seconds(1))  // 👈 Don't use Task.sleep
+    try await self.clock.sleep(for: .seconds(1))  // 👈 Don't use 'Task.sleep'
     self.items.append(
       Item(
-        id: self.uuid(),  // 👈 Don't use UUID()
+        id: self.uuid(),  // 👈 Don't use 'UUID()'
         name: "",
-        createdAt: self.now  // 👈 Don't use Date()
+        createdAt: self.now  // 👈 Don't use 'Date()'
       )
     )
   }
@@ -94,6 +94,7 @@ func testAdd() async throws {
         id: UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
         name: "",
         createdAt: Date(timeIntervalSinceReferenceDate: 1234567890)
+      )
     ]
   )
 }

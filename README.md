@@ -154,8 +154,8 @@ following projects all build on top of Dependencies:
 
 ## Alternatives
 
-There are also many dependency injection libraries in the Swift and iOS community. Each one of these
-has their own set of priorities and trade-offs that differ from Dependencies.
+There are many other dependency injection libraries in the Swift community. Each has its own set of
+priorities and trade-offs that differ from Dependencies. Here are a few well-known examples:
 
   * [Cleanse](https://github.com/square/Cleanse)
   * [Factory](https://github.com/hmlongco/Factory)

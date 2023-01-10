@@ -394,12 +394,12 @@ final class DependencyValuesTests: XCTestCase {
       /*@Published */var value = 0
       @Dependency(\.fullDependency) var fullDependency
       func doSomething(expectation: XCTestExpectation) {
-        withDependencies {
-          $0.fullDependency.value = 999
-        } operation: {
-          withEscapedDependencies { continuation in
-            DispatchQueue.main.async {
-              continuation.yield {
+        withEscapedDependencies { continuation in
+          DispatchQueue.main.async {
+            continuation.yield {
+              withDependencies {
+                $0.fullDependency.value = 999
+              } operation: {
                 self.value = self.fullDependency.value
                 expectation.fulfill()
               }

@@ -353,6 +353,7 @@ extension DependencyValues {
     /// See the docs of ``withEscapedDependencies(_:)-5xvi3`` for more information.
     /// - Parameter operation: A closure which will have access to the propagated dependencies.
     public func yield<R>(_ operation: () throws -> R) rethrows -> R {
+      // TODO: Should `yield` be renamed to `restore`?
       try withDependencies {
         $0 = self.dependencies
       } operation: {

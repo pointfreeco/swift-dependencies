@@ -240,3 +240,31 @@ extension TestDependencyKey {
   /// which will take precedence over this implementation.
   public static var previewValue: Value { Self.testValue }
 }
+
+public protocol UnsafeDependencyKey: TestDependencyKey {
+  associatedtype Value = Self
+}
+
+extension UnsafeDependencyKey {
+  public static var testValue: Value {
+    fatalError("TODO")
+  }
+}
+
+//extension UnsafeDependencyKey where Value == Self? {
+//  public static var testValue: Value {
+//    nil
+//  }
+//}
+
+extension Optional: TestDependencyKey where Wrapped: UnsafeDependencyKey {
+  public static var testValue: Wrapped? {
+    nil
+  }
+}
+
+// TODO: Better protocol name?
+// `UncheckedDependencyKey`?
+// `SingletonDependencyKey`?
+// `InstanceDependencyKey`?
+// `TypeDependencyKey`?

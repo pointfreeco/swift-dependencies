@@ -51,7 +51,7 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
   let initialValues: DependencyValues
   // NB: Key paths do not conform to sendable and are instead diagnosed at the time of forming the
   //     literal.
-  private let keyPath: KeyPath<DependencyValues, Value>
+  private let getValue: @Sendable (DependencyValues) -> Value
   private let file: StaticString
   private let fileID: StaticString
   private let line: UInt
@@ -78,7 +78,19 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
     line: UInt = #line
   ) {
     self.initialValues = DependencyValues._current
-    self.keyPath = keyPath
+    self.getValue = { $0[keyPath: keyPath] }
+    self.file = file
+    self.fileID = fileID
+    self.line = line
+  }
+
+  public init(
+    file: StaticString = #file,
+    fileID: StaticString = #fileID,
+    line: UInt = #line
+  ) where Value: TestDependencyKey, Value.Value == Value {
+    self.initialValues = DependencyValues._current
+    self.getValue = { $0[Value.self] }
     self.file = file
     self.fileID = fileID
     self.line = line
@@ -92,10 +104,10 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
       currentDependency.fileID = self.fileID
       currentDependency.line = self.line
       return DependencyValues.$currentDependency.withValue(currentDependency) {
-        self.initialValues.merging(DependencyValues._current)[keyPath: self.keyPath]
+        self.getValue(self.initialValues.merging(DependencyValues._current))
       }
     #else
-      return self.initialValues.merging(DependencyValues._current)[keyPath: self.keyPath]
+      return self.getValue(self.initialValues.merging(DependencyValues._current))
     #endif
   }
 }

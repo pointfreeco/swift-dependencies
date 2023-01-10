@@ -128,6 +128,9 @@ public struct DependencyValues: Sendable {
     get {
       guard let dependency = self.storage[ObjectIdentifier(key)]?.base as? Key.Value
       else {
+        if Key.self is any UnsafeDependencyKey.Type {
+          fatalError("TODO")
+        }
         let context =
           self.storage[ObjectIdentifier(DependencyContextKey.self)]?.base as? DependencyContext
           ?? defaultContext
@@ -195,6 +198,12 @@ public struct DependencyValues: Sendable {
     var values = Self()
     values.context = .test
     return values
+  }
+
+  public mutating func assign<Key: TestDependencyKey>(
+    _ value: Key
+  ) where Key.Value == Key {
+    self[Key.self] = value
   }
 
   func merging(_ other: Self) -> Self {

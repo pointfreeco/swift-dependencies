@@ -396,10 +396,10 @@ final class DependencyValuesTests: XCTestCase {
       func doSomething(expectation: XCTestExpectation) {
         withEscapedDependencies { continuation in
           DispatchQueue.main.async {
-            withDependencies {
-              $0.fullDependency.value = 999
-            } operation: {
-              continuation.yield {
+            continuation.yield {
+              withDependencies {
+                $0.fullDependency.value = 999
+              } operation: {
                 self.value = self.fullDependency.value
                 expectation.fulfill()
               }

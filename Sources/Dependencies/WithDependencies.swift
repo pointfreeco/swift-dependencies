@@ -309,17 +309,35 @@ public func withDependencies<Model: AnyObject, R>(
 /// withEscapedDependencies { dependencies in
 ///   DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
 ///     dependencies.yield {
-///       // All code in here will use dependencies at the time of
-///       // calling DependencyValues.escape.
+///       // All code in here will use dependencies at the time of calling withEscapedDependencies.
 ///     }
 ///   }
 /// }
 /// ```
 ///
 /// As a general rule, you should surround _all_ escaping code that may access dependencies with
-/// this helper. Otherwise you run the risk of the escaped code using the wrong dependencies. But,
-/// you should also try your hardest to keep your code in the structured world using Swift's tools
-/// of structured concurrency, and should avoid using escaping closures.
+/// this helper, and you should use ``DependencyValues/Continuation/yield(_:)-42ttb`` _immediately_
+/// inside the escaping closure. Otherwise you run the risk of the escaped code using the wrong
+/// dependencies. But, you should also try your hardest to keep your code in the structured world
+/// using Swift's tools of structured concurrency, and should avoid using escaping closures.
+///
+/// If you need to further override dependencies in the escaped closure, do so inside the
+/// ``DependencyValues/Continuation/yield(_:)-42ttb`` and not outside:
+///
+/// ```swift
+/// withEscapedDependencies { dependencies in
+///   DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+///     dependencies.yield {
+///       withDependencies {
+///         $0.apiClient = .mock
+///       } operation: {
+///         // All code in here will use dependencies at the time of calling
+///         // withEscapedDependencies except the API client will be mocked.
+///       }
+///     }
+///   }
+/// }
+/// ```
 ///
 /// - Parameter operation: A closure that takes a ``DependencyValues/Continuation`` value for
 ///   propagating dependencies past an escaping closure boundary.
@@ -346,13 +364,14 @@ extension DependencyValues {
   ///
   /// See the docs of ``withEscapedDependencies(_:)-5xvi3`` for more information.
   public struct Continuation: Sendable {
-    @Dependency(\.self) private var dependencies
+    let dependencies = DependencyValues._current
 
     /// Access the propagated dependencies in an escaping context.
     ///
     /// See the docs of ``withEscapedDependencies(_:)-5xvi3`` for more information.
     /// - Parameter operation: A closure which will have access to the propagated dependencies.
     public func yield<R>(_ operation: () throws -> R) rethrows -> R {
+      // TODO: Should `yield` be renamed to `restore`?
       try withDependencies {
         $0 = self.dependencies
       } operation: {

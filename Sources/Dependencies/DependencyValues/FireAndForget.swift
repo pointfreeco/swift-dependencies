@@ -34,8 +34,8 @@ extension DependencyValues {
   ///
   /// ```swift
   /// try await self.database.updateUser(id: userID, email: newEmailAddress)
-  /// self.fireAndForget {
-  ///   self.sendEmail(
+  /// await self.fireAndForget {
+  ///   try await self.sendEmail(
   ///     email: newEmailAddress,
   ///     subject: "You email has been updated"
   ///   )

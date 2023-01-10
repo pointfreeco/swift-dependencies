@@ -57,6 +57,21 @@ public struct DateGenerator: Sendable {
   public static func constant(_ now: Date) -> Self {
     Self { now }
   }
+	
+	/// A generator that generates dates in a predictable, incrementing order.
+	///
+	/// For example:
+	///
+	/// ```swift
+	/// let generate = DateGenerator.incrementing(by: 1, offset: 0)
+	/// generate()  // Date(2001-01-01 00:00:00 +0000)
+	/// generate()  // Date(2001-01-01 00:00:01 +0000)
+	/// generate()  // Date(2001-01-01 00:00:02 +0000)
+	/// ```
+	public static func incrementing(by delta: TimeInterval, offset: TimeInterval) -> Self {
+		let generator = IncrementingDateGenerator(delta: delta, offset: offset)
+		return Self { generator() }
+	}
 
   /// The current date.
   public var now: Date {
@@ -74,4 +89,24 @@ public struct DateGenerator: Sendable {
   public func callAsFunction() -> Date {
     self.generate()
   }
+}
+
+private final class IncrementingDateGenerator: @unchecked Sendable {
+	private let lock = NSLock()
+	private var delta: TimeInterval = 0
+	private var timeInterval: TimeInterval
+	
+	init(delta: TimeInterval, offset: TimeInterval) {
+		self.delta = delta
+		self.timeInterval = offset
+	}
+
+	func callAsFunction() -> Date {
+		self.lock.lock()
+		defer {
+			self.timeInterval += delta
+			self.lock.unlock()
+		}
+		return Date(timeIntervalSinceReferenceDate: timeInterval)
+	}
 }

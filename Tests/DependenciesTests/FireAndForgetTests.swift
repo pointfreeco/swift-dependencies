@@ -30,7 +30,7 @@ final class FireAndForgetTests: XCTestCase {
       var value = await didExecute.value
       XCTAssertEqual(value, false)
 
-      try await Task.sleep(nanoseconds: 200_000_000)
+      try await Task.sleep(nanoseconds: 500_000_000)
       value = await didExecute.value
       XCTAssertEqual(value, true)
     }

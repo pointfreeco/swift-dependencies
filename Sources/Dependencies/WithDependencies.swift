@@ -346,8 +346,7 @@ extension DependencyValues {
   ///
   /// See the docs of ``withEscapedDependencies(_:)-5xvi3`` for more information.
   public struct Continuation: Sendable {
-    @Dependency(\.self) var currentDependencies
-    let escapedDependencies = DependencyValues._current
+    let dependencies = DependencyValues._current
 
     /// Access the propagated dependencies in an escaping context.
     ///
@@ -355,7 +354,7 @@ extension DependencyValues {
     /// - Parameter operation: A closure which will have access to the propagated dependencies.
     public func yield<R>(_ operation: () throws -> R) rethrows -> R {
       try withDependencies {
-        $0 = self.currentDependencies.merging(self.escapedDependencies)
+        $0 = self.dependencies
       } operation: {
         try operation()
       }
@@ -367,7 +366,7 @@ extension DependencyValues {
     /// - Parameter operation: A closure which will have access to the propagated dependencies.
     public func yield<R>(_ operation: () async throws -> R) async rethrows -> R {
       try await withDependencies {
-        $0 = self.currentDependencies.merging(self.escapedDependencies)
+        $0 = self.dependencies
       } operation: {
         try await operation()
       }

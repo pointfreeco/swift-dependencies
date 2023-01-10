@@ -394,11 +394,11 @@ final class DependencyValuesTests: XCTestCase {
       /*@Published */var value = 0
       @Dependency(\.fullDependency) var fullDependency
       func doSomething(expectation: XCTestExpectation) {
-        withEscapedDependencies { continuation in
-          DispatchQueue.main.async {
-            withDependencies {
-              $0.fullDependency.value = 999
-            } operation: {
+        withDependencies {
+          $0.fullDependency.value = 999
+        } operation: {
+          withEscapedDependencies { continuation in
+            DispatchQueue.main.async {
               continuation.yield {
                 self.value = self.fullDependency.value
                 expectation.fulfill()
@@ -418,7 +418,7 @@ final class DependencyValuesTests: XCTestCase {
     }
     self.wait(for: [expectation], timeout: 1)
     let newValue = await model.value
-    XCTAssertEqual(newValue, 42)
+    XCTAssertEqual(newValue, 999)
   }
 
   func testEscapingInFeatureModelWithOverride_NotPropagated() async {

@@ -326,7 +326,7 @@ public func withDependencies<Model: AnyObject, R>(
 public func withEscapedDependencies<R>(
   _ operation: (DependencyValues.Continuation) throws -> R
 ) rethrows -> R {
-  try operation(DependencyValues.Continuation(escapedDependencies: ._current))
+  try operation(DependencyValues.Continuation())
 }
 
 /// Propagates the current dependencies to an escaping context.
@@ -338,7 +338,7 @@ public func withEscapedDependencies<R>(
 public func withEscapedDependencies<R>(
   _ operation: (DependencyValues.Continuation) async throws -> R
 ) async rethrows -> R {
-  try await operation(DependencyValues.Continuation(escapedDependencies: ._current))
+  try await operation(DependencyValues.Continuation())
 }
 
 extension DependencyValues {
@@ -347,7 +347,7 @@ extension DependencyValues {
   /// See the docs of ``withEscapedDependencies(_:)-5xvi3`` for more information.
   public struct Continuation: Sendable {
     @Dependency(\.self) var currentDependencies
-    let escapedDependencies: DependencyValues
+    let escapedDependencies = DependencyValues._current
 
     /// Access the propagated dependencies in an escaping context.
     ///

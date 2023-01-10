@@ -386,7 +386,7 @@ final class DependencyValuesTests: XCTestCase {
     self.wait(for: [expectation], timeout: 1)
   }
 
-  func testEscapingInFeatureModelWithOverride_OverrideEscaped() async {
+  func testEscapingInFeatureModelWithOverride_EscapedIsPreferred() async {
     let expectation = self.expectation(description: "escape")
 
     @MainActor

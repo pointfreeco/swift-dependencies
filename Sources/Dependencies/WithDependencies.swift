@@ -326,7 +326,7 @@ public func withDependencies<Model: AnyObject, R>(
 public func withEscapedDependencies<R>(
   _ operation: (DependencyValues.Continuation) throws -> R
 ) rethrows -> R {
-  try operation(DependencyValues.Continuation(dependencies: ._current))
+  try operation(DependencyValues.Continuation(escapedDependencies: ._current))
 }
 
 /// Propagates the current dependencies to an escaping context.
@@ -338,7 +338,7 @@ public func withEscapedDependencies<R>(
 public func withEscapedDependencies<R>(
   _ operation: (DependencyValues.Continuation) async throws -> R
 ) async rethrows -> R {
-  try await operation(DependencyValues.Continuation(dependencies: ._current))
+  try await operation(DependencyValues.Continuation(escapedDependencies: ._current))
 }
 
 extension DependencyValues {
@@ -346,7 +346,8 @@ extension DependencyValues {
   ///
   /// See the docs of ``withEscapedDependencies(_:)-5xvi3`` for more information.
   public struct Continuation: Sendable {
-    let dependencies: DependencyValues
+    @Dependency(\.self) var currentDependencies
+    let escapedDependencies: DependencyValues
 
     /// Access the propagated dependencies in an escaping context.
     ///
@@ -354,7 +355,7 @@ extension DependencyValues {
     /// - Parameter operation: A closure which will have access to the propagated dependencies.
     public func yield<R>(_ operation: () throws -> R) rethrows -> R {
       try withDependencies {
-        $0 = self.dependencies
+        $0 = self.currentDependencies.merging(self.escapedDependencies)
       } operation: {
         try operation()
       }
@@ -366,7 +367,7 @@ extension DependencyValues {
     /// - Parameter operation: A closure which will have access to the propagated dependencies.
     public func yield<R>(_ operation: () async throws -> R) async rethrows -> R {
       try await withDependencies {
-        $0 = self.dependencies
+        $0 = self.currentDependencies.merging(self.escapedDependencies)
       } operation: {
         try await operation()
       }

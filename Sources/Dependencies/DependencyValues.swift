@@ -327,31 +327,33 @@ private final class CachedValues: @unchecked Sendable {
   #endif
 
   private let setUpTestObservers: Void = {
-    #if canImport(ObjectiveC)
-      DispatchQueue.mainSync {
-        guard
-          let XCTestObservation = objc_getProtocol("XCTestObservation"),
-          let XCTestObservationCenter = NSClassFromString("XCTestObservationCenter"),
-          let XCTestObservationCenter = XCTestObservationCenter as Any as? NSObjectProtocol,
-          let XCTestObservationCenterShared =
-            XCTestObservationCenter
-            .perform(Selector(("sharedTestObservationCenter")))?
-            .takeUnretainedValue()
-        else { return }
-        let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
-          DependencyValues._current.cachedValues.cached = [:]
+    if _XCTIsTesting {
+      #if canImport(ObjectiveC)
+        DispatchQueue.mainSync {
+          guard
+            let XCTestObservation = objc_getProtocol("XCTestObservation"),
+            let XCTestObservationCenter = NSClassFromString("XCTestObservationCenter"),
+            let XCTestObservationCenter = XCTestObservationCenter as Any as? NSObjectProtocol,
+            let XCTestObservationCenterShared =
+              XCTestObservationCenter
+              .perform(Selector(("sharedTestObservationCenter")))?
+              .takeUnretainedValue()
+          else { return }
+          let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
+            DependencyValues._current.cachedValues.cached = [:]
+          }
+          let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
+          class_addMethod(
+            TestObserver.self, Selector(("testCaseWillStart:")), testCaseWillStartImp, nil)
+          class_addProtocol(TestObserver.self, XCTestObservation)
+          _ =
+            XCTestObservationCenterShared
+            .perform(Selector(("addTestObserver:")), with: TestObserver())
         }
-        let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
-        class_addMethod(
-          TestObserver.self, Selector(("testCaseWillStart:")), testCaseWillStartImp, nil)
-        class_addProtocol(TestObserver.self, XCTestObservation)
-        _ =
-          XCTestObservationCenterShared
-          .perform(Selector(("addTestObserver:")), with: TestObserver())
-      }
-    #else
-      XCTestObservationCenter.shared.addTestObserver(TestObserver())
-    #endif
+      #else
+        XCTestObservationCenter.shared.addTestObserver(TestObserver())
+      #endif
+    }
   }()
 
   #if canImport(ObjectiveC)

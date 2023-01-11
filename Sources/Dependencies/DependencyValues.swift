@@ -327,7 +327,8 @@ private final class CachedValues: @unchecked Sendable {
   #endif
 
   private let setUpTestObservers: Void = {
-    #if canImport(ObjectiveC)
+    if _XCTIsTesting {
+#if canImport(ObjectiveC)
       DispatchQueue.mainSync {
         guard
           let XCTestObservation = objc_getProtocol("XCTestObservation"),
@@ -346,12 +347,13 @@ private final class CachedValues: @unchecked Sendable {
           TestObserver.self, Selector(("testCaseWillStart:")), testCaseWillStartImp, nil)
         class_addProtocol(TestObserver.self, XCTestObservation)
         _ =
-          XCTestObservationCenterShared
+        XCTestObservationCenterShared
           .perform(Selector(("addTestObserver:")), with: TestObserver())
       }
-    #else
+#else
       XCTestObservationCenter.shared.addTestObserver(TestObserver())
-    #endif
+#endif
+    }
   }()
 
   #if canImport(ObjectiveC)

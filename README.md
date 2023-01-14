@@ -179,7 +179,7 @@ and articles:
 
 #### Getting started
 
-* **[Quick start][quick-start-article]**:
+* **[Quick start][quick-start-article] (Same as the information above)**:
   Learn the basics of getting started with the library before diving deep into all of its features.
 
 * **[What are dependencies?][what-are-dependencies-article]**:

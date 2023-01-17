@@ -28,7 +28,24 @@ protocol AudioPlayer {
 Then you are free to make as many conformances of this protocol as you want, such as a
 `LiveAudioPlayer` that actually interacts with AVFoundation, or a `MockAudioPlayer` that doesn't
 play any sounds, but does suspend in order to simulate that something is playing. You could even
-have an `UnimplementedAudioPlayer` conformance that invokes `XCTFail` when any method is invoked.
+have an `UnimplementedAudioPlayer` conformance that invokes `XCTFail` when any method is invoked:
+
+```swift
+struct LiveAudioPlayer: AudioPlayer {
+  let audioEngine: AVAudioEngine
+  // ...
+}
+struct MockAudioPlayer: AudioPlayer {
+  // ...
+}
+struct UnimplementedAudioPlayer: AudioPlayer {
+  func loop(_ url: URL) async throws {
+    XCTFail("AudioPlayer.loop is unimplemented")
+  }
+  // ...
+}
+```
+
 And all of those conformances can be used to specify the live, preview and test values for the
 dependency:
 
@@ -63,20 +80,47 @@ Then, rather than defining types that conform to the protocol you construct valu
 
 ```swift
 extension AudioPlayerClient {
-  static let live = Self(/* ... */)
+  static var live: Self {
+    let audioEngine: AVAudioEngine
+    return Self(/*...*/)
+  }
+
   static let mock = Self(/* ... */)
+
   static let unimplemented = Self(/* ... */)
 }
 ```
 
-And to register the dependency you can leverage the struct that defines the interface. There's no
-need to define a new type:
+> Tip: We are using the `unimplemented` method from our 
+[XCTestDynamicOverlay][xctest-dynamic-overlay-gh] library to provide closures that cause an XCTest
+failure if they are ever invoked. See <doc:LivePreviewTest> for more information on this pattern.
+
+Then, to register this dependency you can leverage the `AudioPlayerClient` struct to conform
+to the ``DependencyKey`` protocol. There's no need to define a new type. In fact, you can even 
+define the live, preview and test values directly in the conformance, all at once:
 
 ```swift
 extension AudioPlayerClient: DependencyKey {
-  static let liveValue = Self(/* ... */)
+  static var liveValue: Self {
+    let audioEngine: AVAudioEngine
+    return Self(/*...*/)
+  }
+
   static let previewValue = Self(/* ... */)
-  static let testValue = Self(/* ... */)
+
+  static let testValue = Self(
+    loop: unimplemented("AudioPlayerClient.loop"),
+    play: unimplemented("AudioPlayerClient.play"),
+    setVolume: unimplemented("AudioPlayerClient.setVolume"),
+    stop: unimplemented("AudioPlayerClient.stop")
+  )
+}
+
+extension DependencyValues {
+  var audioPlayer: AudioPlayerClient {
+    get { self[AudioPlayerClient.self] }
+    set { self[AudioPlayerClient.self] = newValue }
+  }
 }
 ```
 
@@ -119,3 +163,4 @@ user flow you are testing. If someday in the future more of the dependency is us
 instantly get a test failure, letting you know that there is more behavior that you must assert on.
 
 [designing-deps]: https://www.pointfree.co/collections/dependencies
+[xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay

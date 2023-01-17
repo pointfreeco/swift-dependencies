@@ -87,12 +87,7 @@ extension AudioPlayerClient {
 
   static let mock = Self(/* ... */)
 
-  static let unimplemented = Self(
-    loop: unimplemented("AudioPlayerClient.loop"),
-    play: unimplemented("AudioPlayerClient.play"),
-    setVolume: unimplemented("AudioPlayerClient.setVolume"),
-    stop: unimplemented("AudioPlayerClient.stop")
-  )
+  static let unimplemented = Self(/* ... */)
 }
 ```
 
@@ -106,16 +101,18 @@ define the live, preview and test values directly in the conformance, all at onc
 
 ```swift
 extension AudioPlayerClient: DependencyKey {
-  static var live: Self {
+  static var liveValue: Self {
     let audioEngine: AVAudioEngine
     return Self(/*...*/)
   }
 
-  static let mock = Self(/* ... */)
+  static let previewValue = Self(/* ... */)
 
-  static let unimplemented = Self(
+  static let testValue = Self(
     loop: unimplemented("AudioPlayerClient.loop"),
-    // ...
+    play: unimplemented("AudioPlayerClient.play"),
+    setVolume: unimplemented("AudioPlayerClient.setVolume"),
+    stop: unimplemented("AudioPlayerClient.stop")
   )
 }
 

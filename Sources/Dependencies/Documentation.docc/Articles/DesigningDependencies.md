@@ -59,16 +59,6 @@ struct AudioPlayerClient {
 }
 ```
 
-Then, rather than defining types that conform to the protocol you construct values:
-
-```swift
-extension AudioPlayerClient {
-  static let live = Self(/* ... */)
-  static let mock = Self(/* ... */)
-  static let unimplemented = Self(/* ... */)
-}
-```
-
 And to register the dependency you can leverage the struct that defines the interface. There's no
 need to define a new type:
 

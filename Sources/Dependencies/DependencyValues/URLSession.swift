@@ -60,7 +60,7 @@ extension DependencyValues {
   /// hood:
   ///
   /// ```swift
-  /// extension APIClient {
+  /// extension APIClient: DependencyKey {
   ///   static var liveValue: APIClient {
   ///     @Dependency(\.urlSession) var urlSession
   ///

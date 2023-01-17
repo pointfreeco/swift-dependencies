@@ -61,8 +61,10 @@ extension DependencyValues {
   ///
   /// ```swift
   /// extension APIClient {
-  ///   static func live(urlSession: URLSession) -> Self {
-  ///     Self(
+  ///   static var liveValue: APIClient {
+  ///     @Dependency(\.urlSession) var urlSession
+  ///
+  ///     return Self(
   ///       fetchProfile: {
   ///         // Use URL session to make request
   ///       }

@@ -88,7 +88,7 @@ extension AudioPlayerClient {
   static let mock = Self(/* ... */)
 
   static let unimplemented = Self(
-    loop: { _ in XCTFail("AudioPlayer.loop is unimplemented") },
+    loop: { _ in XCTFail("AudioPlayerClient.loop is unimplemented") },
     // ...
   )
 }

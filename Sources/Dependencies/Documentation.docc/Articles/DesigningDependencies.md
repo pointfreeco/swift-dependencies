@@ -87,13 +87,12 @@ extension AudioPlayerClient {
 
   static let mock = Self(/* ... */)
 
-  static let unimplemented = Self(/* ... */)
+  static let unimplemented = Self(
+    loop: { _ in XCTFail("AudioPlayer.loop is unimplemented") },
+    // ...
+  )
 }
 ```
-
-> Tip: We are using the `unimplemented` method from our 
-[XCTestDynamicOverlay][xctest-dynamic-overlay-gh] library to provide closures that cause an XCTest
-failure if they are ever invoked. See <doc:LivePreviewTest> for more information on this pattern.
 
 Then, to register this dependency you can leverage the `AudioPlayerClient` struct to conform
 to the ``DependencyKey`` protocol. There's no need to define a new type. In fact, you can even 
@@ -123,6 +122,11 @@ extension DependencyValues {
   }
 }
 ```
+
+> Tip: We are using the `unimplemented` method from our 
+> [XCTestDynamicOverlay][xctest-dynamic-overlay-gh] library to provide closures that cause an
+> XCTest failure if they are ever invoked. See <doc:LivePreviewTest> for more information on this
+> pattern.
 
 If you design your dependencies in this way you can pick which dependency endpoints you need in your
 feature. For example, if you have a feature that needs an audio player to do its job, but it only

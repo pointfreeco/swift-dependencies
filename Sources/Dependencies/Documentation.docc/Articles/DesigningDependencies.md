@@ -89,10 +89,16 @@ extension AudioPlayerClient {
 
   static let unimplemented = Self(
     loop: unimplemented("AudioPlayerClient.loop"),
-    // ...
+    play: unimplemented("AudioPlayerClient.play"),
+    setVolume: unimplemented("AudioPlayerClient.setVolume"),
+    stop: unimplemented("AudioPlayerClient.stop")
   )
 }
 ```
+
+> Tip: We are using the `unimplemented` method from our 
+[XCTestDynamicOverlay][xctest-dynamic-overlay-gh] library to provide closures that cause an XCTest
+failure if they are ever invoked. See <doc:LivePreviewTest> for more information on this pattern.
 
 Then, to register this dependency you can leverage the `AudioPlayerClient` struct to conform
 to the ``DependencyKey`` protocol. There's no need to define a new type. In fact, you can even 
@@ -160,3 +166,4 @@ user flow you are testing. If someday in the future more of the dependency is us
 instantly get a test failure, letting you know that there is more behavior that you must assert on.
 
 [designing-deps]: https://www.pointfree.co/collections/dependencies
+[xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay

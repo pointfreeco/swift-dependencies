@@ -28,7 +28,24 @@ protocol AudioPlayer {
 Then you are free to make as many conformances of this protocol as you want, such as a
 `LiveAudioPlayer` that actually interacts with AVFoundation, or a `MockAudioPlayer` that doesn't
 play any sounds, but does suspend in order to simulate that something is playing. You could even
-have an `UnimplementedAudioPlayer` conformance that invokes `XCTFail` when any method is invoked.
+have an `UnimplementedAudioPlayer` conformance that invokes `XCTFail` when any method is invoked:
+
+```swift
+struct LiveAudioPlayer: AudioPlayer {
+  let audioEngine: AVAudioEngine
+  // ...
+}
+struct MockAudioPlayer: AudioPlayer {
+  // ...
+}
+struct UnimplementedAudioPlayer: AudioPlayer {
+  func loop(_ url: URL) async throws {
+    XCTFail("AudioPlayer.loop is unimplemented")
+  }
+  // ...
+}
+```
+
 And all of those conformances can be used to specify the live, preview and test values for the
 dependency:
 
@@ -59,14 +76,48 @@ struct AudioPlayerClient {
 }
 ```
 
-And to register the dependency you can leverage the struct that defines the interface. There's no
-need to define a new type:
+Then, rather than defining types that conform to the protocol you construct values:
+
+```swift
+extension AudioPlayerClient {
+  static var live: Self {
+    let audioEngine: AVAudioEngine
+    return Self(/*...*/)
+  }
+
+  static let mock = Self(/* ... */)
+
+  static let unimplemented = Self(
+    loop: unimplemented("AudioPlayerClient.loop"),
+    // ...
+  )
+}
+```
+
+Then, to register this dependency you can leverage the `AudioPlayerClient` struct to conform
+to the ``DependencyKey`` protocol. There's no need to define a new type. In fact, you can even 
+define the live, preview and test values directly in the conformance, all at once:
 
 ```swift
 extension AudioPlayerClient: DependencyKey {
-  static let liveValue = Self(/* ... */)
-  static let previewValue = Self(/* ... */)
-  static let testValue = Self(/* ... */)
+  static var live: Self {
+    let audioEngine: AVAudioEngine
+    return Self(/*...*/)
+  }
+
+  static let mock = Self(/* ... */)
+
+  static let unimplemented = Self(
+    loop: unimplemented("AudioPlayerClient.loop"),
+    // ...
+  )
+}
+
+extension DependencyValues {
+  var audioPlayer: AudioPlayerClient {
+    get { self[AudioPlayerClient.self] }
+    set { self[AudioPlayerClient.self] = newValue }
+  }
 }
 ```
 

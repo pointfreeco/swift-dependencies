@@ -99,6 +99,7 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
+  #if !os(Linux)
   func testOptionalDependencyUndefined() {
     @Dependency(\.optionalDependency) var optionalDependency: String?
     XCTExpectFailure {
@@ -107,6 +108,7 @@ final class DependencyValuesTests: XCTestCase {
       $0.compactDescription.contains(#"Unimplemented: @Dependency(\.optionalDependency) …"#)
     }
   }
+  #endif
 
   func testDependencyDefaultIsReused() {
     withDependencies {

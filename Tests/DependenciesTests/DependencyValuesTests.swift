@@ -71,6 +71,43 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
+  func testOptionalDependency() {
+    for value in [nil, ""] {
+      withDependencies {
+        $0.optionalDependency = value
+      } operation: {
+        @Dependency(\.optionalDependency) var optionalDependency: String?
+        XCTAssertEqual(optionalDependency, value)
+      }
+    }
+  }
+
+  func testOptionalDependencyLive() {
+    withDependencies {
+      $0.context = .live
+    } operation: {
+      @Dependency(\.optionalDependency) var optionalDependency: String?
+      XCTAssertEqual(optionalDependency, "live")
+    }
+
+    withDependencies {
+      $0.context = .live
+      $0.optionalDependency = nil
+    } operation: {
+      @Dependency(\.optionalDependency) var optionalDependency: String?
+      XCTAssertNil(optionalDependency)
+    }
+  }
+
+  func testOptionalDependencyUndefined() {
+    @Dependency(\.optionalDependency) var optionalDependency: String?
+    XCTExpectFailure {
+      XCTAssertNil(optionalDependency)
+    } issueMatcher: {
+      $0.compactDescription.contains(#"Unimplemented: @Dependency(\.optionalDependency) …"#)
+    }
+  }
+
   func testDependencyDefaultIsReused() {
     withDependencies {
       $0 = .init()
@@ -603,6 +640,20 @@ extension DependencyValues {
   var childDependencyLateBinding: ChildDependencyLateBinding {
     get { self[ChildDependencyLateBinding.self] }
     set { self[ChildDependencyLateBinding.self] = newValue }
+  }
+}
+
+extension DependencyValues {
+  var optionalDependency: String? {
+    get { self[OptionalDependencyKey.self] }
+    set { self[OptionalDependencyKey.self] = newValue }
+  }
+}
+
+private enum OptionalDependencyKey: DependencyKey {
+  static let liveValue: String? = "live"
+  static var testValue: String? {
+    unimplemented(#"@Dependency(\.optionalDependency)"#, placeholder: nil)
   }
 }
 

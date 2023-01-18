@@ -99,7 +99,7 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
-  #if !os(Linux)
+  #if DEBUG && !os(Linux)
   func testOptionalDependencyUndefined() {
     @Dependency(\.optionalDependency) var optionalDependency: String?
     XCTExpectFailure {

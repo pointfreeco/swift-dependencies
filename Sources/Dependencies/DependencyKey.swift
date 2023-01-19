@@ -163,8 +163,8 @@ extension DependencyKey {
   /// which will take precedence over this implementation.
   public static var previewValue: Value { Self.liveValue }
 
-  /// A default implementation that provides the ``liveValue`` to XCTest runs, but will trigger test
-  /// failure to occur if accessed.
+  /// A default implementation that provides the ``previewValue`` to XCTest runs (or ``liveValue``,
+  /// if no preview value is implemented), but will trigger a test failure when accessed.
   ///
   /// To prevent test failures, explicitly override the dependency in any tests in which it is
   /// accessed:
@@ -183,7 +183,7 @@ extension DependencyKey {
   /// which will take precedence over this implementation.
   public static var testValue: Value {
     guard !DependencyValues.isSetting
-    else { return Self.liveValue }
+    else { return Self.previewValue }
 
     var dependencyDescription = ""
     if let fileID = DependencyValues.currentDependency.fileID,
@@ -228,7 +228,7 @@ extension DependencyKey {
       requirement of the 'DependencyKey' protocol.
       """
     )
-    return Self.liveValue
+    return Self.previewValue
   }
 }
 

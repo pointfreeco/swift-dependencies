@@ -88,7 +88,7 @@ final class DependencyKeyTests: XCTestCase {
 
     #if DEBUG && !os(Linux)
       XCTExpectFailure {
-        XCTAssertEqual(42, Key.testValue)
+        XCTAssertEqual(1729, Key.testValue)
       } issueMatcher: { issue in
         issue.compactDescription == """
           A dependency has no test implementation, but was accessed from a test context:

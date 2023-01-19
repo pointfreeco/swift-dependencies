@@ -127,7 +127,7 @@ public struct DependencyValues: Sendable {
   ) -> Key.Value where Key.Value: Sendable {
     get {
       guard let base = self.storage[ObjectIdentifier(key)]?.base,
-            let dependency = base as? Key.Value
+        let dependency = base as? Key.Value
       else {
         let context =
           self.storage[ObjectIdentifier(DependencyContextKey.self)]?.base as? DependencyContext

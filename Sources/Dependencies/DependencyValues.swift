@@ -126,7 +126,8 @@ public struct DependencyValues: Sendable {
     line: UInt = #line
   ) -> Key.Value where Key.Value: Sendable {
     get {
-      guard let dependency = self.storage[ObjectIdentifier(key)]?.base as? Key.Value
+      guard let base = self.storage[ObjectIdentifier(key)]?.base,
+            let dependency = base as? Key.Value
       else {
         let context =
           self.storage[ObjectIdentifier(DependencyContextKey.self)]?.base as? DependencyContext
@@ -249,7 +250,7 @@ private final class CachedValues: @unchecked Sendable {
     defer { self.lock.unlock() }
 
     let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
-    guard let value = self.cached[cacheKey]?.base as? Key.Value
+    guard let base = self.cached[cacheKey]?.base, let value = base as? Key.Value
     else {
       let value: Key.Value?
       switch context {

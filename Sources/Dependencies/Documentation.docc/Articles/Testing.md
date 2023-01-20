@@ -10,9 +10,9 @@ when registering your dependencies, which will be automatically used during test
 we cover more detailed information about how to actually write tests with overridden dependencies,
 as well as some tips and gotchas to keep in mind.
 
-* [Altered execution contexts](#)
-* [Changing dependencies during tests](#)
-* [Testing gotchas](#)
+* [Altered execution contexts](#Altered-execution-contexts)
+* [Changing dependencies during tests](#Changing-dependencies-during-tests)
+* [Testing gotchas](#Testing-gotchas)
 
 ## Altered execution contexts
 

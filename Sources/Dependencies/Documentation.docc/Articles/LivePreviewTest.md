@@ -15,6 +15,12 @@ delegate to ``DependencyKey/liveValue`` if left unimplemented.
 Leveraging these alternative dependency implementations allow to run your features in safer
 environments for tests, previews, and more.
 
+* [Live value](#Live-value)
+* [Test value](#Test-value)
+* [Preview value](#Preview-value)
+* [Separating interface and implementation](#Separating-interface-and-implementation)
+* [Cascading rules](#Cascading-rules)
+
 ## Live value
 
 The ``DependencyKey/liveValue`` static property from the ``DependencyKey`` protocol is the only

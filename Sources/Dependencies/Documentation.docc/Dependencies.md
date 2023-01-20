@@ -64,6 +64,7 @@ This library addresses all of the points above, and much, _much_ more.
 - <doc:UsingDependencies>
 - <doc:RegisteringDependencies>
 - <doc:LivePreviewTest>
+- <doc:Testing>
 
 ### Advanced
 

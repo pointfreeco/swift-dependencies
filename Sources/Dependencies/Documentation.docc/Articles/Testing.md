@@ -5,7 +5,7 @@ tricks for writing better tests with the library.
 
 ## Overview
 
-In the article <doc:LivePreviewTest> you learned how to define a ``TestDependencyKey/testValue``
+In the article [LivePreviewTest](https://github.com/pointfreeco/swift-dependencies/blob/main/Sources/Dependencies/Documentation.docc/Articles/LivePreviewTest.md) you learned how to define a ``TestDependencyKey/testValue``
 when registering your dependencies, which will be automatically used during tests. In this article
 we cover more detailed information about how to actually write tests with overridden dependencies,
 as well as some tips and gotchas to keep in mind.
@@ -21,7 +21,7 @@ great for tests. It means your feature doesn't need to actually make network req
 how your feature deals with data returned from an API, and your feature doesn't need to interact
 with the file system just to test how data gets loaded or persisted.
 
-The tool for doing this is ``withDependencies(_:operation:)-3vrqy``, which allows you to specify
+The tool for doing this is ``withDependencies(_:operation:)``, which allows you to specify
 which dependencies should be overriden for the test, and then construct your feature's model
 in that context:
 
@@ -47,7 +47,7 @@ It is important to note that if `FeatureModel` creates _other_ models inside its
 has to be careful about how it does so. In order for `FeatureModel`'s dependencies to propagate
 to the new child model, it must construct the child model in an altered execution context that
 passes along the dependencies. The tool for this is 
-``withDependencies(from:operation:file:line:)-2qx0c`` and can be used simply like this:
+``withDependencies(from:operation:file:line:)`` and can be used simply like this:
 
 ```swift
 class FeatureModel: ObservableObject {
@@ -75,7 +75,7 @@ For example, suppose we have a login feature such that if you try logging in and
 causing a message to appear. But then later, if login succeeds that message goes away. We can
 test that entire flow, from end-to-end, but starting the API client dependency in a state where
 login fails, and then later change the dependency so that it succeeds using 
-``withDependencies(_:operation:)-3vrqy``:
+``withDependencies(_:operation:)``:
 
 ```swift
 func testRetryFlow() async {

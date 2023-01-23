@@ -113,7 +113,7 @@ The presence of `_EnvironmentKeyWritingModifier` shows that an environment key i
 This is an incredibly powerful feature of SwiftUI, and the only reason it works so well and is so
 easy to understand is specifically because SwiftUI views form a single entry point system. That
 makes it possible to alter the execution environment of `HeaderView` so that its foreground color
-is red, and that altered state does not affect the other parts of the view true, such as
+is red, and that altered state does not affect the other parts of the view tree, such as
 `FooterView`.
 
 The same is possible with the Composable Architecture and the dependencies of features. For example,

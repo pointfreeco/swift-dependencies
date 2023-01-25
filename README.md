@@ -197,7 +197,11 @@ and articles:
 * **[Live, preview, and test dependencies][live-preview-test-article]**:
   Learn how to provide different implementations of your dependencies for use in the live
   application, as well as in Xcode previews, and even in tests.
-  
+
+* **[Testing][testing-article]**:
+  One of the main reasons to control dependencies is to allow for easier testing. Learn some tips
+  and tricks for writing better tests with the library.
+
 #### Advanced
 
 * **[Designing dependencies][designing-dependencies-article]**:
@@ -281,6 +285,7 @@ This library is released under the MIT license. See [LICENSE](LICENSE) for detai
 [designing-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/designingdependencies
 [lifetimes-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/lifetimes
 [live-preview-test-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/livepreviewtest
+[testing-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/testing
 [overriding-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/overridingdependencies
 [registering-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/registeringdependencies
 [single-entry-point-systems-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/singleentrypointsystems

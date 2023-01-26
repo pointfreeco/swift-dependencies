@@ -9,6 +9,10 @@ When the ``Dependency`` property wrapper is initialized it captures the current 
 dependency at that moment. This provides a kind of "scoping" mechanism that is similar to how
 `@TaskLocal` values are inherited by new asynchronous tasks, but has some new caveats of its own.
 
+* [How task locals work](#How-task-locals-work)
+* [How @Dependency lifetimes work](#How-Dependency-lifetimes-work)
+* [Accessing a @Dependency from pre-structured concurrency](#Accessing-a-Dependency-from-pre-structured-concurrency)
+
 ## How task locals work
 
 Task locals are what power this library under the hood, and so it can be important to first
@@ -267,6 +271,28 @@ struct Feature_Previews: PreviewProvider {
         FeatureModel()
       }
     )
+  }
+}
+```
+
+## Accessing a @Dependency from pre-structured concurrency
+
+Because dependencies are held in a task local, they only automatically propagate within structured
+concurrency and in `Task`s. In order to access dependencies across escaping closures, _e.g._ in a
+callback or Combine operator, you must do additional work to "escape" the dependencies so that they
+can be passed into the closure.
+
+For example, suppose you use `DispatchQueue.main.asyncAfter` to execute some logic after a delay,
+and that logic needs to make use of dependencies. In order to guarantee that dependencies used in
+the escaping closure of `asyncAfter` reflect the correct values, you must use
+``withEscapedDependencies(_:)-5xvi3``:
+
+```swift
+withEscapedDependencies { dependencies in
+  DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+    dependencies.yield {
+      // All code in here will use dependencies at the time of calling withEscapedDependencies.
+    }
   }
 }
 ```

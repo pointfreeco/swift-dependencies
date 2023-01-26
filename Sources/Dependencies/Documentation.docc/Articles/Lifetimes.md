@@ -9,6 +9,10 @@ When the ``Dependency`` property wrapper is initialized it captures the current 
 dependency at that moment. This provides a kind of "scoping" mechanism that is similar to how
 `@TaskLocal` values are inherited by new asynchronous tasks, but has some new caveats of its own.
 
+* [How task locals work](#How-task-locals-work)
+* [How @Dependency lifetimes work](#How-Dependency-lifetimes-work)
+* [Accessing a @Dependency from pre-structured concurrency](#Accessing-a-Dependency-from-pre-structured-concurrency)
+
 ## How task locals work
 
 Task locals are what power this library under the hood, and so it can be important to first
@@ -271,7 +275,7 @@ struct Feature_Previews: PreviewProvider {
 }
 ```
 
-## Accessing a @Dependency in pre-structured concurrency
+## Accessing a @Dependency from pre-structured concurrency
 
 Because dependencies are held in a task local, they only automatically propagate within structured
 concurrency and in `Task`s. In order to access dependencies across escaping closures, _e.g._ in a

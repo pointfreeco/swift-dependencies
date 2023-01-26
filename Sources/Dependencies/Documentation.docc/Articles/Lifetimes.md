@@ -271,6 +271,28 @@ struct Feature_Previews: PreviewProvider {
 }
 ```
 
+## Accessing a @Dependency in pre-structured concurrency
+
+Because dependencies are held in a task local, they only automatically propagate within structured
+concurrency and in `Task`s. In order to access dependencies across escaping closures, _e.g._ in a
+callback or Combine operator, you must do additional work to "escape" the dependencies so that they
+can be passed into the closure.
+
+For example, suppose you use `DispatchQueue.main.asyncAfter` to execute some logic after a delay,
+and that logic needs to make use of dependencies. In order to guarantee that dependencies used in
+the escaping closure of `asyncAfter` reflect the correct values, you must use
+``withEscapedDependencies(_:)-5xvi3``:
+
+```swift
+withEscapedDependencies { dependencies in
+  DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+    dependencies.yield {
+      // All code in here will use dependencies at the time of calling withEscapedDependencies.
+    }
+  }
+}
+```
+
 [task-copy-locals-code]: https://github.com/apple/swift/blob/60952b868d46fc9a83619f747a7f92b5534fb632/stdlib/public/Concurrency/Task.swift#L500-L509
 [task-init-docs]: https://developer.apple.com/documentation/swift/task/init(priority:operation:)-5k89c
 [group-add-task-docs]: https://developer.apple.com/documentation/swift/taskgroup/addtask(priority:operation:)

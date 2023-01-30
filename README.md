@@ -3,6 +3,7 @@
 A dependency management library inspired by SwiftUI's "environment."
 
 [![CI](https://github.com/pointfreeco/swift-dependencies/actions/workflows/ci.yml/badge.svg)](https://github.com/pointfreeco/swift-dependencies/actions/workflows/ci.yml)
+[![Slack](https://img.shields.io/badge/slack-chat-informational.svg?label=Slack&logo=slack)](http://pointfree.co/slack-invite)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-dependencies%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/pointfreeco/swift-dependencies)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-dependencies%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/pointfreeco/swift-dependencies)
 
@@ -11,6 +12,7 @@ A dependency management library inspired by SwiftUI's "environment."
   * [Quick start](#quick-start)
   * [Examples](#examples)
   * [Documentation](#documentation)
+  * [Community](#community)
   * [Extensions](#extensions)
 
 ## Learn More
@@ -257,6 +259,15 @@ And then adding the product to any target that needs access to the library:
 ```swift
 .product(name: "Dependencies", package: "swift-dependencies"),
 ```
+
+## Community
+
+If you want to discuss this library or have a question about how to use it to solve 
+a particular problem, there are a number of places you can discuss with fellow 
+[Point-Free](http://www.pointfree.co) enthusiasts:
+
+* For long-form discussions, we recommend the [discussions](http://github.com/pointfreeco/swift-dependencies/discussions) tab of this repo.
+* For casual chat, we recommend the [Point-Free Community Slack](http://pointfree.co/slack-invite).
 
 ## Extensions
 

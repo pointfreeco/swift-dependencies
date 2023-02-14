@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import Dependencies
+@_spi(Internals) import Dependencies
 
 final class DependencyTests: XCTestCase {
   func testExtendingLifetimeToChildModels() {
@@ -170,6 +170,34 @@ final class DependencyTests: XCTestCase {
     }
     XCTAssertEqual(9000, greatGrandchild.int)
     XCTAssertEqual("cool", greatGrandchild.string)
+  }
+
+  func testExtendingLifetime_MemoryManagement() async throws {
+    try await withDependencies {
+      $0 = .test
+    } operation: {
+      let model = Model()
+      XCTAssertEqual(_dependencyObjects.storage.value.count, 0)
+      let childID: ObjectIdentifier = {
+        let child = model.child()
+        XCTAssertEqual(_dependencyObjects.storage.value.count, 1)
+        return ObjectIdentifier(child)
+      }()
+      XCTAssertNil(
+        _dependencyObjects.storage.withValue { $0[childID]?.object }
+      )
+
+      let child = await model.child()
+      XCTAssertEqual(_dependencyObjects.storage.value.count, 1)
+      try await Task.sleep(nanoseconds: 100_000_000)
+
+      XCTAssertNil(
+        _dependencyObjects.storage.withValue { $0[childID] }
+      )
+      XCTAssertEqual(_dependencyObjects.storage.count, 1)
+
+      _ = child
+    }
   }
 }
 private class Model {

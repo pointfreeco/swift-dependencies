@@ -31,7 +31,7 @@ public func withDependencies<R>(
       try DependencyValues.$isSetting.withValue(false) {
         let result = try operation()
         if R.self is AnyClass {
-          dependencyObjects.store(result as AnyObject)
+          _dependencyObjects.store(result as AnyObject)
         }
         return result
       }
@@ -72,7 +72,7 @@ public func withDependencies<R>(
         try await DependencyValues.$isSetting.withValue(false) {
           let result = try await operation()
           if R.self is AnyClass {
-            dependencyObjects.store(result as AnyObject)
+            _dependencyObjects.store(result as AnyObject)
           }
           return result
         }
@@ -119,7 +119,7 @@ public func withDependencies<Model: AnyObject, R>(
   file: StaticString? = nil,
   line: UInt? = nil
 ) rethrows -> R {
-  guard let values = dependencyObjects.values(from: model)
+  guard let values = _dependencyObjects.values(from: model)
   else {
     runtimeWarn(
       """
@@ -138,7 +138,7 @@ public func withDependencies<Model: AnyObject, R>(
   } operation: {
     let result = try operation()
     if R.self is AnyClass {
-      dependencyObjects.store(result as AnyObject)
+      _dependencyObjects.store(result as AnyObject)
     }
     return result
   }
@@ -189,7 +189,7 @@ public func withDependencies<Model: AnyObject, R>(
     file: StaticString? = nil,
     line: UInt? = nil
   ) async rethrows -> R {
-    guard let values = dependencyObjects.values(from: model)
+    guard let values = _dependencyObjects.values(from: model)
     else {
       runtimeWarn(
         """
@@ -208,7 +208,7 @@ public func withDependencies<Model: AnyObject, R>(
     } operation: {
       let result = try await operation()
       if R.self is AnyClass {
-        dependencyObjects.store(result as AnyObject)
+        _dependencyObjects.store(result as AnyObject)
       }
       return result
     }
@@ -393,22 +393,23 @@ extension DependencyValues {
   }
 }
 
-private let dependencyObjects = DependencyObjects()
+@_spi(Internals) public let _dependencyObjects = _DependencyObjects()
 
-private class DependencyObjects: @unchecked Sendable {
-  private var storage = LockIsolated<[ObjectIdentifier: DependencyObject]>([:])
+@_spi(Internals) public final class _DependencyObjects: Sendable {
+  public let storage = LockIsolated<[ObjectIdentifier: _DependencyObject]>([:])
 
   internal init() {}
 
   func store(_ object: AnyObject) {
     self.storage.withValue { storage in
-      storage[ObjectIdentifier(object)] = DependencyObject(
+      storage[ObjectIdentifier(object)] = _DependencyObject(
         object: object,
         dependencyValues: DependencyValues._current
       )
       Task {
         self.storage.withValue { storage in
           for (id, box) in storage where box.object == nil {
+            print("Remove", id)
             storage.removeValue(forKey: id)
           }
         }
@@ -426,7 +427,7 @@ private class DependencyObjects: @unchecked Sendable {
   }
 }
 
-private struct DependencyObject {
-  weak var object: AnyObject?
+@_spi(Internals) public struct _DependencyObject {
+  public weak var object: AnyObject?
   let dependencyValues: DependencyValues
 }

@@ -160,7 +160,9 @@ extension DependencyKey {
   /// A default implementation that provides the ``liveValue`` to Xcode previews.
   ///
   /// You may provide your own default `previewValue` in your conformance to ``TestDependencyKey``,
-  /// which will take precedence over this implementation.
+  /// which will take precedence over this implementation. If you are going to provide your own
+  /// `previewValue` implementation, be sure to do it in the same module as the
+  /// ``TestDependencyKey``.
   public static var previewValue: Value { Self.liveValue }
 
   /// A default implementation that provides the ``previewValue`` to XCTest runs (or ``liveValue``,

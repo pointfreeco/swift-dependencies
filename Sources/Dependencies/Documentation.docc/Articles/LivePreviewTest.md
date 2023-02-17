@@ -133,13 +133,13 @@ There's a third kind of implementation that you can provide that sits somewhere 
 ``TestDependencyKey/previewValue-8u2sy``. It will be used whenever your feature is run in an Xcode
 preview.
 
-Previews are similar to tests in that you usually do not want to interact with the outside world,
-such as making network requests. In fact, many of Apple's frameworks do not work in previews, such
-as Core Location, and so it will be hard to interact with your feature in previews if it touches
-those frameworks.
+Xcode previews are similar to tests in that you usually do not want to interact with the outside 
+world, such as making network requests. In fact, many of Apple's frameworks do not work in previews, 
+such as Core Location, and so it will be hard to interact with your feature in previews if it 
+touches those frameworks.
 
-However, previews are dissimilar to tests in that it's fine for dependencies to return some mock
-data. There's no need to deal with "unimplemented" clients for proving which dependencies are
+However, Xcode previews are dissimilar to tests in that it's fine for dependencies to return some 
+mock data. There's no need to deal with "unimplemented" clients for proving which dependencies are
 actually used.
 
 For example, suppose you have an API client with some endpoints for fetching users. You do not want
@@ -163,6 +163,11 @@ extension APIClient: TestDependencyKey {
   )
 }
 ```
+
+> Note: The `previewValue` implementation must be defined in the same module as the 
+``TestDependencyKey`` conformance. If you end up separating the interface and implementation of your
+dependency, as shown in <doc:LivePreviewTest#Separating-interface-and-implementation>, then it
+must be defined the interface module, not the implementation module.
 
 Then when running a feature that uses this dependency in an Xcode preview, it will immediately get
 data provided to it, making it easier for you to iterate on your feature's logic and styling.

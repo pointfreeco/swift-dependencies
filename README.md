@@ -286,6 +286,7 @@ priorities and trade-offs that differ from Dependencies. Here are a few well-kno
   * [Factory](https://github.com/hmlongco/Factory)
   * [Needle](https://github.com/uber/needle)
   * [Swinject](https://github.com/Swinject/Swinject)
+  * [Weaver](https://github.com/scribd/Weaver)
 
 ## License
 

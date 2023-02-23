@@ -85,6 +85,7 @@ public struct DependencyValues: Sendable {
   @TaskLocal static var currentDependency = CurrentDependency()
 
   fileprivate var cachedValues = CachedValues()
+  @_spi(Internals) public var isEmpty: Bool { self.storage.isEmpty }
   private var storage: [ObjectIdentifier: AnySendable] = [:]
 
   /// Creates a dependency values instance.

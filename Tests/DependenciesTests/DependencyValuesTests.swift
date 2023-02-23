@@ -1,4 +1,4 @@
-import Dependencies
+@_spi(Internals) import Dependencies
 import XCTest
 
 final class DependencyValuesTests: XCTestCase {
@@ -591,6 +591,22 @@ final class DependencyValuesTests: XCTestCase {
       XCTAssertEqual(value, 1)
     }
   #endif
+  
+  func testIsEmpty() {
+    @Dependency(\.self) var dependencies
+    
+    XCTAssertTrue(dependencies.isEmpty)
+    
+    withDependencies { _ in () } operation: {
+      XCTAssertTrue(dependencies.isEmpty)
+    }
+    
+    withDependencies {
+      $0.date = .constant(.now)
+    } operation: {
+      XCTAssertFalse(dependencies.isEmpty)
+    }
+  }
 }
 
 actor CachedDependency: TestDependencyKey {

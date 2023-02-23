@@ -602,7 +602,7 @@ final class DependencyValuesTests: XCTestCase {
     }
     
     withDependencies {
-      $0.date = .constant(.now)
+      $0.context = .preview
     } operation: {
       XCTAssertFalse(dependencies.isEmpty)
     }

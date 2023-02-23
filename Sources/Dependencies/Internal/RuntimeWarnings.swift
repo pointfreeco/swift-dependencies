@@ -1,3 +1,4 @@
+import Foundation
 @_transparent
 @usableFromInline
 @inline(__always)

@@ -591,16 +591,18 @@ final class DependencyValuesTests: XCTestCase {
       XCTAssertEqual(value, 1)
     }
   #endif
-  
+
   func testIsEmpty() {
-    @Dependency(\.self) var dependencies
-    
+    @Dependency(\.self) var dependencies;
+
     XCTAssertTrue(dependencies.isEmpty)
-    
-    withDependencies { _ in () } operation: {
+
+    withDependencies { _ in
+      ()
+    } operation: {
       XCTAssertTrue(dependencies.isEmpty)
     }
-    
+
     withDependencies {
       $0.context = .preview
     } operation: {

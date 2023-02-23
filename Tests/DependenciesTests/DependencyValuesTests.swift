@@ -598,7 +598,6 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertTrue(dependencies.isEmpty)
 
     withDependencies { _ in
-      ()
     } operation: {
       XCTAssertTrue(dependencies.isEmpty)
     }

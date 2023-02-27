@@ -151,23 +151,20 @@ struct MyApp: App {
 That will allow tests to run in the application target without your actual application code 
 interfering.
 
-### Statically linking `Dependencies` in the tests target
+### Statically linking your tests target to `Dependencies`
 
-If you explicitly statically link with the `Dependencies` library in your tests target, its 
-implementation will clash with the `Dependencies` implementation that is usually statically linked
-with the app itself. It then may use a different `DependenciesValue` base type in the app and in 
-tests, and you may encounter test failures where dependencies overrides performed with 
-`withDependencies` will seem ineffective.
+If you statically link the `Dependencies` module to your tests target, its implementation may clash
+with the implementation that is statically linked to the app itself. It then may use a different
+`DependencyValues` base type in the app and in tests, and you may encounter test failures where
+dependency overrides performed with `withDependencies` seem ineffective.
 
 In such cases Xcode will display multiple warnings similar to:
-```
-objc[70954]: Class _TtC12Dependencies[…]CachedValues is implemented in both 
-/Users/[…]/Library/Developer/XCTestDevices/[…]/App.app/App and 
-/Users/[…]/Library/Developer/XCTestDevices/[…]/App.app/PlugIns/AppTests.xctest/AppTests
-One of the two will be used. Which one is undefined.
+
+> Class _TtC12Dependencies[…] is implemented in both […] and […].
+> One of the two will be used. Which one is undefined.
 ```
 
-The solution is to remove the static dependency to `Dependencies` from your test target, as you
+The solution is to remove the static link to `Dependencies` from your test target, as you
 transitively get access to it through the app itself. In Xcode, go to "Build Phases" and remove
 "Dependencies" from the "Link Binary With Libraries" section. When using SwiftPM, remove the
 "Dependencies" entry from the `testTarget`'s' `dependencies` array in `Package.swift`.

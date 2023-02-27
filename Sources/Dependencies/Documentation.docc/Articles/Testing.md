@@ -162,7 +162,6 @@ In such cases Xcode will display multiple warnings similar to:
 
 > Class _TtC12Dependencies[…] is implemented in both […] and […].
 > One of the two will be used. Which one is undefined.
-```
 
 The solution is to remove the static link to `Dependencies` from your test target, as you
 transitively get access to it through the app itself. In Xcode, go to "Build Phases" and remove

@@ -107,6 +107,8 @@ the updated dependency when run in the new `withDependencies` context.
 
 ## Testing gotchas
 
+### Testing host application
+
 This is not well known, but when an application target runs tests it actually boots up a simulator
 and runs your actual application entry point in the simulator. This means while tests are running,
 your application's code is separately also running. This can be a huge gotcha because it means you
@@ -122,7 +124,7 @@ running in a test context, and accessing dependencies will cause test failures.
 
 This only happens when running tests in a _application target_, that is, a target that is 
 specifically used to launch the application for a simulator or device. This does not happen when
-running tests for frameworks or SPM libraries, which is yet another good reason to modularize
+running tests for frameworks or SwiftPM libraries, which is yet another good reason to modularize
 your code base.
 
 However, if you aren't in a position to modularize your code base right now, there is a quick
@@ -148,5 +150,26 @@ struct MyApp: App {
 
 That will allow tests to run in the application target without your actual application code 
 interfering.
+
+### Statically linking `Dependencies` in the tests target
+
+If you explicitly statically link with the `Dependencies` library in your tests target, its 
+implementation will clash with the `Dependencies` implementation that is usually statically linked
+with the app itself. It then may use a different `DependenciesValue` base type in the app and in 
+tests, and you may encounter test failures where dependencies overrides performed with 
+`withDependencies` will seem ineffective.
+
+In such cases Xcode will display multiple warnings similar to:
+```
+objc[70954]: Class _TtC12Dependencies[…]CachedValues is implemented in both 
+/Users/[…]/Library/Developer/XCTestDevices/[…]/App.app/App and 
+/Users/[…]/Library/Developer/XCTestDevices/[…]/App.app/PlugIns/AppTests.xctest/AppTests
+One of the two will be used. Which one is undefined.
+```
+
+The solution is to remove the static dependency to `Dependencies` from your test target, as you
+transitively get access to it through the app itself. In Xcode, go to "Build Phases" and remove
+"Dependencies" from the "Link Binary With Libraries" section. When using SwiftPM, remove the
+"Dependencies" entry from the `testTarget`'s' `dependencies` array in `Package.swift`.
 
 [xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay

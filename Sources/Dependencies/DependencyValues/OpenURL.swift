@@ -12,26 +12,19 @@
 
   @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
   private enum OpenURLKey: DependencyKey {
-    static let liveValue = OpenURLEffect { url in
-      let stream = AsyncStream<Bool> { continuation in
-        let task = Task { @MainActor in
-          #if os(watchOS)
-            EnvironmentValues().openURL(url)
-            continuation.yield(true)
-            continuation.finish()
-          #else
-            EnvironmentValues().openURL(url) { canOpen in
-              continuation.yield(canOpen)
-              continuation.finish()
-            }
-          #endif
+    static let liveValue = OpenURLEffect { @MainActor url in
+      #if os(watchOS)
+        EnvironmentValues().openURL(url)
+        return true
+      #else
+        return await withCheckedContinuation { continuation in
+          EnvironmentValues().openURL(url) { canOpen in
+            continuation.resume(returning: canOpen)
+          }
         }
-        continuation.onTermination = { @Sendable _ in
-          task.cancel()
-        }
-      }
-      return await stream.first(where: { _ in true }) ?? false
+      #endif
     }
+
     static let testValue = OpenURLEffect { _ in
       XCTFail(#"Unimplemented: @Dependency(\.openURL)"#)
       return false

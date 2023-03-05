@@ -39,7 +39,7 @@ final class FireAndForgetTests: XCTestCase {
   func testLiveContext_DependencyAccess() async {
     await withDependencies {
       $0.context = .live
-      $0.date.now = Date(timeIntervalSince1970: 1234567890)
+      $0.date.now = Date(timeIntervalSince1970: 1_234_567_890)
     } operation: {
       let date = ActorIsolated<Date?>(nil)
 
@@ -50,7 +50,7 @@ final class FireAndForgetTests: XCTestCase {
 
       while await date.value == nil {}
       let value = await date.value
-      XCTAssertEqual(value, Date(timeIntervalSince1970: 1234567890))
+      XCTAssertEqual(value, Date(timeIntervalSince1970: 1_234_567_890))
     }
   }
 }

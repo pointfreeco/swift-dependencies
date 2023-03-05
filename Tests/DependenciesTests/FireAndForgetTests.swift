@@ -44,7 +44,7 @@ final class FireAndForgetTests: XCTestCase {
       let date = ActorIsolated<Date?>(nil)
 
       await self.fireAndForget {
-        @Dependency(\.date.now) var now
+        @Dependency(\.date.now) var now: Date
         await date.setValue(now)
       }
 

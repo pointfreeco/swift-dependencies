@@ -35,6 +35,11 @@ test-linux:
 		swift:5.7-focal \
 		bash -c 'apt-get update && apt-get -y install make && make test-swift'
 
+test-integration:
+	xcodebuild test \
+		-scheme "Integration" \
+		-destination platform="$(PLATFORM_IOS)" || exit 1; \
+
 build-for-library-evolution:
 	swift build \
 		-c release \

@@ -69,7 +69,7 @@ private enum FireAndForgetKey: DependencyKey {
   public static let liveValue = FireAndForget { priority, operation in
     Task(priority: priority) { try await operation() }
   }
-  public static let testValue = FireAndForget { _, operation in
-    try? await operation()
+  public static let testValue = FireAndForget { priority, operation in
+    await Task(priority: priority) { try? await operation() }.value
   }
 }

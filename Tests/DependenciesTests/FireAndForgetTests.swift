@@ -62,12 +62,14 @@ final class FireAndForgetTests: XCTestCase {
       } operation: {
         let date = ActorIsolated<Date?>(nil)
 
-        await self.fireAndForget {
+        await self.fireAndForget(priority: .userInitiated) {
           @Dependency(\.date.now) var now: Date
           await date.setValue(now)
         }
 
-        while await date.value == nil {}
+        while await date.value == nil {
+          await Task.yield()
+        }
         let value = await date.value
         XCTAssertEqual(value, Date(timeIntervalSince1970: 1_234_567_890))
       }

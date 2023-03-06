@@ -220,8 +220,6 @@ struct CurrentDependency {
   var line: UInt?
 }
 
-private let contextEnvVarName = "SWIFT_DEPENDENCIES_CONTEXT"
-
 private let defaultContext: DependencyContext = {
   let environment = ProcessInfo.processInfo.environment
   var inferredContext: DependencyContext {
@@ -234,7 +232,7 @@ private let defaultContext: DependencyContext = {
     }
   }
 
-  guard let value = environment[contextEnvVarName]
+  guard let value = environment["SWIFT_DEPENDENCIES_CONTEXT"]
   else { return inferredContext }
 
   switch value {

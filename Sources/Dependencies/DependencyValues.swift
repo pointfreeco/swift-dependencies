@@ -221,12 +221,37 @@ struct CurrentDependency {
 }
 
 private let defaultContext: DependencyContext = {
-  if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-    return .preview
-  } else if _XCTIsTesting {
-    return .test
-  } else {
+  let environment = ProcessInfo.processInfo.environment
+  var inferredContext: DependencyContext {
+    if environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+      return .preview
+    } else if _XCTIsTesting {
+      return .test
+    } else {
+      return .live
+    }
+  }
+
+  guard let value = environment["SWIFT_DEPENDENCIES_CONTEXT"]
+  else { return inferredContext }
+
+  switch value {
+  case "live":
     return .live
+  case "preview":
+    return .preview
+  case "test":
+    return .test
+  default:
+    runtimeWarn(
+      """
+      An environment value for SWIFT_DEPENDENCIES_CONTEXT was provided but did not match "live",
+      "preview", or "test".
+      
+          SWIFT_DEPENDENCIES_CONTEXT = \(value.debugDescription)
+      """
+    )
+    return inferredContext
   }
 }()
 

@@ -243,10 +243,14 @@ private let defaultContext: DependencyContext = {
   case "test":
     return .test
   default:
-    runtimeWarn("""
+    runtimeWarn(
+      """
       An environment value for SWIFT_DEPENDENCIES_CONTEXT was provided but did not match "live",
       "preview", or "test".
-      """)
+      
+          SWIFT_DEPENDENCIES_CONTEXT = \(value.debugDescription)
+      """
+    )
     return inferredContext
   }
 }()

@@ -247,7 +247,7 @@ private let defaultContext: DependencyContext = {
       """
       An environment value for SWIFT_DEPENDENCIES_CONTEXT was provided but did not match "live",
       "preview", or "test".
-      
+
           SWIFT_DEPENDENCIES_CONTEXT = \(value.debugDescription)
       """
     )

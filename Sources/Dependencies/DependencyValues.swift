@@ -81,7 +81,9 @@ import Foundation
 /// Read the article <doc:RegisteringDependencies> for more information.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
-  @TaskLocal static var isSetting = false
+  #if DEBUG
+    @TaskLocal static var isSetting = false
+  #endif
   @TaskLocal static var currentDependency = CurrentDependency()
 
   fileprivate var cachedValues = CachedValues()
@@ -289,51 +291,53 @@ private final class CachedValues: @unchecked Sendable {
 
       guard let value = value
       else {
-        if !DependencyValues.isSetting {
-          var dependencyDescription = ""
-          if let fileID = DependencyValues.currentDependency.fileID,
-            let line = DependencyValues.currentDependency.line
-          {
-            dependencyDescription.append(
-              """
-                Location:
-                  \(fileID):\(line)
+        #if DEBUG
+          if !DependencyValues.isSetting {
+            var dependencyDescription = ""
+            if let fileID = DependencyValues.currentDependency.fileID,
+              let line = DependencyValues.currentDependency.line
+            {
+              dependencyDescription.append(
+                """
+                  Location:
+                    \(fileID):\(line)
 
+                """
+              )
+            }
+            dependencyDescription.append(
+              Key.self == Key.Value.self
+                ? """
+                  Dependency:
+                    \(typeName(Key.Value.self))
+                """
+                : """
+                  Key:
+                    \(typeName(Key.self))
+                  Value:
+                    \(typeName(Key.Value.self))
+                """
+            )
+
+            runtimeWarn(
               """
+              "@Dependency(\\.\(function))" has no live implementation, but was accessed from a \
+              live context.
+
+              \(dependencyDescription)
+
+              Every dependency registered with the library must conform to "DependencyKey", and \
+              that conformance must be visible to the running application.
+
+              To fix, make sure that "\(typeName(Key.self))" conforms to "DependencyKey" by \
+              providing a live implementation of your dependency, and make sure that the \
+              conformance is linked with this current application.
+              """,
+              file: DependencyValues.currentDependency.file ?? file,
+              line: DependencyValues.currentDependency.line ?? line
             )
           }
-          dependencyDescription.append(
-            Key.self == Key.Value.self
-              ? """
-                Dependency:
-                  \(typeName(Key.Value.self))
-              """
-              : """
-                Key:
-                  \(typeName(Key.self))
-                Value:
-                  \(typeName(Key.Value.self))
-              """
-          )
-
-          runtimeWarn(
-            """
-            "@Dependency(\\.\(function))" has no live implementation, but was accessed from a \
-            live context.
-
-            \(dependencyDescription)
-
-            Every dependency registered with the library must conform to "DependencyKey", and \
-            that conformance must be visible to the running application.
-
-            To fix, make sure that "\(typeName(Key.self))" conforms to "DependencyKey" by \
-            providing a live implementation of your dependency, and make sure that the \
-            conformance is linked with this current application.
-            """,
-            file: DependencyValues.currentDependency.file ?? file,
-            line: DependencyValues.currentDependency.line ?? line
-          )
-        }
+        #endif
         return Key.testValue
       }
 

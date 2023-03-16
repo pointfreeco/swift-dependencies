@@ -1,6 +1,5 @@
+import Dependencies
 import XCTest
-
-@testable import Dependencies
 
 final class DependencyTests: XCTestCase {
   func testExtendingLifetimeToChildModels() {

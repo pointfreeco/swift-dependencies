@@ -24,11 +24,11 @@ public func withDependencies<R>(
   _ updateValuesForOperation: (inout DependencyValues) throws -> Void,
   operation: () throws -> R
 ) rethrows -> R {
-  try DependencyValues.$isSetting.withValue(true) {
+  try isSetting(true) {
     var dependencies = DependencyValues._current
     try updateValuesForOperation(&dependencies)
     return try DependencyValues.$_current.withValue(dependencies) {
-      try DependencyValues.$isSetting.withValue(false) {
+      try isSetting(false) {
         let result = try operation()
         if R.self is AnyClass {
           dependencyObjects.store(result as AnyObject)
@@ -65,11 +65,11 @@ public func withDependencies<R>(
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
     operation: () async throws -> R
   ) async rethrows -> R {
-    try await DependencyValues.$isSetting.withValue(true) {
+    try await isSetting(true) {
       var dependencies = DependencyValues._current
       try await updateValuesForOperation(&dependencies)
       return try await DependencyValues.$_current.withValue(dependencies) {
-        try await DependencyValues.$isSetting.withValue(false) {
+        try await isSetting(false) {
           let result = try await operation()
           if R.self is AnyClass {
             dependencyObjects.store(result as AnyObject)
@@ -85,11 +85,11 @@ public func withDependencies<R>(
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
     operation: () async throws -> R
   ) async rethrows -> R {
-    try await DependencyValues.$isSetting.withValue(true) {
+    try await isSetting(true) {
       var dependencies = DependencyValues._current
       try await updateValuesForOperation(&dependencies)
       return try await DependencyValues.$_current.withValue(dependencies) {
-        try await DependencyValues.$isSetting.withValue(false) {
+        try await isSetting(false) {
           let result = try await operation()
           if R.self is AnyClass {
             dependencyObjects.store(result as AnyObject)
@@ -429,4 +429,28 @@ private class DependencyObjects: @unchecked Sendable {
 private struct DependencyObject {
   weak var object: AnyObject?
   let dependencyValues: DependencyValues
+}
+
+@_transparent
+private func isSetting<R>(
+  _ value: Bool,
+  operation: () throws -> R
+) rethrows -> R {
+  #if DEBUG
+    try DependencyValues.$isSetting.withValue(value, operation: operation)
+  #else
+    try operation()
+  #endif
+}
+
+@_transparent
+private func isSetting<R>(
+  _ value: Bool,
+  operation: () async throws -> R
+) async rethrows -> R {
+  #if DEBUG
+    try await DependencyValues.$isSetting.withValue(value, operation: operation)
+  #else
+    try await operation()
+  #endif
 }

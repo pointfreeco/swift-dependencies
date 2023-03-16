@@ -213,9 +213,10 @@ extension DependencyKey {
               \(typeName(Value.self))
           """
       )
-    let dependencyName = DependencyValues.currentDependency.name
-      .map { "@Dependency(\\.\($0))" }
-      ?? "A dependency"
+      let dependencyName =
+        DependencyValues.currentDependency.name
+        .map { "@Dependency(\\.\($0))" }
+        ?? "A dependency"
       XCTFail(
         """
         \(dependencyName) has no test implementation, but was accessed from a test context:

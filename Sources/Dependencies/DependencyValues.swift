@@ -82,6 +82,7 @@ import Foundation
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
   #if DEBUG
+    @usableFromInline
     @TaskLocal static var isSetting = false
   #endif
   @TaskLocal static var currentDependency = CurrentDependency()
@@ -200,6 +201,7 @@ public struct DependencyValues: Sendable {
     return values
   }
 
+  @usableFromInline
   func merging(_ other: Self) -> Self {
     var values = self
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })

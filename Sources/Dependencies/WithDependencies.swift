@@ -20,6 +20,7 @@ import Foundation
 ///   - operation: An operation to perform wherein dependencies have been overridden.
 /// - Returns: The result returned from `operation`.
 @discardableResult
+@inlinable
 public func withDependencies<R>(
   _ updateValuesForOperation: (inout DependencyValues) throws -> Void,
   operation: () throws -> R
@@ -61,6 +62,7 @@ public func withDependencies<R>(
   /// - Returns: The result returned from `operation`.
   @_unsafeInheritExecutor
   @discardableResult
+  @inlinable
   public func withDependencies<R>(
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
     operation: () async throws -> R
@@ -81,6 +83,7 @@ public func withDependencies<R>(
   }
 #else
   @discardableResult
+  @inlinable
   public func withDependencies<R>(
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
     operation: () async throws -> R
@@ -112,6 +115,7 @@ public func withDependencies<R>(
 ///   - operation: The operation to run with the updated dependencies.
 /// - Returns: The result returned from `operation`.
 @discardableResult
+@inlinable
 public func withDependencies<Model: AnyObject, R>(
   from model: Model,
   _ updateValuesForOperation: (inout DependencyValues) throws -> Void,
@@ -153,6 +157,7 @@ public func withDependencies<Model: AnyObject, R>(
 ///   - operation: The operation to run with the updated dependencies.
 /// - Returns: The result returned from `operation`.
 @discardableResult
+@inlinable
 public func withDependencies<Model: AnyObject, R>(
   from model: Model,
   operation: () throws -> R,
@@ -182,6 +187,7 @@ public func withDependencies<Model: AnyObject, R>(
   /// - Returns: The result returned from `operation`.
   @_unsafeInheritExecutor
   @discardableResult
+  @inlinable
   public func withDependencies<Model: AnyObject, R>(
     from model: Model,
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
@@ -215,6 +221,7 @@ public func withDependencies<Model: AnyObject, R>(
   }
 #else
   @discardableResult
+  @inlinable
   public func withDependencies<Model: AnyObject, R>(
     from model: Model,
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
@@ -260,6 +267,7 @@ public func withDependencies<Model: AnyObject, R>(
   /// - Returns: The result returned from `operation`.
   @_unsafeInheritExecutor
   @discardableResult
+  @inlinable
   public func withDependencies<Model: AnyObject, R>(
     from model: Model,
     operation: () async throws -> R,
@@ -276,6 +284,7 @@ public func withDependencies<Model: AnyObject, R>(
   }
 #else
   @discardableResult
+  @inlinable
   public func withDependencies<Model: AnyObject, R>(
     from model: Model,
     operation: () async throws -> R,
@@ -393,13 +402,16 @@ extension DependencyValues {
   }
 }
 
-private let dependencyObjects = DependencyObjects()
+@usableFromInline
+let dependencyObjects = DependencyObjects()
 
-private class DependencyObjects: @unchecked Sendable {
+@usableFromInline
+class DependencyObjects: @unchecked Sendable {
   private var storage = LockIsolated<[ObjectIdentifier: DependencyObject]>([:])
 
   internal init() {}
 
+  @usableFromInline
   func store(_ object: AnyObject) {
     self.storage.withValue { storage in
       storage[ObjectIdentifier(object)] = DependencyObject(
@@ -416,6 +428,7 @@ private class DependencyObjects: @unchecked Sendable {
     }
   }
 
+  @usableFromInline
   func values(from object: AnyObject) -> DependencyValues? {
     Mirror(reflecting: object).children
       .lazy
@@ -432,7 +445,8 @@ private struct DependencyObject {
 }
 
 @_transparent
-private func isSetting<R>(
+@usableFromInline
+func isSetting<R>(
   _ value: Bool,
   operation: () throws -> R
 ) rethrows -> R {
@@ -444,7 +458,8 @@ private func isSetting<R>(
 }
 
 @_transparent
-private func isSetting<R>(
+@usableFromInline
+func isSetting<R>(
   _ value: Bool,
   operation: () async throws -> R
 ) async rethrows -> R {

@@ -82,8 +82,7 @@ import Foundation
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
   #if DEBUG
-    @usableFromInline
-    @TaskLocal static var isSetting = false
+    @TaskLocal public static var isSetting = false
   #endif
   @TaskLocal static var currentDependency = CurrentDependency()
 

@@ -118,12 +118,9 @@ public protocol DependencyKey: TestDependencyKey {
 /// return a default value suitable for Xcode previews, or the ``testValue``, if left unimplemented.
 ///
 /// See ``DependencyKey`` to define a static, default value for the live application.
-public protocol TestDependencyKey {
+public protocol TestDependencyKey: Sendable where Value: Sendable {
   /// The associated type representing the type of the dependency key's value.
-  associatedtype Value = Self
-
-  // NB: This associated type should be constrained to `Sendable` when this bug is fixed:
-  //     https://github.com/apple/swift/issues/60649
+	associatedtype Value = Self
 
   /// The preview value for the dependency key.
   ///

@@ -120,10 +120,13 @@ public protocol DependencyKey: TestDependencyKey {
 /// See ``DependencyKey`` to define a static, default value for the live application.
 public protocol TestDependencyKey {
   /// The associated type representing the type of the dependency key's value.
-  associatedtype Value = Self
-
-  // NB: This associated type should be constrained to `Sendable` when this bug is fixed:
-  //     https://github.com/apple/swift/issues/60649
+  #if swift(>=5.7.1)
+    associatedtype Value: Sendable = Self
+  #else
+    // NB: Can't constrain to `Sendable` on earlier Swift versions due to this bug:
+    //     https://github.com/apple/swift/issues/60649
+    associatedtype Value = Self
+  #endif
 
   /// The preview value for the dependency key.
   ///

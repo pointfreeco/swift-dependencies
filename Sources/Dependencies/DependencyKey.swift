@@ -118,7 +118,7 @@ public protocol DependencyKey: TestDependencyKey {
 /// return a default value suitable for Xcode previews, or the ``testValue``, if left unimplemented.
 ///
 /// See ``DependencyKey`` to define a static, default value for the live application.
-public protocol TestDependencyKey: Sendable where Value: Sendable {
+public protocol TestDependencyKey {
   /// The associated type representing the type of the dependency key's value.
 	associatedtype Value = Self
 

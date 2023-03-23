@@ -604,8 +604,8 @@ final class DependencyValuesTests: XCTestCase {
         await withTaskGroup(of: Void.self) { group in
           for _ in 1...taskCount {
             group.addTask {
-              @Dependency(\.countInitDependency) var countInitDependency
-              _ = countInitDependency.fetch()
+              @Dependency(\.countInitDependency) var countInitDependency: CountInitDependency
+              let _ = countInitDependency.fetch()
             }
           }
           for await _ in group {}

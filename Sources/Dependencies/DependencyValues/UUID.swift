@@ -104,6 +104,12 @@ public struct UUIDGenerator: Sendable {
   }
 }
 
+extension UUID {
+  public init(_ intValue: Int) {
+    self.init(uuidString: "00000000-0000-0000-0000-\(String(format: "%012x", intValue))")!
+  }
+}
+
 private final class IncrementingUUIDGenerator: @unchecked Sendable {
   private let lock = NSLock()
   private var sequence = 0
@@ -114,6 +120,6 @@ private final class IncrementingUUIDGenerator: @unchecked Sendable {
       self.sequence += 1
       self.lock.unlock()
     }
-    return UUID(uuidString: "00000000-0000-0000-0000-\(String(format: "%012x", self.sequence))")!
+    return UUID(self.sequence)
   }
 }

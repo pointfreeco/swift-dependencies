@@ -13,4 +13,11 @@ final class UUIDDependencyTests: XCTestCase {
       XCTAssertEqual(self.uuid(), UUID(uuidString: "00000000-0000-0000-0000-000000000001"))
     }
   }
+
+  func testInitIntValue() {
+    XCTAssertEqual(UUID(0), UUID(uuidString: "00000000-0000-0000-0000-000000000000"))
+    XCTAssertEqual(UUID(1), UUID(uuidString: "00000000-0000-0000-0000-000000000001"))
+    XCTAssertEqual(UUID(15), UUID(uuidString: "00000000-0000-0000-0000-00000000000F"))
+    XCTAssertEqual(UUID(256), UUID(uuidString: "00000000-0000-0000-0000-000000000100"))
+  }
 }

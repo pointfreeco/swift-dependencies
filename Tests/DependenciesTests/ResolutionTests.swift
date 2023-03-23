@@ -17,6 +17,29 @@ final class ResolutionTests: XCTestCase {
     }
   }
 
+  func testDependencyWithInitialValuesDependingOnDependency_Eager() {
+    struct Model {
+      @Dependency(\.eagerParent) var eagerParent: EagerParentDependency
+      @Dependency(\.eagerChild) var eagerChild: EagerChildDependency
+    }
+
+    let model = withDependencies {
+      $0.eagerChild.value = 1
+    } operation: {
+      Model()
+    }
+
+    XCTAssertEqual(model.eagerParent.value, 1)
+    XCTAssertEqual(model.eagerChild.value, 1)
+
+    withDependencies {
+      $0.eagerChild.value = 42
+    } operation: {
+      XCTAssertEqual(model.eagerParent.value, 1)
+      XCTAssertEqual(model.eagerChild.value, 42)
+    }
+  }
+
   func testDependencyDependingOnDependency_Lazy() {
     @Dependency(\.lazyParent) var lazyParent: LazyParentDependency
     @Dependency(\.lazyChild) var lazyChild: LazyChildDependency

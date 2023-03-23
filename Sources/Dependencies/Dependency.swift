@@ -92,10 +92,16 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
       currentDependency.fileID = self.fileID
       currentDependency.line = self.line
       return DependencyValues.$currentDependency.withValue(currentDependency) {
-        self.initialValues.merging(DependencyValues._current)[keyPath: self.keyPath]
+        let dependencies = self.initialValues.merging(DependencyValues._current)
+        return DependencyValues.$_current.withValue(dependencies) {
+          DependencyValues._current[keyPath: self.keyPath]
+        }
       }
     #else
-      return self.initialValues.merging(DependencyValues._current)[keyPath: self.keyPath]
+      let dependencies = self.initialValues.merging(DependencyValues._current)
+      return DependencyValues.$_current.withValue(dependencies) {
+        DependencyValues._current[keyPath: self.keyPath]
+      }
     #endif
   }
 }

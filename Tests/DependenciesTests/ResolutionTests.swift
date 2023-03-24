@@ -17,29 +17,6 @@ final class ResolutionTests: XCTestCase {
     }
   }
 
-  func testDependencyWithInitialValuesDependingOnDependency_Eager() {
-    struct Model {
-      @Dependency(\.eagerParent) var eagerParent: EagerParentDependency
-      @Dependency(\.eagerChild) var eagerChild: EagerChildDependency
-    }
-
-    let model = withDependencies {
-      $0.eagerChild.value = 1
-    } operation: {
-      Model()
-    }
-
-    XCTAssertEqual(model.eagerParent.value, 1)
-    XCTAssertEqual(model.eagerChild.value, 1)
-
-    withDependencies {
-      $0.eagerChild.value = 42
-    } operation: {
-      XCTAssertEqual(model.eagerParent.value, 1)
-      XCTAssertEqual(model.eagerChild.value, 42)
-    }
-  }
-
   func testDependencyDependingOnDependency_Lazy() {
     @Dependency(\.lazyParent) var lazyParent: LazyParentDependency
     @Dependency(\.lazyChild) var lazyChild: LazyChildDependency
@@ -67,6 +44,29 @@ final class ResolutionTests: XCTestCase {
     } operation: {
       XCTAssertEqual(lazyParent.value(), 42)
       XCTAssertEqual(lazyChild.value(), -42)
+    }
+  }
+
+  func testDependencyDependingOnDependency_Nested() {
+    struct Model {
+      @Dependency(\.nestedParent) var nestedParent: NestedParentDependency
+      @Dependency(\.nestedChild) var nestedChild: NestedChildDependency
+    }
+
+    let model = withDependencies {
+      $0.nestedChild.value = 1
+    } operation: {
+      Model()
+    }
+
+    XCTAssertEqual(model.nestedParent.value, 1)
+    XCTAssertEqual(model.nestedChild.value, 1)
+
+    withDependencies {
+      $0.nestedChild.value = 42
+    } operation: {
+      XCTAssertEqual(model.nestedParent.value, 42)
+      XCTAssertEqual(model.nestedChild.value, 42)
     }
   }
 
@@ -134,6 +134,15 @@ private struct LazyChildDependency: TestDependencyKey {
 
   static let testValue = Self { 1729 }
 }
+private struct NestedParentDependency: TestDependencyKey {
+  @Dependency(\.nestedChild) var child
+  var value: Int { self.child.value }
+  static var testValue = Self()
+}
+private struct NestedChildDependency: TestDependencyKey {
+  var value: Int
+  static var testValue = Self(value: 1729)
+}
 private struct DiamondDependencyA: TestDependencyKey {
   var value: @Sendable () -> Int
   static let testValue = Self {
@@ -191,6 +200,14 @@ extension DependencyValues {
   fileprivate var lazyChild: LazyChildDependency {
     get { self[LazyChildDependency.self] }
     set { self[LazyChildDependency.self] = newValue }
+  }
+  fileprivate var nestedParent: NestedParentDependency {
+    get { self[NestedParentDependency.self] }
+    set { self[NestedParentDependency.self] = newValue }
+  }
+  fileprivate var nestedChild: NestedChildDependency {
+    get { self[NestedChildDependency.self] }
+    set { self[NestedChildDependency.self] = newValue }
   }
   fileprivate var diamondA: DiamondDependencyA {
     get { self[DiamondDependencyA.self] }

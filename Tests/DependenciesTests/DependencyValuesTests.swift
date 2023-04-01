@@ -392,7 +392,7 @@ final class DependencyValuesTests: XCTestCase {
     }
 
     await model.doSomething(expectation: expectation)
-    self.wait(for: [expectation], timeout: 1)
+    await self.fulfillment(of: [expectation], timeout: 1)
     let newValue = await model.value
     XCTAssertEqual(newValue, 3)
   }
@@ -422,7 +422,7 @@ final class DependencyValuesTests: XCTestCase {
     } operation: {
       await model.doSomething(expectation: expectation)
     }
-    self.wait(for: [expectation], timeout: 1)
+    await self.fulfillment(of: [expectation], timeout: 1)
   }
 
   func testEscapingInFeatureModelWithOverride_OverrideEscaped() async {
@@ -455,7 +455,7 @@ final class DependencyValuesTests: XCTestCase {
     } operation: {
       await model.doSomething(expectation: expectation)
     }
-    self.wait(for: [expectation], timeout: 1)
+    await self.fulfillment(of: [expectation], timeout: 1)
     let newValue = await model.value
     XCTAssertEqual(newValue, 999)
   }
@@ -482,7 +482,7 @@ final class DependencyValuesTests: XCTestCase {
     } operation: {
       await model.doSomething(expectation: expectation)
     }
-    self.wait(for: [expectation], timeout: 1)
+    await self.fulfillment(of: [expectation], timeout: 1)
     let newValue = await model.value
     XCTAssertEqual(newValue, 3)
   }

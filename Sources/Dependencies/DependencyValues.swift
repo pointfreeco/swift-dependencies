@@ -275,7 +275,7 @@ private final class CachedValues: @unchecked Sendable {
   ) -> Key.Value where Key.Value: Sendable {
     self.lock.lock()
     defer { self.lock.unlock() }
-
+ 
     let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
     guard let base = self.cached[cacheKey]?.base, let value = base as? Key.Value
     else {

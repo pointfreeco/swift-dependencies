@@ -591,6 +591,70 @@ final class DependencyValuesTests: XCTestCase {
       XCTAssertEqual(value, 1)
     }
   #endif
+
+  func test_mainThread_deadlock() async {
+
+    /*
+     Main thread:
+      - wants CachedValues.lock
+     Non main thread:
+      - has CachedValues.lock
+      - resolving default value requires sync access to main thread
+     */
+
+    // Not really related to the test.
+    // But otherwise there's a deadlock with DispatchQueue.mainSync via setupTestObservers.
+    @Dependency(\.cachedDependency) var cachedDependency
+    _ = cachedDependency
+
+    let startMainThreadDepTaskExpectation = expectation(description: "mainThreadDepTask should execute")
+    let runsMainThreadTaskExpectation = expectation(description: "runsMainThreadTask should execute")
+
+    let mainThreadDepTask = Task {
+      startMainThreadDepTaskExpectation.fulfill()
+      await fulfillment(of: [runsMainThreadTaskExpectation], timeout: 1)
+      // We're not on the main thread, but resolving this will need the main thread.
+      @Dependency(\.needsMainThreadDep) var needsMainThreadDep
+      _ = needsMainThreadDep
+    }
+
+    await fulfillment(of: [startMainThreadDepTaskExpectation], timeout: 1)
+
+    let runsMainThreadTask = Task { @MainActor in
+      runsMainThreadTaskExpectation.fulfill()
+      // Sleep a bit to let the thread resolving @Dependency(\.needsMainThreadDep) acquire the lock first.
+      // Task.sleep doesn't work as it would unblock the main thread.
+      Thread.sleep(forTimeInterval: 0.5)
+      // Should continue after 0.5s, if no deadlock.
+      @Dependency(\.someDependency) var some
+      _ = some
+    }
+
+    // This is to not let the test run forever,
+    // but the timeout of fulfillment(of:timeout:) doesn't seem to work,
+    // when the deadlock is hit.
+    let expectFinish = expectation(description: "finish")
+    Task {
+      await mainThreadDepTask.value
+      await runsMainThreadTask.value
+      expectFinish.fulfill()
+    }
+
+    await fulfillment(of: [expectFinish], timeout: 1)
+  }
+}
+
+struct NeedsMainThreadDep: TestDependencyKey {
+  static var testValue: NeedsMainThreadDep {
+    if Thread.isMainThread {
+      XCTFail("should be called on background thread for testing purposes")
+      return NeedsMainThreadDep()
+    }
+    // Mock need of sync main thread access
+    return DispatchQueue.main.sync {
+      return NeedsMainThreadDep()
+    }
+  }
 }
 
 actor CachedDependency: TestDependencyKey {
@@ -642,6 +706,10 @@ extension DependencyValues {
   var childDependencyLateBinding: ChildDependencyLateBinding {
     get { self[ChildDependencyLateBinding.self] }
     set { self[ChildDependencyLateBinding.self] = newValue }
+  }
+  var needsMainThreadDep: NeedsMainThreadDep {
+    get { self[NeedsMainThreadDep.self] }
+    set { self[NeedsMainThreadDep.self] = newValue }
   }
 }
 

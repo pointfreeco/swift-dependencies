@@ -179,8 +179,8 @@ final class DependencyValuesTests: XCTestCase {
             reuseClient.setCount(-42)
             XCTAssertEqual(
               reuseClient.count(),
-              0,
-              "Don't cache dependency when using a test value in a live context"
+              -42,
+              "Dependency should cache when using a test value in a live context"
             )
           }
 
@@ -197,22 +197,17 @@ final class DependencyValuesTests: XCTestCase {
       withDependencies {
         $0.context = .live
       } operation: {
-        withDependencies {
-          XCTAssertEqual($0.reuseClient.count(), 0)
-          XCTAssertEqual(reuseClient.count(), 0)
-        } operation: {
-          #if DEBUG
-            XCTExpectFailure {
-              $0.compactDescription.contains(
-                """
-                @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a live \
-                context.
-                """
-              )
-            }
-          #endif
-          XCTAssertEqual(reuseClient.count(), 0)
-        }
+        #if DEBUG
+          XCTExpectFailure {
+            $0.compactDescription.contains(
+              """
+              @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a live \
+              context.
+              """
+            )
+          }
+        #endif
+        XCTAssertEqual(reuseClient.count(), 0)
       }
     #endif
   }

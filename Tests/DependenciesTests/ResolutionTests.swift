@@ -47,6 +47,102 @@ final class ResolutionTests: XCTestCase {
     }
   }
 
+  func testDependencyDependingOnDependency_Nested() {
+    struct Model {
+      @Dependency(\.nestedParent) var nestedParent: NestedParentDependency
+      @Dependency(\.nestedChild) var nestedChild: NestedChildDependency
+    }
+
+    let model = withDependencies {
+      $0.nestedChild.value = { 1 }
+    } operation: {
+      Model()
+    }
+
+    XCTAssertEqual(model.nestedParent.value(), 1)
+    XCTAssertEqual(model.nestedChild.value(), 1)
+
+    withDependencies {
+      $0.nestedChild.value = { 42 }
+    } operation: {
+      XCTAssertEqual(model.nestedParent.value(), 42)
+      XCTAssertEqual(model.nestedChild.value(), 42)
+    }
+  }
+
+  func testFirstAccessBehavior() {
+    @Dependency(\.nestedParent) var nestedParent: NestedParentDependency
+    struct Model {
+      @Dependency(\.nestedParent) var nestedParent: NestedParentDependency
+      @Dependency(\.nestedChild) var nestedChild: NestedChildDependency
+    }
+
+    let model = withDependencies {
+      $0.nestedChild.value = { 1 }
+    } operation: {
+      Model()
+    }
+
+    XCTAssertEqual(nestedParent.value(), 1729)
+    XCTAssertEqual(model.nestedParent.value(), 1729)
+    XCTAssertEqual(model.nestedChild.value(), 1)
+
+    withDependencies {
+      $0.nestedChild.value = { 42 }
+    } operation: {
+      XCTAssertEqual(model.nestedParent.value(), 42)
+      XCTAssertEqual(model.nestedChild.value(), 42)
+    }
+  }
+
+  func testParentChildScoping() {
+    withDependencies {
+      $0.context = .live
+    } operation: {
+      @Dependency(\.date) var date
+      let _ = date.now
+
+      class ParentModel {
+        @Dependency(\.date) var date
+        var child1: Child1Model?
+        var child2: Child2Model?
+        func goToChild1() {
+          self.child1 = withDependencies(from: self) { Child1Model() }
+        }
+        func goToChild2() {
+          self.child2 = withDependencies(from: self) { Child2Model() }
+        }
+      }
+      class Child1Model {
+        @Dependency(\.date) var date
+      }
+      class Child2Model {
+        @Dependency(\.date) var date
+      }
+
+      let model = withDependencies {
+        $0.date = .constant(Date(timeIntervalSince1970: 1))
+      } operation: {
+        ParentModel()
+      }
+
+      withDependencies {
+        $0.date = .constant(Date(timeIntervalSince1970: 2))
+      } operation: {
+        model.goToChild1()
+      }
+      withDependencies {
+        $0.date = .constant(Date(timeIntervalSince1970: 3))
+      } operation: {
+        model.goToChild2()
+      }
+
+      XCTAssertEqual(model.date.now.timeIntervalSince1970, 1)
+      XCTAssertEqual(model.child1?.date.now.timeIntervalSince1970, 2)
+      XCTAssertEqual(model.child2?.date.now.timeIntervalSince1970, 3)
+    }
+  }
+
   func testDependencyDiamond() {
     @Dependency(\.diamondA) var diamondA: DiamondDependencyA
     @Dependency(\.diamondB1) var diamondB1: DiamondDependencyB1
@@ -111,6 +207,19 @@ private struct LazyChildDependency: TestDependencyKey {
 
   static let testValue = Self { 1729 }
 }
+private struct NestedParentDependency: TestDependencyKey {
+  var value: () -> Int
+  static var testValue: NestedParentDependency {
+    @Dependency(\.nestedChild) var child
+    return Self {
+      return child.value()
+    }
+  }
+}
+private struct NestedChildDependency: TestDependencyKey {
+  var value: () -> Int
+  static let testValue = Self { 1729 }
+}
 private struct DiamondDependencyA: TestDependencyKey {
   var value: @Sendable () -> Int
   static let testValue = Self {
@@ -168,6 +277,14 @@ extension DependencyValues {
   fileprivate var lazyChild: LazyChildDependency {
     get { self[LazyChildDependency.self] }
     set { self[LazyChildDependency.self] = newValue }
+  }
+  fileprivate var nestedParent: NestedParentDependency {
+    get { self[NestedParentDependency.self] }
+    set { self[NestedParentDependency.self] = newValue }
+  }
+  fileprivate var nestedChild: NestedChildDependency {
+    get { self[NestedChildDependency.self] }
+    set { self[NestedChildDependency.self] = newValue }
   }
   fileprivate var diamondA: DiamondDependencyA {
     get { self[DiamondDependencyA.self] }

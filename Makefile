@@ -55,12 +55,12 @@ build-for-static-stdlib-docker:
 	@docker run \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.7-focal \
+		swift:5.8-focal \
 		bash -c "swift build -c debug --static-swift-stdlib"
 	@docker run \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.7-focal \
+		swift:5.8-focal \
 		bash -c "swift build -c release --static-swift-stdlib"
 
 format:

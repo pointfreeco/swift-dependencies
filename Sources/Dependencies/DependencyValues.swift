@@ -81,7 +81,7 @@ import Foundation
 /// Read the article <doc:RegisteringDependencies> for more information.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
-  #if canImport(XCTest)
+  #if DEBUG
     @TaskLocal static var isSetting = false
   #endif
   @TaskLocal static var currentDependency = CurrentDependency()
@@ -95,7 +95,7 @@ public struct DependencyValues: Sendable {
   /// provide access only to default values. Instead, you rely on the dependency values' instance
   /// that the library manages for you when you use the ``Dependency`` property wrapper.
   public init() {
-    #if DEBUG
+    #if canImport(XCTest)
       _ = setUpTestObservers
     #endif
   }

@@ -36,8 +36,8 @@ test-linux:
 		bash -c 'apt-get update && apt-get -y install make && make test-swift'
 
 build-for-static-stdlib:
-	@swift build -c debug -Xswiftc -static-stdlib
-	@swift build -c release -Xswiftc -static-stdlib
+	@swift build -c debug --static-swift-stdlib
+	@swift build -c release --static-swift-stdlib
 
 test-integration:
 	xcodebuild test \
@@ -56,12 +56,12 @@ build-for-static-stdlib-docker:
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
 		swift:5.7-focal \
-		bash -c "swift build -c debug -Xswiftc -static-stdlib"
+		bash -c "swift build -c debug --static-swift-stdlib"
 	@docker run \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
 		swift:5.7-focal \
-		bash -c "swift build -c release -Xswiftc -static-stdlib"
+		bash -c "swift build -c release --static-swift-stdlib"
 
 format:
 	swift format \

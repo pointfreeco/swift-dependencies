@@ -81,7 +81,7 @@ import Foundation
 /// Read the article <doc:RegisteringDependencies> for more information.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
-  #if DEBUG
+  #if canImport(XCTest)
     @TaskLocal static var isSetting = false
   #endif
   @TaskLocal static var currentDependency = CurrentDependency()
@@ -351,7 +351,7 @@ private final class CachedValues: @unchecked Sendable {
 
 // NB: We cannot statically link/load XCTest on Apple platforms, so we dynamically load things
 //     instead and we limit this to debug builds to avoid App Store binary rejection.
-#if DEBUG
+#if canImport(XCTest)
   #if !canImport(ObjectiveC)
     import XCTest
   #endif

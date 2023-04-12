@@ -350,7 +350,7 @@ private final class CachedValues: @unchecked Sendable {
 }
 
 // NB: We cannot statically link/load XCTest on Apple platforms, so we dynamically load things
-//     instead and we limit this to debug builds to avoid App Store binary rejection.
+//     instead on platforms where XCTest is available.
 #if canImport(XCTest)
   #if !canImport(ObjectiveC)
     import XCTest

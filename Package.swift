@@ -27,7 +27,7 @@ let package = Package(
     .target(
       name: "Dependencies",
       dependencies: [
-        "_CAsyncSupport",                              
+        "_CAsyncSupport",
         .product(name: "CombineSchedulers", package: "combine-schedulers"),
         .product(name: "Clocks", package: "swift-clocks"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),

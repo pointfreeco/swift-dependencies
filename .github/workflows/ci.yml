@@ -49,3 +49,18 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run tests
         run: make test-swift
+
+  static-stdlib:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: '5.8.0'
+      - name: Install dependencies
+        run: sudo apt-get install -y libcurl4-openssl-dev
+      - uses: actions/checkout@v3
+      - name: Build for static-stdlib
+        run: make build-for-static-stdlib

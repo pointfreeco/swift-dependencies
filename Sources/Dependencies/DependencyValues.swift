@@ -95,7 +95,9 @@ public struct DependencyValues: Sendable {
   /// provide access only to default values. Instead, you rely on the dependency values' instance
   /// that the library manages for you when you use the ``Dependency`` property wrapper.
   public init() {
-    _ = setUpTestObservers
+    #if canImport(XCTest)
+      _ = setUpTestObservers
+    #endif
   }
 
   /// Accesses the dependency value associated with a custom key.
@@ -348,61 +350,63 @@ private final class CachedValues: @unchecked Sendable {
 }
 
 // NB: We cannot statically link/load XCTest on Apple platforms, so we dynamically load things
-//     instead and we limit this to debug builds to avoid App Store binary rejection.
-#if !canImport(ObjectiveC)
-  import XCTest
-#endif
+//     instead on platforms where XCTest is available.
+#if canImport(XCTest)
+  #if !canImport(ObjectiveC)
+    import XCTest
+  #endif
 
-private let setUpTestObservers: Void = {
-  if _XCTIsTesting {
-    #if canImport(ObjectiveC)
-      DispatchQueue.mainSync {
-        guard
-          let XCTestObservation = objc_getProtocol("XCTestObservation"),
-          let XCTestObservationCenter = NSClassFromString("XCTestObservationCenter"),
-          let XCTestObservationCenter = XCTestObservationCenter as Any as? NSObjectProtocol,
-          let XCTestObservationCenterShared =
-            XCTestObservationCenter
-            .perform(Selector(("sharedTestObservationCenter")))?
-            .takeUnretainedValue()
-        else { return }
-        let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
-          DependencyValues._current.cachedValues.cached = [:]
+  private let setUpTestObservers: Void = {
+    if _XCTIsTesting {
+      #if canImport(ObjectiveC)
+        DispatchQueue.mainSync {
+          guard
+            let XCTestObservation = objc_getProtocol("XCTestObservation"),
+            let XCTestObservationCenter = NSClassFromString("XCTestObservationCenter"),
+            let XCTestObservationCenter = XCTestObservationCenter as Any as? NSObjectProtocol,
+            let XCTestObservationCenterShared =
+              XCTestObservationCenter
+              .perform(Selector(("sharedTestObservationCenter")))?
+              .takeUnretainedValue()
+          else { return }
+          let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
+            DependencyValues._current.cachedValues.cached = [:]
+          }
+          let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
+          class_addMethod(
+            TestObserver.self, Selector(("testCaseWillStart:")), testCaseWillStartImp, nil)
+          class_addProtocol(TestObserver.self, XCTestObservation)
+          _ =
+            XCTestObservationCenterShared
+            .perform(Selector(("addTestObserver:")), with: TestObserver())
         }
-        let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
-        class_addMethod(
-          TestObserver.self, Selector(("testCaseWillStart:")), testCaseWillStartImp, nil)
-        class_addProtocol(TestObserver.self, XCTestObservation)
-        _ =
-          XCTestObservationCenterShared
-          .perform(Selector(("addTestObserver:")), with: TestObserver())
-      }
-    #else
-      XCTestObservationCenter.shared.addTestObserver(TestObserver())
-    #endif
-  }
-}()
+      #else
+        XCTestObservationCenter.shared.addTestObserver(TestObserver())
+      #endif
+    }
+  }()
 
-#if canImport(ObjectiveC)
-  private final class TestObserver: NSObject {}
-#else
-  private final class TestObserver: NSObject, XCTestObservation {
-    func testCaseWillStart(_ testCase: XCTestCase) {
-      DependencyValues._current.cachedValues.cached = [:]
+  #if canImport(ObjectiveC)
+    private final class TestObserver: NSObject {}
+  #else
+    private final class TestObserver: NSObject, XCTestObservation {
+      func testCaseWillStart(_ testCase: XCTestCase) {
+        DependencyValues._current.cachedValues.cached = [:]
+      }
+    }
+  #endif
+
+  extension DispatchQueue {
+    private static let key = DispatchSpecificKey<UInt8>()
+    private static let value: UInt8 = 0
+
+    fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
+      Self.main.setSpecific(key: Self.key, value: Self.value)
+      if getSpecific(key: Self.key) == Self.value {
+        return block()
+      } else {
+        return Self.main.sync(execute: block)
+      }
     }
   }
 #endif
-
-extension DispatchQueue {
-  private static let key = DispatchSpecificKey<UInt8>()
-  private static let value: UInt8 = 0
-
-  fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
-    Self.main.setSpecific(key: Self.key, value: Self.value)
-    if getSpecific(key: Self.key) == Self.value {
-      return block()
-    } else {
-      return Self.main.sync(execute: block)
-    }
-  }
-}

@@ -35,6 +35,10 @@ test-linux:
 		swift:5.7-focal \
 		bash -c 'apt-get update && apt-get -y install make && make test-swift'
 
+build-for-static-stdlib:
+	@swift build -c debug --static-swift-stdlib
+	@swift build -c release --static-swift-stdlib
+
 test-integration:
 	xcodebuild test \
 		-scheme "Integration" \
@@ -46,6 +50,18 @@ build-for-library-evolution:
 		--target Dependencies \
 		-Xswiftc -emit-module-interface \
 		-Xswiftc -enable-library-evolution
+
+build-for-static-stdlib-docker:
+	@docker run \
+		-v "$(PWD):$(PWD)" \
+		-w "$(PWD)" \
+		swift:5.8-focal \
+		bash -c "swift build -c debug --static-swift-stdlib"
+	@docker run \
+		-v "$(PWD):$(PWD)" \
+		-w "$(PWD)" \
+		swift:5.8-focal \
+		bash -c "swift build -c release --static-swift-stdlib"
 
 format:
 	swift format \

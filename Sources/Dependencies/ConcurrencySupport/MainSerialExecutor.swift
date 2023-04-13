@@ -1,6 +1,6 @@
 import _CAsyncSupport
 
-@_spi(Concurrency) public func _withMainSerialExecutor<T>(
+@_spi(Concurrency) public func withMainSerialExecutor<T>(
   @_implicitSelfCapture operation: () async throws -> T
 ) async rethrows -> T {
   let hook = swift_task_enqueueGlobal_hook

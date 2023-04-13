@@ -15,4 +15,15 @@ final class MainSerialExecutorTests: XCTestCase {
     }
     xs.withValue { XCTAssertEqual(Array(1...1000), $0) }
   }
+
+  func testSerializedExecution_UnstructuredTasks() async {
+    await withMainSerialExecutor {
+      let xs = LockIsolated<[Int]>([])
+      for x in 1...1000 {
+        Task { xs.withValue { $0.append(x) } }
+      }
+      while xs.count < 1_000 { await Task.yield() }
+      xs.withValue { XCTAssertEqual(Array(1...1000), $0) }
+    }
+  }
 }

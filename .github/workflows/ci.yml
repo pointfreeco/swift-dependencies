@@ -59,6 +59,8 @@ jobs:
       - uses: swift-actions/setup-swift@v1
         with:
           swift-version: '5.8.0'
+      - name: Install dependencies
+        run: apt-get install -y libcurl4-openssl-dev
       - uses: actions/checkout@v3
       - name: Build for static-stdlib
         run: make build-for-static-stdlib

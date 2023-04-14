@@ -53,14 +53,13 @@ jobs:
   static-stdlib:
     strategy:
       matrix:
-        os: [ubuntu-20.04]
-    runs-on: ${{ matrix.os }}
+        image: ['swift:5.7-focal', 'swift:5.8-focal']
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
     steps:
-      - uses: swift-actions/setup-swift@v1
-        with:
-          swift-version: '5.8.0'
-      - name: Install dependencies
-        run: sudo apt-get install -y libcurl4-openssl-dev
       - uses: actions/checkout@v3
-      - name: Build for static-stdlib
-        run: make build-for-static-stdlib
+      - name: Build for static-stdlib (debug)
+        run: swift build -c debug --static-swift-stdlib
+      - name: Build for static-stdlib (release)
+        run: swift build -c release --static-swift-stdlib

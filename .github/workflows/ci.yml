@@ -53,7 +53,7 @@ jobs:
   static-stdlib:
     strategy:
       matrix:
-        image: [swift:5.8-focal]
+        image: ['swift:5.8-focal']
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.image }}

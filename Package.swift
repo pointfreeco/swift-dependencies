@@ -23,11 +23,9 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "0.8.0"),
   ],
   targets: [
-    .systemLibrary(name: "_CAsyncSupport"),
     .target(
       name: "Dependencies",
       dependencies: [
-        "_CAsyncSupport",
         .product(name: "CombineSchedulers", package: "combine-schedulers"),
         .product(name: "Clocks", package: "swift-clocks"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),

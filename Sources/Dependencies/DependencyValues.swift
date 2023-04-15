@@ -200,7 +200,7 @@ public struct DependencyValues: Sendable {
     return values
   }
 
-  func merging(_ other: Self) -> Self {
+  public func merging(_ other: Self) -> Self {
     var values = self
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })
     return values

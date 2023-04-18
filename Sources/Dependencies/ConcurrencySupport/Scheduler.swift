@@ -2,7 +2,10 @@
   import Combine
 
   extension Scheduler {
-    /// Propagates dependencies across `schedule` calls.
+    /// Propagates dependencies across the scheduler boundary.
+    ///
+    /// - Parameter update: Enables transforming the propagated dependencies. No-ops by default.
+    /// - Returns: A version of the scheduler that propagates dependencies.
     public func dependencies(
       _ update: @escaping (inout DependencyValues) -> Void = { _ in }
     ) -> AnySchedulerOf<Self> {

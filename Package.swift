@@ -18,7 +18,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
-    .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "0.1.0"),
+    .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "0.10.0"),
     .package(url: "https://github.com/pointfreeco/swift-clocks", from: "0.3.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "0.8.0"),
   ],

@@ -57,6 +57,9 @@ class BaseTestCase: XCTestCase {
 
   override func invokeTest() {
     withDependencies {
+      #if os(WASI)
+        $0.context = .test
+      #endif
       $0.uuid = .constant(.deadbeef)
     } operation: {
       super.invokeTest()

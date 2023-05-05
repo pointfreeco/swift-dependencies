@@ -2,19 +2,29 @@ import Dependencies
 import XCTest
 
 final class DependencyValuesTests: XCTestCase {
-  func testMissingLiveValue() {
-#if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
-    var line = 0
-    XCTExpectFailure {
+  #if os(WASI)
+    override func invokeTest() {
       withDependencies {
-        $0.context = .live
+        $0.context = .test
       } operation: {
-        line = #line + 1
-        @Dependency(\.missingLiveDependency) var missingLiveDependency: Int
-        _ = missingLiveDependency
+        super.invokeTest()
       }
-    } issueMatcher: {
-      $0.compactDescription == """
+    }
+  #endif
+
+  func testMissingLiveValue() {
+    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+      var line = 0
+      XCTExpectFailure {
+        withDependencies {
+          $0.context = .live
+        } operation: {
+          line = #line + 1
+          @Dependency(\.missingLiveDependency) var missingLiveDependency: Int
+          _ = missingLiveDependency
+        }
+      } issueMatcher: {
+        $0.compactDescription == """
           "@Dependency(\\.missingLiveDependency)" has no live implementation, but was accessed \
           from a live context.
 
@@ -32,8 +42,8 @@ final class DependencyValuesTests: XCTestCase {
           implementation of your dependency, and make sure that the conformance is linked with \
           this current application.
           """
-    }
-#endif
+      }
+    #endif
   }
 
   func testWithValues() {
@@ -99,16 +109,16 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
-#if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
-  func testOptionalDependencyUndefined() {
-    @Dependency(\.optionalDependency) var optionalDependency: String?
-    XCTExpectFailure {
-      XCTAssertNil(optionalDependency)
-    } issueMatcher: {
-      $0.compactDescription.contains(#"Unimplemented: @Dependency(\.optionalDependency) …"#)
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    func testOptionalDependencyUndefined() {
+      @Dependency(\.optionalDependency) var optionalDependency: String?
+      XCTExpectFailure {
+        XCTAssertNil(optionalDependency)
+      } issueMatcher: {
+        $0.compactDescription.contains(#"Unimplemented: @Dependency(\.optionalDependency) …"#)
+      }
     }
-  }
-#endif
+  #endif
 
   func testDependencyDefaultIsReused() {
     withDependencies {
@@ -126,83 +136,83 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
-#if !os(Linux) && !os(WASI) && !os(Windows)
-  func testDependencyDefaultIsReused_SegmentedByContext() {
-    withDependencies {
-      $0 = .init()
-    } operation: {
+  #if !os(Linux) && !os(WASI) && !os(Windows)
+    func testDependencyDefaultIsReused_SegmentedByContext() {
       withDependencies {
-        $0.context = .test
+        $0 = .init()
       } operation: {
-        @Dependency(\.reuseClient) var reuseClient: ReuseClient
-
-        XCTAssertEqual(reuseClient.count(), 0)
-        reuseClient.setCount(42)
-        XCTAssertEqual(reuseClient.count(), 42)
-
         withDependencies {
-          $0.context = .preview
-        } operation: { () -> Void in
-          XCTAssertEqual(reuseClient.count(), 0)
-          reuseClient.setCount(1729)
-          XCTAssertEqual(reuseClient.count(), 1729)
-        }
-
-        XCTAssertEqual(reuseClient.count(), 42)
-
-        withDependencies {
-          $0.context = .live
+          $0.context = .test
         } operation: {
-#if DEBUG
-          XCTExpectFailure {
-            $0.compactDescription.contains(
+          @Dependency(\.reuseClient) var reuseClient: ReuseClient
+
+          XCTAssertEqual(reuseClient.count(), 0)
+          reuseClient.setCount(42)
+          XCTAssertEqual(reuseClient.count(), 42)
+
+          withDependencies {
+            $0.context = .preview
+          } operation: { () -> Void in
+            XCTAssertEqual(reuseClient.count(), 0)
+            reuseClient.setCount(1729)
+            XCTAssertEqual(reuseClient.count(), 1729)
+          }
+
+          XCTAssertEqual(reuseClient.count(), 42)
+
+          withDependencies {
+            $0.context = .live
+          } operation: {
+            #if DEBUG
+              XCTExpectFailure {
+                $0.compactDescription.contains(
                   """
                   @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a \
                   live context.
                   """
+                )
+              }
+            #endif
+            XCTAssertEqual(reuseClient.count(), 0)
+            reuseClient.setCount(-42)
+            XCTAssertEqual(
+              reuseClient.count(),
+              0,
+              "Don't cache dependency when using a test value in a live context"
             )
           }
-#endif
-          XCTAssertEqual(reuseClient.count(), 0)
-          reuseClient.setCount(-42)
-          XCTAssertEqual(
-            reuseClient.count(),
-            0,
-            "Don't cache dependency when using a test value in a live context"
-          )
-        }
 
-        XCTAssertEqual(reuseClient.count(), 42)
+          XCTAssertEqual(reuseClient.count(), 42)
+        }
       }
     }
-  }
-#endif
+  #endif
 
   func testAccessingTestDependencyFromLiveContext_WhenUpdatingDependencies() {
     @Dependency(\.reuseClient) var reuseClient: ReuseClient
 
-#if !os(Linux) && !os(WASI) && !os(Windows)
-    withDependencies {
-      $0.context = .live
-    } operation: {
+    #if !os(Linux) && !os(WASI) && !os(Windows)
       withDependencies {
-        XCTAssertEqual($0.reuseClient.count(), 0)
-        XCTAssertEqual(reuseClient.count(), 0)
+        $0.context = .live
       } operation: {
-#if DEBUG
-        XCTExpectFailure {
-          $0.compactDescription.contains(
+        withDependencies {
+          XCTAssertEqual($0.reuseClient.count(), 0)
+          XCTAssertEqual(reuseClient.count(), 0)
+        } operation: {
+          #if DEBUG
+            XCTExpectFailure {
+              $0.compactDescription.contains(
                 """
                 @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a live \
                 context.
                 """
-          )
+              )
+            }
+          #endif
+          XCTAssertEqual(reuseClient.count(), 0)
         }
-#endif
-        XCTAssertEqual(reuseClient.count(), 0)
       }
-    }
-#endif
+    #endif
   }
 
   func testBinding() {
@@ -210,9 +220,9 @@ final class DependencyValuesTests: XCTestCase {
       $0.context = .test
     } operation: {
       @Dependency(\.childDependencyEarlyBinding) var childDependencyEarlyBinding:
-      ChildDependencyEarlyBinding
+        ChildDependencyEarlyBinding
       @Dependency(\.childDependencyLateBinding) var childDependencyLateBinding:
-      ChildDependencyLateBinding
+        ChildDependencyLateBinding
 
       XCTAssertEqual(childDependencyEarlyBinding.fetch(), 42)
       XCTAssertEqual(childDependencyLateBinding.fetch(), 42)
@@ -231,9 +241,9 @@ final class DependencyValuesTests: XCTestCase {
         $0.someDependency.fetch = { 999 }
       } operation: {
         @Dependency(\.childDependencyEarlyBinding) var childDependencyEarlyBinding2:
-        ChildDependencyEarlyBinding
+          ChildDependencyEarlyBinding
         @Dependency(\.childDependencyLateBinding) var childDependencyLateBinding2:
-        ChildDependencyLateBinding
+          ChildDependencyLateBinding
 
         childDependencyEarlyBindingEscaped = childDependencyEarlyBinding
         childDependencyLateBindingEscaped = childDependencyLateBinding

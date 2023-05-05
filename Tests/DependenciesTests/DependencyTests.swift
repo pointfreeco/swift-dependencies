@@ -2,6 +2,16 @@ import Dependencies
 import XCTest
 
 final class DependencyTests: XCTestCase {
+  #if os(WASI)
+    override func invokeTest() {
+      withDependencies {
+        $0.context = .test
+      } operation: {
+        super.invokeTest()
+      }
+    }
+  #endif
+
   func testExtendingLifetimeToChildModels() {
     @Dependency(\.int) var int: Int
     XCTAssertEqual(int, 42)

@@ -396,17 +396,19 @@ private final class CachedValues: @unchecked Sendable {
     }
   #endif
 
-  extension DispatchQueue {
-    private static let key = DispatchSpecificKey<UInt8>()
-    private static let value: UInt8 = 0
+  #if canImport(ObjectiveC)
+    extension DispatchQueue {
+      private static let key = DispatchSpecificKey<UInt8>()
+      private static let value: UInt8 = 0
 
-    fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
-      Self.main.setSpecific(key: Self.key, value: Self.value)
-      if getSpecific(key: Self.key) == Self.value {
-        return block()
-      } else {
-        return Self.main.sync(execute: block)
+      fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
+        Self.main.setSpecific(key: Self.key, value: Self.value)
+        if getSpecific(key: Self.key) == Self.value {
+          return block()
+        } else {
+          return Self.main.sync(execute: block)
+        }
       }
     }
-  }
+  #endif
 #endif

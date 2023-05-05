@@ -3,18 +3,18 @@ import XCTest
 
 final class DependencyValuesTests: XCTestCase {
   func testMissingLiveValue() {
-    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
-      var line = 0
-      XCTExpectFailure {
-        withDependencies {
-          $0.context = .live
-        } operation: {
-          line = #line + 1
-          @Dependency(\.missingLiveDependency) var missingLiveDependency: Int
-          _ = missingLiveDependency
-        }
-      } issueMatcher: {
-        $0.compactDescription == """
+#if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    var line = 0
+    XCTExpectFailure {
+      withDependencies {
+        $0.context = .live
+      } operation: {
+        line = #line + 1
+        @Dependency(\.missingLiveDependency) var missingLiveDependency: Int
+        _ = missingLiveDependency
+      }
+    } issueMatcher: {
+      $0.compactDescription == """
           "@Dependency(\\.missingLiveDependency)" has no live implementation, but was accessed \
           from a live context.
 
@@ -32,8 +32,8 @@ final class DependencyValuesTests: XCTestCase {
           implementation of your dependency, and make sure that the conformance is linked with \
           this current application.
           """
-      }
-    #endif
+    }
+#endif
   }
 
   func testWithValues() {
@@ -99,16 +99,16 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
-  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
-    func testOptionalDependencyUndefined() {
-      @Dependency(\.optionalDependency) var optionalDependency: String?
-      XCTExpectFailure {
-        XCTAssertNil(optionalDependency)
-      } issueMatcher: {
-        $0.compactDescription.contains(#"Unimplemented: @Dependency(\.optionalDependency) …"#)
-      }
+#if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+  func testOptionalDependencyUndefined() {
+    @Dependency(\.optionalDependency) var optionalDependency: String?
+    XCTExpectFailure {
+      XCTAssertNil(optionalDependency)
+    } issueMatcher: {
+      $0.compactDescription.contains(#"Unimplemented: @Dependency(\.optionalDependency) …"#)
     }
-  #endif
+  }
+#endif
 
   func testDependencyDefaultIsReused() {
     withDependencies {
@@ -126,83 +126,83 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
-  #if !os(Linux) && !os(WASI) && !os(Windows)
-    func testDependencyDefaultIsReused_SegmentedByContext() {
+#if !os(Linux) && !os(WASI) && !os(Windows)
+  func testDependencyDefaultIsReused_SegmentedByContext() {
+    withDependencies {
+      $0 = .init()
+    } operation: {
       withDependencies {
-        $0 = .init()
+        $0.context = .test
       } operation: {
+        @Dependency(\.reuseClient) var reuseClient: ReuseClient
+
+        XCTAssertEqual(reuseClient.count(), 0)
+        reuseClient.setCount(42)
+        XCTAssertEqual(reuseClient.count(), 42)
+
         withDependencies {
-          $0.context = .test
-        } operation: {
-          @Dependency(\.reuseClient) var reuseClient: ReuseClient
-
+          $0.context = .preview
+        } operation: { () -> Void in
           XCTAssertEqual(reuseClient.count(), 0)
-          reuseClient.setCount(42)
-          XCTAssertEqual(reuseClient.count(), 42)
+          reuseClient.setCount(1729)
+          XCTAssertEqual(reuseClient.count(), 1729)
+        }
 
-          withDependencies {
-            $0.context = .preview
-          } operation: { () -> Void in
-            XCTAssertEqual(reuseClient.count(), 0)
-            reuseClient.setCount(1729)
-            XCTAssertEqual(reuseClient.count(), 1729)
-          }
+        XCTAssertEqual(reuseClient.count(), 42)
 
-          XCTAssertEqual(reuseClient.count(), 42)
-
-          withDependencies {
-            $0.context = .live
-          } operation: {
-            #if DEBUG
-              XCTExpectFailure {
-                $0.compactDescription.contains(
+        withDependencies {
+          $0.context = .live
+        } operation: {
+#if DEBUG
+          XCTExpectFailure {
+            $0.compactDescription.contains(
                   """
                   @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a \
                   live context.
                   """
-                )
-              }
-            #endif
-            XCTAssertEqual(reuseClient.count(), 0)
-            reuseClient.setCount(-42)
-            XCTAssertEqual(
-              reuseClient.count(),
-              0,
-              "Don't cache dependency when using a test value in a live context"
             )
           }
-
-          XCTAssertEqual(reuseClient.count(), 42)
+#endif
+          XCTAssertEqual(reuseClient.count(), 0)
+          reuseClient.setCount(-42)
+          XCTAssertEqual(
+            reuseClient.count(),
+            0,
+            "Don't cache dependency when using a test value in a live context"
+          )
         }
+
+        XCTAssertEqual(reuseClient.count(), 42)
       }
     }
-  #endif
+  }
+#endif
 
   func testAccessingTestDependencyFromLiveContext_WhenUpdatingDependencies() {
     @Dependency(\.reuseClient) var reuseClient: ReuseClient
 
-    #if !os(Linux) && !os(WASI) && !os(Windows)
+#if !os(Linux) && !os(WASI) && !os(Windows)
+    withDependencies {
+      $0.context = .live
+    } operation: {
       withDependencies {
-        $0.context = .live
+        XCTAssertEqual($0.reuseClient.count(), 0)
+        XCTAssertEqual(reuseClient.count(), 0)
       } operation: {
-        withDependencies {
-          XCTAssertEqual($0.reuseClient.count(), 0)
-          XCTAssertEqual(reuseClient.count(), 0)
-        } operation: {
-          #if DEBUG
-            XCTExpectFailure {
-              $0.compactDescription.contains(
+#if DEBUG
+        XCTExpectFailure {
+          $0.compactDescription.contains(
                 """
                 @Dependency(\\.reuseClient)" has no live implementation, but was accessed from a live \
                 context.
                 """
-              )
-            }
-          #endif
-          XCTAssertEqual(reuseClient.count(), 0)
+          )
         }
+#endif
+        XCTAssertEqual(reuseClient.count(), 0)
       }
-    #endif
+    }
+#endif
   }
 
   func testBinding() {
@@ -210,9 +210,9 @@ final class DependencyValuesTests: XCTestCase {
       $0.context = .test
     } operation: {
       @Dependency(\.childDependencyEarlyBinding) var childDependencyEarlyBinding:
-        ChildDependencyEarlyBinding
+      ChildDependencyEarlyBinding
       @Dependency(\.childDependencyLateBinding) var childDependencyLateBinding:
-        ChildDependencyLateBinding
+      ChildDependencyLateBinding
 
       XCTAssertEqual(childDependencyEarlyBinding.fetch(), 42)
       XCTAssertEqual(childDependencyLateBinding.fetch(), 42)
@@ -231,9 +231,9 @@ final class DependencyValuesTests: XCTestCase {
         $0.someDependency.fetch = { 999 }
       } operation: {
         @Dependency(\.childDependencyEarlyBinding) var childDependencyEarlyBinding2:
-          ChildDependencyEarlyBinding
+        ChildDependencyEarlyBinding
         @Dependency(\.childDependencyLateBinding) var childDependencyLateBinding2:
-          ChildDependencyLateBinding
+        ChildDependencyLateBinding
 
         childDependencyEarlyBindingEscaped = childDependencyEarlyBinding
         childDependencyLateBindingEscaped = childDependencyLateBinding
@@ -321,171 +321,173 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
-  func testEscape() {
-    let expectation = self.expectation(description: "escape")
-    withDependencies {
-      $0.fullDependency.value = 42
-    } operation: {
-      withEscapedDependencies { continuation in
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-          continuation.yield {
-            @Dependency(\.fullDependency.value) var value: Int
-            XCTAssertEqual(value, 42)
+  #if !os(WASI)
+    func testEscape() {
+      let expectation = self.expectation(description: "escape")
+      withDependencies {
+        $0.fullDependency.value = 42
+      } operation: {
+        withEscapedDependencies { continuation in
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            continuation.yield {
+              @Dependency(\.fullDependency.value) var value: Int
+              XCTAssertEqual(value, 42)
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+              DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                continuation.yield {
+                  @Dependency(\.fullDependency.value) var value: Int
+                  XCTAssertEqual(value, 42)
+                  expectation.fulfill()
+                }
+              }
+            }
+          }
+        }
+      }
+
+      self.wait(for: [expectation], timeout: 1)
+    }
+
+    func testEscapingInFeatureModel_InstanceVariablePropagated() {
+      let expectation = self.expectation(description: "escape")
+
+      class FeatureModel /*: ObservableObject*/ {
+        @Dependency(\.fullDependency) var fullDependency
+        func doSomething(expectation: XCTestExpectation) {
+          DispatchQueue.main.async {
+            XCTAssertEqual(self.fullDependency.value, 42)
+            expectation.fulfill()
+          }
+        }
+      }
+
+      let model = withDependencies {
+        $0.fullDependency.value = 42
+      } operation: {
+        FeatureModel()
+      }
+
+      model.doSomething(expectation: expectation)
+      self.wait(for: [expectation], timeout: 1)
+    }
+
+    func testEscapingInFeatureModel_NotPropagated() async {
+      let expectation = self.expectation(description: "escape")
+
+      @MainActor
+      class FeatureModel /*: ObservableObject*/ {
+        /*@Published */var value = 0
+        func doSomething(expectation: XCTestExpectation) {
+          DispatchQueue.main.async {
+            @Dependency(\.fullDependency) var fullDependency: FullDependency
+            self.value = fullDependency.value
+            expectation.fulfill()
+          }
+        }
+      }
+
+      let model = await withDependencies {
+        $0.fullDependency.value = 42
+      } operation: {
+        await FeatureModel()
+      }
+
+      await model.doSomething(expectation: expectation)
+      _ = { self.wait(for: [expectation], timeout: 1) }()
+      let newValue = await model.value
+      XCTAssertEqual(newValue, 3)
+    }
+
+    func testEscapingInFeatureModelWithOverride() async {
+      let expectation = self.expectation(description: "escape")
+
+      @MainActor
+      class FeatureModel /*: ObservableObject*/ {
+        @Dependency(\.fullDependency) var fullDependency
+        func doSomething(expectation: XCTestExpectation) {
+          withEscapedDependencies { continuation in
+            DispatchQueue.main.async {
               continuation.yield {
-                @Dependency(\.fullDependency.value) var value: Int
-                XCTAssertEqual(value, 42)
+                XCTAssertEqual(self.fullDependency.value, 42)
                 expectation.fulfill()
               }
             }
           }
         }
       }
-    }
 
-    self.wait(for: [expectation], timeout: 1)
-  }
+      let model = await FeatureModel()
 
-  func testEscapingInFeatureModel_InstanceVariablePropagated() {
-    let expectation = self.expectation(description: "escape")
-
-    class FeatureModel /*: ObservableObject*/ {
-      @Dependency(\.fullDependency) var fullDependency
-      func doSomething(expectation: XCTestExpectation) {
-        DispatchQueue.main.async {
-          XCTAssertEqual(self.fullDependency.value, 42)
-          expectation.fulfill()
-        }
+      await withDependencies {
+        $0.fullDependency.value = 42
+      } operation: {
+        await model.doSomething(expectation: expectation)
       }
+      _ = { self.wait(for: [expectation], timeout: 1) }()
     }
 
-    let model = withDependencies {
-      $0.fullDependency.value = 42
-    } operation: {
-      FeatureModel()
-    }
+    func testEscapingInFeatureModelWithOverride_OverrideEscaped() async {
+      let expectation = self.expectation(description: "escape")
 
-    model.doSomething(expectation: expectation)
-    self.wait(for: [expectation], timeout: 1)
-  }
-
-  func testEscapingInFeatureModel_NotPropagated() async {
-    let expectation = self.expectation(description: "escape")
-
-    @MainActor
-    class FeatureModel /*: ObservableObject*/ {
-      /*@Published */var value = 0
-      func doSomething(expectation: XCTestExpectation) {
-        DispatchQueue.main.async {
-          @Dependency(\.fullDependency) var fullDependency: FullDependency
-          self.value = fullDependency.value
-          expectation.fulfill()
-        }
-      }
-    }
-
-    let model = await withDependencies {
-      $0.fullDependency.value = 42
-    } operation: {
-      await FeatureModel()
-    }
-
-    await model.doSomething(expectation: expectation)
-    _ = { self.wait(for: [expectation], timeout: 1) }()
-    let newValue = await model.value
-    XCTAssertEqual(newValue, 3)
-  }
-
-  func testEscapingInFeatureModelWithOverride() async {
-    let expectation = self.expectation(description: "escape")
-
-    @MainActor
-    class FeatureModel /*: ObservableObject*/ {
-      @Dependency(\.fullDependency) var fullDependency
-      func doSomething(expectation: XCTestExpectation) {
-        withEscapedDependencies { continuation in
-          DispatchQueue.main.async {
-            continuation.yield {
-              XCTAssertEqual(self.fullDependency.value, 42)
-              expectation.fulfill()
-            }
-          }
-        }
-      }
-    }
-
-    let model = await FeatureModel()
-
-    await withDependencies {
-      $0.fullDependency.value = 42
-    } operation: {
-      await model.doSomething(expectation: expectation)
-    }
-    _ = { self.wait(for: [expectation], timeout: 1) }()
-  }
-
-  func testEscapingInFeatureModelWithOverride_OverrideEscaped() async {
-    let expectation = self.expectation(description: "escape")
-
-    @MainActor
-    class FeatureModel /*: ObservableObject*/ {
-      /*@Published */var value = 0
-      @Dependency(\.fullDependency) var fullDependency
-      func doSomething(expectation: XCTestExpectation) {
-        withEscapedDependencies { continuation in
-          DispatchQueue.main.async {
-            continuation.yield {
-              withDependencies {
-                $0.fullDependency.value = 999
-              } operation: {
-                self.value = self.fullDependency.value
-                expectation.fulfill()
+      @MainActor
+      class FeatureModel /*: ObservableObject*/ {
+        /*@Published */var value = 0
+        @Dependency(\.fullDependency) var fullDependency
+        func doSomething(expectation: XCTestExpectation) {
+          withEscapedDependencies { continuation in
+            DispatchQueue.main.async {
+              continuation.yield {
+                withDependencies {
+                  $0.fullDependency.value = 999
+                } operation: {
+                  self.value = self.fullDependency.value
+                  expectation.fulfill()
+                }
               }
             }
           }
         }
       }
+
+      let model = await FeatureModel()
+
+      await withDependencies {
+        $0.fullDependency.value = 42
+      } operation: {
+        await model.doSomething(expectation: expectation)
+      }
+      _ = { self.wait(for: [expectation], timeout: 1) }()
+      let newValue = await model.value
+      XCTAssertEqual(newValue, 999)
     }
 
-    let model = await FeatureModel()
+    func testEscapingInFeatureModelWithOverride_NotPropagated() async {
+      let expectation = self.expectation(description: "escape")
 
-    await withDependencies {
-      $0.fullDependency.value = 42
-    } operation: {
-      await model.doSomething(expectation: expectation)
-    }
-    _ = { self.wait(for: [expectation], timeout: 1) }()
-    let newValue = await model.value
-    XCTAssertEqual(newValue, 999)
-  }
-
-  func testEscapingInFeatureModelWithOverride_NotPropagated() async {
-    let expectation = self.expectation(description: "escape")
-
-    @MainActor
-    class FeatureModel /*: ObservableObject*/ {
-      /*@Published */var value = 0
-      @Dependency(\.fullDependency) var fullDependency
-      func doSomething(expectation: XCTestExpectation) {
-        DispatchQueue.main.async {
-          self.value = self.fullDependency.value
-          expectation.fulfill()
+      @MainActor
+      class FeatureModel /*: ObservableObject*/ {
+        /*@Published */var value = 0
+        @Dependency(\.fullDependency) var fullDependency
+        func doSomething(expectation: XCTestExpectation) {
+          DispatchQueue.main.async {
+            self.value = self.fullDependency.value
+            expectation.fulfill()
+          }
         }
       }
-    }
 
-    let model = await FeatureModel()
+      let model = await FeatureModel()
 
-    await withDependencies {
-      $0.fullDependency.value = 42
-    } operation: {
-      await model.doSomething(expectation: expectation)
+      await withDependencies {
+        $0.fullDependency.value = 42
+      } operation: {
+        await model.doSomething(expectation: expectation)
+      }
+      _ = { self.wait(for: [expectation], timeout: 1) }()
+      let newValue = await model.value
+      XCTAssertEqual(newValue, 3)
     }
-    _ = { self.wait(for: [expectation], timeout: 1) }()
-    let newValue = await model.value
-    XCTAssertEqual(newValue, 3)
-  }
+  #endif
 
   func testTaskPropagation() async throws {
     let task = withDependencies {

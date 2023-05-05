@@ -25,6 +25,10 @@ func runtimeWarn(
           "%@",
           message
         )
+      #elseif os(WASI)
+        JSObjectRef.global.console.warn.callWithArguments([
+          "\(JSObjectRef.global.Date.new().toISOString()) [\(category)] \(message)"
+        ])
       #else
         fputs("\(formatter.string(from: Date())) [\(category)] \(message)\n", stderr)
       #endif
@@ -34,6 +38,7 @@ func runtimeWarn(
 
 #if DEBUG
   #if canImport(os)
+    import Foundation
     import os
 
     // NB: Xcode runtime warnings offer a much better experience than traditional assertions and
@@ -56,6 +61,8 @@ func runtimeWarn(
       }
       return UnsafeMutableRawPointer(mutating: #dsohandle)
     }()
+  #elseif os(WASI)
+    import JavaScriptKit
   #else
     import Foundation
 

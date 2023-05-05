@@ -75,7 +75,7 @@ final class DependencyTests: XCTestCase {
   }
 
   func testInvalidScope() {
-    #if DEBUG && !os(Linux) && !os(Windows)
+    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
       XCTExpectFailure {
         withDependencies(from: self) {}
       } issueMatcher: {

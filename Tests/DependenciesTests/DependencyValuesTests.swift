@@ -3,7 +3,7 @@ import XCTest
 
 final class DependencyValuesTests: XCTestCase {
   func testMissingLiveValue() {
-    #if DEBUG && !os(Linux) && !os(Windows)
+    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
       var line = 0
       XCTExpectFailure {
         withDependencies {
@@ -99,7 +99,7 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
-  #if DEBUG && !os(Linux) && !os(Windows)
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
     func testOptionalDependencyUndefined() {
       @Dependency(\.optionalDependency) var optionalDependency: String?
       XCTExpectFailure {
@@ -126,7 +126,7 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
-  #if !os(Linux) && !os(Windows)
+  #if !os(Linux) && !os(WASI) && !os(Windows)
     func testDependencyDefaultIsReused_SegmentedByContext() {
       withDependencies {
         $0 = .init()
@@ -181,7 +181,7 @@ final class DependencyValuesTests: XCTestCase {
   func testAccessingTestDependencyFromLiveContext_WhenUpdatingDependencies() {
     @Dependency(\.reuseClient) var reuseClient: ReuseClient
 
-    #if !os(Linux)
+    #if !os(Linux) && !os(WASI) && !os(Windows)
       withDependencies {
         $0.context = .live
       } operation: {

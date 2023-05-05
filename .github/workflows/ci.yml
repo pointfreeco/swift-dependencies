@@ -76,7 +76,10 @@ jobs:
           tag: 5.8-RELEASE
 
       - uses: actions/checkout@v3
-      - run: make test-swift
+      - name: Run tests
+        run: swift test
+      - name: Run tests (release)
+        run: swift test -c release
 
   static-stdlib:
     strategy:

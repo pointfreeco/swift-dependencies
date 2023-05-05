@@ -1,4 +1,4 @@
-#if !os(Windows)
+#if !os(WASI) && !os(Windows)
   import Foundation
 
   @_spi(Concurrency) public func withMainSerialExecutor<T>(

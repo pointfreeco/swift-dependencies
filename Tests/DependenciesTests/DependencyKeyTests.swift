@@ -21,7 +21,7 @@ final class DependencyKeyTests: XCTestCase {
     XCTAssertEqual(42, Dependency.liveValue.value)
     XCTAssertEqual(42, Dependency.previewValue.value)
 
-    #if DEBUG && !os(Linux)
+    #if DEBUG && !os(Linux) && !os(Windows)
       XCTExpectFailure {
         XCTAssertEqual(42, Dependency.testValue.value)
       } issueMatcher: { issue in
@@ -52,7 +52,7 @@ final class DependencyKeyTests: XCTestCase {
     XCTAssertEqual(42, Key.liveValue)
     XCTAssertEqual(42, Key.previewValue)
 
-    #if DEBUG && !os(Linux)
+    #if DEBUG && !os(Linux) && !os(Windows)
       XCTExpectFailure {
         XCTAssertEqual(42, Key.testValue)
       } issueMatcher: { issue in
@@ -86,7 +86,7 @@ final class DependencyKeyTests: XCTestCase {
     XCTAssertEqual(42, Key.liveValue)
     XCTAssertEqual(1729, Key.previewValue)
 
-    #if DEBUG && !os(Linux)
+    #if DEBUG && !os(Linux) && !os(Windows)
       XCTExpectFailure {
         XCTAssertEqual(1729, Key.testValue)
       } issueMatcher: { issue in
@@ -121,7 +121,7 @@ final class DependencyKeyTests: XCTestCase {
   }
 
   func testDependencyKeyCascading_ImplementOnlyLive_Named() {
-    #if DEBUG && !os(Linux)
+    #if DEBUG && !os(Linux) && !os(Windows)
       withDependencies {
         $0.context = .test
       } operation: {

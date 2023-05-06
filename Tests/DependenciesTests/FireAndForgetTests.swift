@@ -5,7 +5,7 @@ import XCTest
 final class FireAndForgetTests: XCTestCase {
   @Dependency(\.fireAndForget) var fireAndForget
 
-  // NB: These tests fail/crash in WASM
+  // NB: These tests fail/crash in Wasm.
   #if !os(WASI)
     func testTestContext() async throws {
       let didExecute = ActorIsolated(false)

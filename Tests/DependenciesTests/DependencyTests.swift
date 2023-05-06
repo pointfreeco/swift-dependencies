@@ -2,7 +2,7 @@ import Dependencies
 import XCTest
 
 final class DependencyTests: XCTestCase {
-  // NB: It doesn't seem possible to detect a test context from WASM:
+  // NB: It doesn't seem possible to detect a test context from Wasm:
   //     https://github.com/swiftwasm/carton/issues/400
   #if os(WASI)
     override func invokeTest() {

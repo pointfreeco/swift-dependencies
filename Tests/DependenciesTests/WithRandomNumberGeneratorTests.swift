@@ -10,7 +10,7 @@ final class WithRandomNumberGeneratorDependencyTests: XCTestCase {
       $0.withRandomNumberGenerator = .init(LCRNG(seed: 0))
     } operation: {
       self.withRandomNumberGenerator { generator -> Void in
-        // NB: WASM has different behavior here
+        // NB: Wasm has different behavior here.
         #if os(WASI)
           let sequence = [5, 6, 5, 4, 4]
         #else

@@ -593,7 +593,7 @@ final class DependencyValuesTests: XCTestCase {
   }
 
   #if DEBUG
-    // NB: WASM has different behavior here
+    // NB: Wasm has different behavior here.
     #if os(WASI)
       func testCachePollution1() async {
         @Dependency(\.cachedDependency) var cachedDependency: CachedDependency

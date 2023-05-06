@@ -2,7 +2,7 @@ import Dependencies
 import XCTest
 
 final class ResolutionTests: XCTestCase {
-  // NB: It doesn't seem possible to detect a test context from WASM:
+  // NB: It doesn't seem possible to detect a test context from Wasm:
   //     https://github.com/swiftwasm/carton/issues/400
   #if os(WASI)
     override func invokeTest() {
@@ -95,7 +95,7 @@ final class ResolutionTests: XCTestCase {
       Model()
     }
 
-    // NB: WASM has different behavior here
+    // NB: Wasm has different behavior here.
     #if os(WASI)
       let expected = 1
     #else

@@ -2,6 +2,8 @@ import Dependencies
 import XCTest
 
 final class DependencyValuesTests: XCTestCase {
+  // NB: It doesn't seem possible to detect a test context from WASM:
+  //     https://github.com/swiftwasm/carton/issues/400
   #if os(WASI)
     override func invokeTest() {
       withDependencies {
@@ -591,17 +593,32 @@ final class DependencyValuesTests: XCTestCase {
   }
 
   #if DEBUG
-    func testCachePollution1() async {
-      @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
-      let value = await cachedDependency.increment()
-      XCTAssertEqual(value, 1)
-    }
+    // NB: WASM has different behavior here
+    #if os(WASI)
+      func testCachePollution1() async {
+        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+        let value = await cachedDependency.increment()
+        XCTAssertEqual(value, 1)
+      }
 
-    func testCachePollution2() async {
-      @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
-      let value = await cachedDependency.increment()
-      XCTAssertEqual(value, 1)
-    }
+      func testCachePollution2() async {
+        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+        let value = await cachedDependency.increment()
+        XCTAssertEqual(value, 2)
+      }
+    #else
+      func testCachePollution1() async {
+        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+        let value = await cachedDependency.increment()
+        XCTAssertEqual(value, 1)
+      }
+
+      func testCachePollution2() async {
+        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+        let value = await cachedDependency.increment()
+        XCTAssertEqual(value, 1)
+      }
+    #endif
   #endif
 }
 

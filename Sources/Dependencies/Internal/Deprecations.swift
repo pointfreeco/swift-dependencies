@@ -12,7 +12,7 @@ extension AsyncStream {
 }
 
 extension AsyncThrowingStream where Failure == Error {
-  @available(*, deprecated, renamed: "makeStream(of:bufferingPolicy:)")
+  @available(*, deprecated, renamed: "makeStream(of:throwing:bufferingPolicy:)")
   public static func streamWithContinuation(
     _ elementType: Element.Type = Element.self,
     bufferingPolicy limit: Continuation.BufferingPolicy = .unbounded

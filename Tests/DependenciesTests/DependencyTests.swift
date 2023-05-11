@@ -2,6 +2,18 @@ import Dependencies
 import XCTest
 
 final class DependencyTests: XCTestCase {
+  // NB: It doesn't seem possible to detect a test context from Wasm:
+  //     https://github.com/swiftwasm/carton/issues/400
+  #if os(WASI)
+    override func invokeTest() {
+      withDependencies {
+        $0.context = .test
+      } operation: {
+        super.invokeTest()
+      }
+    }
+  #endif
+
   func testExtendingLifetimeToChildModels() {
     @Dependency(\.int) var int: Int
     XCTAssertEqual(int, 42)
@@ -75,7 +87,7 @@ final class DependencyTests: XCTestCase {
   }
 
   func testInvalidScope() {
-    #if DEBUG && !os(Linux)
+    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
       XCTExpectFailure {
         withDependencies(from: self) {}
       } issueMatcher: {

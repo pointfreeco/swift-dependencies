@@ -57,6 +57,11 @@ class BaseTestCase: XCTestCase {
 
   override func invokeTest() {
     withDependencies {
+      // NB: It doesn't seem possible to detect a test context from Wasm:
+      //     https://github.com/swiftwasm/carton/issues/400
+      #if os(WASI)
+        $0.context = .test
+      #endif
       $0.uuid = .constant(.deadbeef)
     } operation: {
       super.invokeTest()

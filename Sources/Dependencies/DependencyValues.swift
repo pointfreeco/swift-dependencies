@@ -352,10 +352,6 @@ private final class CachedValues: @unchecked Sendable {
 // NB: We cannot statically link/load XCTest on Apple platforms, so we dynamically load things
 //     instead on platforms where XCTest is available.
 #if canImport(XCTest)
-  #if !canImport(ObjectiveC)
-    import XCTest
-  #endif
-
   private let setUpTestObservers: Void = {
     if _XCTIsTesting {
       #if canImport(ObjectiveC)
@@ -388,25 +384,27 @@ private final class CachedValues: @unchecked Sendable {
 
   #if canImport(ObjectiveC)
     private final class TestObserver: NSObject {}
+
+    extension DispatchQueue {
+      private static let key = DispatchSpecificKey<UInt8>()
+      private static let value: UInt8 = 0
+
+      fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
+        Self.main.setSpecific(key: Self.key, value: Self.value)
+        if getSpecific(key: Self.key) == Self.value {
+          return block()
+        } else {
+          return Self.main.sync(execute: block)
+        }
+      }
+    }
   #else
+    import XCTest
+
     private final class TestObserver: NSObject, XCTestObservation {
       func testCaseWillStart(_ testCase: XCTestCase) {
         DependencyValues._current.cachedValues.cached = [:]
       }
     }
   #endif
-
-  extension DispatchQueue {
-    private static let key = DispatchSpecificKey<UInt8>()
-    private static let value: UInt8 = 0
-
-    fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
-      Self.main.setSpecific(key: Self.key, value: Self.value)
-      if getSpecific(key: Self.key) == Self.value {
-        return block()
-      } else {
-        return Self.main.sync(execute: block)
-      }
-    }
-  }
 #endif

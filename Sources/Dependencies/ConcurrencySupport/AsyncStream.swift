@@ -63,7 +63,7 @@ extension AsyncStream {
   #if swift(<5.9)
     /// Constructs and returns a stream along with its backing continuation.
     ///
-    /// A back-port of [SE-0388: Async Stream Factory][se-0388].
+    /// A back-port of [SE-0388: Convenience Async[Throwing]Stream.makeStream methods][se-0388].
     ///
     /// This is handy for immediately escaping the continuation from an async stream, which
     /// typically requires multiple steps:

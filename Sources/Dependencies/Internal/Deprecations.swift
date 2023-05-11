@@ -1,3 +1,29 @@
+// MARK: - Deprecated after 0.4.2
+
+extension AsyncStream {
+  @available(*, deprecated, renamed: "makeStream(of:bufferingPolicy:)")
+  public static func streamWithContinuation(
+    _ elementType: Element.Type = Element.self,
+    bufferingPolicy limit: Continuation.BufferingPolicy = .unbounded
+  ) -> (stream: Self, continuation: Continuation) {
+    var continuation: Continuation!
+    return (Self(elementType, bufferingPolicy: limit) { continuation = $0 }, continuation)
+  }
+}
+
+extension AsyncThrowingStream where Failure == Error {
+  @available(*, deprecated, renamed: "makeStream(of:bufferingPolicy:)")
+  public static func streamWithContinuation(
+    _ elementType: Element.Type = Element.self,
+    bufferingPolicy limit: Continuation.BufferingPolicy = .unbounded
+  ) -> (stream: Self, continuation: Continuation) {
+    var continuation: Continuation!
+    return (Self(elementType, bufferingPolicy: limit) { continuation = $0 }, continuation)
+  }
+}
+
+// MARK: -
+
 extension ActorIsolated {
   @available(
     *,

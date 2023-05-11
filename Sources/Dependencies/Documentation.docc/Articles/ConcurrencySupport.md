@@ -53,7 +53,7 @@ The library comes with numerous helper APIs spread across the two Swift stream t
     be handy in tests when overriding a dependency endpoint that returns a stream:
 
     ```swift
-    let screenshots = AsyncStream<Void>.streamWithContinuation()
+    let screenshots = AsyncStream.makeStream(of: Void.self)
 
     let model = withDependencies {
       $0.screenshots = { screenshots.stream }

@@ -1,23 +1,27 @@
 #if !os(WASI) && !os(Windows)
   import Foundation
 
-  @_spi(Concurrency) public func withMainSerialExecutor<T>(
-    @_implicitSelfCapture operation: () async throws -> T
+  @_spi(Concurrency)
+  @MainActor
+  public func withMainSerialExecutor<T>(
+    @_implicitSelfCapture operation: @MainActor @Sendable () async throws -> T
   ) async rethrows -> T {
-    guard let pointer = swift_task_enqueueGlobal_hook else { return try await operation() }
-    let hook = pointer.pointee
-    defer { pointer.pointee = hook }
-    pointer.pointee = { job, original in
+    let hook = swift_task_enqueueGlobal_hook
+    defer { swift_task_enqueueGlobal_hook = hook }
+    swift_task_enqueueGlobal_hook = { job, original in
       MainActor.shared.enqueue(job)
     }
     return try await operation()
   }
 
-  // here be dragons
-  private typealias Orig = @convention(thin) (UnownedJob) -> Void
-  private typealias Hook = @convention(thin) (UnownedJob, Orig) -> Void
-  private var swift_task_enqueueGlobal_hook: UnsafeMutablePointer<Hook>? = {
-    dlsym(dlopen(nil, 0), "swift_task_enqueueGlobal_hook")?
-      .assumingMemoryBound(to: Hook.self)
+  typealias Original = @convention(thin) (UnownedJob) -> Void
+  typealias Hook = @convention(thin) (UnownedJob, Original) -> Void
+  private let _swift_task_enqueueGlobal_hook: UnsafeMutablePointer<Hook?> = {
+    dlsym(dlopen(nil, 0), "swift_task_enqueueGlobal_hook").assumingMemoryBound(to: Hook?.self)
   }()
+
+  var swift_task_enqueueGlobal_hook: Hook? {
+    get { _swift_task_enqueueGlobal_hook.pointee }
+    set { _swift_task_enqueueGlobal_hook.pointee = newValue }
+  }
 #endif

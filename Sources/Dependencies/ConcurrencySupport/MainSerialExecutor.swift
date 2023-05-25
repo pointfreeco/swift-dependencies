@@ -4,7 +4,7 @@
   @_spi(Concurrency)
   @MainActor
   public func withMainSerialExecutor<T>(
-    @_implicitSelfCapture operation: @MainActor @Sendable () async throws -> T
+    @_implicitSelfCapture operation: @MainActor () async throws -> T
   ) async rethrows -> T {
     let hook = swift_task_enqueueGlobal_hook
     defer { swift_task_enqueueGlobal_hook = hook }

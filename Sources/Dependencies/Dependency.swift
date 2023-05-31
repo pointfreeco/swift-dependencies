@@ -42,6 +42,19 @@
 /// entry" concept. See the articles <doc:Lifetimes> and <doc:SingleEntryPointSystems> for more
 /// information.
 ///
+/// > Important: Do **not** use `@Dependency` with "static" properties, _e.g._:
+/// >
+/// > ```swift
+/// > struct User {
+/// >   @Dependency(\.uuid) static var uuid
+/// >   // ...
+/// > }
+/// > ```
+/// >
+/// > Static properties are lazily initialized in Swift, and so a static `@Dependency` will lazily
+/// > capture its dependency values wherever it is first accessed, and will likely produce
+/// > unexpected behavior.
+///
 /// For the complete list of dependency values provided by the library, see the properties of the
 /// ``DependencyValues`` structure.
 ///

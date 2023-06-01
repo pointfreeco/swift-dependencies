@@ -195,7 +195,9 @@ final class DependencyTests: XCTestCase {
       }
     }
 
-    let user1 = withDependencies { $0.uuid = .incrementing } operation: {
+    let user1 = withDependencies {
+      $0.uuid = .incrementing
+    } operation: {
       User()
     }
 

@@ -108,7 +108,7 @@ struct AnalyticsClient {
 
 import Dependencies
 
-extension AnalyticsClient: DependencyKey {
+extension AnalyticsClient: TestDependencyKey {
   static let testValue = Self(
     track: unimplemented("AnalyticsClient.track")
   )

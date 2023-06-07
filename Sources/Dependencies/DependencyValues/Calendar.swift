@@ -10,7 +10,7 @@ extension DependencyValues {
   /// ```swift
   /// // Provision model with overridden dependencies
   /// let model = withDependencies {
-  ///   $0.calendar = .gregorian
+  ///   $0.calendar = Calendar(identifier: .gregorian)
   /// } operation: {
   ///   FeatureModel()
   /// }

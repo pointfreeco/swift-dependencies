@@ -88,7 +88,7 @@ print(Locals.value)  // 1
 Locals.$value.withValue(42) {
   print(Locals.value)  // 42
   Task {
-    try await Task.sleep(for: .seconds(1)
+    try await Task.sleep(for: .seconds(1))
     print(Locals.value)  // 42
   }
   print(Locals.value)  // 42

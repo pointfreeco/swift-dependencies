@@ -16,7 +16,7 @@ requests to servers, but also seemingly innocuous things such as `UUID` and `Dat
 file access, user defaults, and even clocks and timers, can all be thought of as dependencies.
 
 You can get really far in application development without ever thinking about dependency management 
-(or, as some like to call it, "dependency injection”), but eventually uncontrolled dependencies can 
+(or, as some like to call it, "dependency injection"), but eventually uncontrolled dependencies can 
 cause many problems in your code base and development cycle:
 
   * Uncontrolled dependencies make it **difficult to write fast, deterministic tests** because you 

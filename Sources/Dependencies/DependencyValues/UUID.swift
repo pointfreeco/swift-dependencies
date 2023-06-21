@@ -63,6 +63,43 @@ extension DependencyValues {
   }
 }
 
+public protocol _UUIDGenerator: Sendable {
+  func callAsFunction() -> UUID
+}
+public struct LiveUUIDGenerator: _UUIDGenerator {
+  public func callAsFunction() -> UUID {
+    UUID()
+  }
+}
+public struct _IncrementingUUIDGenerator: _UUIDGenerator {
+  let sequence: LockIsolated<Int>
+  init(sequence: Int = 0) {
+    self.sequence = LockIsolated(sequence)
+  }
+  public func callAsFunction() -> UUID {
+    self.sequence.withValue { sequence in
+      defer { sequence += 1 }
+      return UUID(sequence)
+    }
+  }
+}
+extension _UUIDGenerator {
+  // @_spi(Internals)
+  public func _incrementingCopy() -> _IncrementingUUIDGenerator? {
+    guard let incrementing = self as? _IncrementingUUIDGenerator
+    else { return nil }
+    return incrementing.sequence.withValue { sequence in
+      return _IncrementingUUIDGenerator(sequence: sequence)
+    }
+  }
+}
+struct ConstantUUIDGenerator: _UUIDGenerator {
+  let uuid: UUID
+  func callAsFunction() -> UUID {
+    self.uuid
+  }
+}
+
 /// A dependency that generates a UUID.
 ///
 /// See ``DependencyValues/uuid`` for more information.

@@ -193,7 +193,7 @@ final class ResolutionTests: XCTestCase {
   }
 
   func testClientWithDependency() {
-    @Dependency(\.clientWithDependency) var clientWithDependency
+    @Dependency(\.clientWithDependency) var clientWithDependency: ClientWithDependency
     withDependencies {
       $0.eagerChild.value = 99
     } operation: {

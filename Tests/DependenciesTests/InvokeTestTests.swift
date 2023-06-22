@@ -1,7 +1,6 @@
 import Dependencies
 import XCTest
 
-@MainActor
 final class InvokeTestTests: XCTestCase {
   override func invokeTest() {
     withDependencies {

@@ -23,7 +23,7 @@ final class InvokeTestTests: XCTestCase {
       Model()
     }
 
-    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    #if !os(Linux) && !os(WASI) && !os(Windows)
       XCTExpectFailure {
         XCTAssertEqual(model.getDate().timeIntervalSince1970, 2)
       }

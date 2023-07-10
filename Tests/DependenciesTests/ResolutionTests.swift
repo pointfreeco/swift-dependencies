@@ -213,6 +213,22 @@ final class ResolutionTests: XCTestCase {
   //
   //    XCTAssertEqual(cyclic1.value(), 3)
   //  }
+
+  func testAndLive() {
+    @Dependency(\.testAndLive) var testAndLive
+
+    XCTAssertEqual(testAndLive.fetch(), 1749)
+    withDependencies {
+      $0.context = .live
+    } operation: {
+      XCTAssertEqual(testAndLive.fetch(), 42)
+    }
+    withDependencies {
+      $0.context = .preview
+    } operation: {
+      XCTAssertEqual(testAndLive.fetch(), 1749)
+    }
+  }
 }
 
 private struct EagerParentDependency: TestDependencyKey {
@@ -353,5 +369,16 @@ extension DependencyValues {
   fileprivate var clientWithDependency: ClientWithDependency {
     get { self[ClientWithDependency.self] }
     set { self[ClientWithDependency.self] = newValue }
+  }
+}
+
+struct TestAndLiveClient: DependencyKey {
+  var fetch: () -> Int
+  static let liveValue = Self { 42 }
+  static let testValue = Self { 1749 }
+}
+extension DependencyValues {
+  var testAndLive: TestAndLiveClient {
+    get { self[TestAndLiveClient.self] }
   }
 }

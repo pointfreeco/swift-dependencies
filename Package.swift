@@ -18,11 +18,9 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
-//    .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "0.10.0"),
-    .package(path: "../combine-schedulers"),
-    .package(path: "../swift-concurrency-extras"),
-    .package(path: "../swift-clocks"),
-//    .package(url: "https://github.com/pointfreeco/swift-clocks", from: "0.3.0"),
+    .package(url: "https://github.com/pointfreeco/combine-schedulers", branch: "concurrency-extras"),
+    .package(url: "https://github.com/pointfreeco/swift-clocks", branch: "concurrency-extras"),
+    .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", branch: "main"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "0.8.0"),
   ],
   targets: [

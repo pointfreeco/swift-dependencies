@@ -192,6 +192,20 @@ final class ResolutionTests: XCTestCase {
     }
   }
 
+  func testClientWithDependency() {
+    @Dependency(\.clientWithDependency) var clientWithDependency: ClientWithDependency
+    withDependencies {
+      $0.eagerChild.value = 99
+    } operation: {
+      XCTAssertEqual(clientWithDependency.value(), 99)
+      withDependencies {
+        $0.eagerChild.value = 42
+      } operation: {
+        XCTAssertEqual(clientWithDependency.value(), 42)
+      }
+    }
+  }
+
   // TODO: investigate using callstack to find dependency cycles
   //  func testCyclic() {
   //    @Dependency(\.cyclic1) var cyclic1: CyclicDependency1
@@ -278,6 +292,14 @@ private struct CyclicDependency2: TestDependencyKey {
     return cyclic1.value() + 2
   }
 }
+private struct ClientWithDependency: TestDependencyKey {
+  @Dependency(\.eagerChild) var eagerChild
+  var onValue: (EagerChildDependency) -> Int = { $0.value }
+  func value() -> Int {
+    self.onValue(self.eagerChild)
+  }
+  static let testValue = Self()
+}
 
 extension DependencyValues {
   fileprivate var eagerParent: EagerParentDependency {
@@ -327,5 +349,9 @@ extension DependencyValues {
   fileprivate var cyclic2: CyclicDependency2 {
     get { self[CyclicDependency2.self] }
     set { self[CyclicDependency2.self] = newValue }
+  }
+  fileprivate var clientWithDependency: ClientWithDependency {
+    get { self[ClientWithDependency.self] }
+    set { self[ClientWithDependency.self] = newValue }
   }
 }

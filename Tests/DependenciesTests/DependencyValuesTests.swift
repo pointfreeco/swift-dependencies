@@ -620,6 +620,43 @@ final class DependencyValuesTests: XCTestCase {
       }
     #endif
   #endif
+
+  func testThreadSafety() async {
+    let runCount = 100_000
+    let taskCount = 10
+
+    for _ in 1...runCount {
+      defer { CountInitDependency.initCount = 0 }
+      await withDependencies {
+        $0 = .test
+      } operation: {
+        await withTaskGroup(of: Void.self) { group in
+          for _ in 1...taskCount {
+            group.addTask {
+              @Dependency(\.countInitDependency) var countInitDependency: CountInitDependency
+              let _ = countInitDependency.fetch()
+            }
+          }
+          for await _ in group {}
+        }
+        XCTAssertEqual(CountInitDependency.initCount, 1)
+      }
+    }
+  }
+}
+
+struct CountInitDependency: TestDependencyKey {
+  static var initCount = 0
+  var fetch: () -> Int
+  static var testValue: Self {
+    initCount += 1
+    return Self { 42 }
+  }
+}
+extension DependencyValues {
+  var countInitDependency: CountInitDependency {
+    self[CountInitDependency.self]
+  }
 }
 
 actor CachedDependency: TestDependencyKey {

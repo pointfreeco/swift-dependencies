@@ -222,12 +222,6 @@ and articles:
   Learn about "single entry point" systems, and why they are best suited for this dependencies
   library, although it is possible to use the library with non-single entry point systems.
 
-#### Miscellaneous
-
-* **[Concurrency support][concurrency-support-article]**:
-  Learn about the concurrency tools that come with the library that make writing tests and 
-  implementing dependencies easy.
-  
 ## Examples
 
 We rebuilt Apple's [Scrumdinger][scrumdinger] demo application using modern, best practices for

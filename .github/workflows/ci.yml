@@ -59,7 +59,7 @@ jobs:
         run: make test-integration
 
   ubuntu:
-    name: Ubuntu
+    name: Linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -67,7 +67,7 @@ jobs:
         run: make test-swift
 
   wasm:
-    name: SwiftWASM
+    name: Wasm
     runs-on: ubuntu-latest
     strategy:
       matrix:

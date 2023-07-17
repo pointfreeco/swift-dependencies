@@ -73,10 +73,6 @@ This library addresses all of the points above, and much, _much_ more.
 - <doc:Lifetimes>
 - <doc:SingleEntryPointSystems>
 
-### Miscellaneous
-
-- <doc:ConcurrencySupport>
-
 ### Dependency management
 
 - ``Dependency``

@@ -15,7 +15,7 @@ build-all-platforms:
 	  "$(PLATFORM_TVOS)" \
 	  "$(PLATFORM_WATCHOS)"; \
 	do \
-		xcodebuild build \
+		xcrun xcodebuild build \
 			-workspace Dependencies.xcworkspace \
 			-scheme Dependencies \
 			-configuration $(CONFIG) \
@@ -39,7 +39,7 @@ build-for-static-stdlib:
 	@swift build -c release --static-swift-stdlib
 
 test-integration:
-	xcodebuild test \
+	xcrun xcodebuild test \
 		-scheme "Integration" \
 		-destination platform="$(PLATFORM_IOS)" || exit 1; \
 

@@ -12,6 +12,8 @@ your dependencies in a way that maximizes their flexibility in tests and other s
 > Tip: We have an [entire series of episodes][designing-deps] dedicated to the topic of dependencies
 > and how to best design and construct them.
 
+# Altenative approaches to interfaces
+
 The most popular way to design dependencies in Swift is to use protocols. For example, if your
 feature needs to interact with an audio player, you might design a protocol with methods for
 playing, stopping, and more:
@@ -165,6 +167,104 @@ func testFeature() {
 If this test passes you can be guaranteed that no other endpoints of the dependency are used in the
 user flow you are testing. If someday in the future more of the dependency is used, you will
 instantly get a test failure, letting you know that there is more behavior that you must assert on.
+
+# Generic dependencies
+
+A generic dependency is one that requires a generic in its interface in some way. This can occur
+if you want to model the interface as a struct with a generic, or a protocol with an associated
+type, or even just if a method needs a generic. Such dependencies are significantly more complicated
+than a non-generic interface, both in terms of how they are provided to features and how one 
+provides alternative conconformances for tests, previews, etc.
+
+For example, you may have a file client that deals with JSON files on the disk, and could model
+that with the following protocol:
+
+```swift
+protocol JSONFileClient {
+  func save<Model: Encodable>(_ model: Model, to url: URL) throws
+  func load<Model: Decodable>(from url: URL) throws -> Model
+}
+```
+
+A "live" implementation of this that actually reaches out to the file system might look like this:
+
+```swift
+struct LiveJSONFileClient: JSONFileClient {
+  func save<Model: Encodable>(_ model: Model, to url: URL) throws {
+    try JSONEncoder().encode(model).write(to: url)
+  }
+  func load<Model: Decodable>(from url: URL) throws -> Model {
+    try JSONDecoder().decode(Model.self, from: Data(contentsOf: url))
+  }
+} 
+```
+
+This kind of dependency does not easily translate to the struct-style of interfaces because `var`
+and `let` properties in Swift cannot have generics:
+
+```swift
+struct JSONFileClient {
+  var save<Model: Encodable>: (Model, URL) throws -> Void  // 🛑
+  var load<Model: Decodable>: (URL) throws -> Model        // 🛑
+}
+```
+
+That may seem unfortunate, but it turns out it's not such a bad thing that this is not possible.
+The problem with generic interfaces like the `JSONFileClient` protocol is that they are incredibly
+difficult to mock for tests and previews.
+
+If you wanted to write a test for a feature that uses a `JSONFileClient` instance, then you would
+want to provide a mock so that you do not interact directly with the file system. Doing so can help
+prevent mysterious test failures where the changes one test makes to the file system bleeds over
+into another test.
+
+So what you would want to do is have a `MockJSONFileClient` conformance of the `JSONFileClient`
+protocol that does not read and write to the file system, but stead 
+
+```swift
+class MockJSONFileClient: JSONFileClient {
+  var storage: Any?
+  func save<Model: Encodable>(_ model: Model, to url: URL) throws {
+    self.storage = model
+  }
+  func load<Model: Decodable>(from url: URL) throws -> Model {
+    guard let storage, let model = storage as? Model
+    else {
+      struct CastError: Error {}
+      throw CastError()
+    }
+    return model
+  }
+}
+```
+
+
+
+---
+
+
+Another example is some kind of media player interface that provides endpoints for loading, playing
+and stopping a piece of media, such as a video or audio file:
+
+
+```swift
+protocol MediaPlayer {
+  associatedtype Media: MediaProtocol
+  var media: Media
+  init(media: Media)
+  func load()
+  func stop()
+  func play()
+}
+```
+
+
+
+
+# What can go wrong with generic dependencies?
+
+
+
 
 [designing-deps]: https://www.pointfree.co/collections/dependencies
 [xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay

@@ -284,6 +284,22 @@ On the flip side, the library also helps you catch when you have not provided a 
 running the application in the simulator or on a device, if a dependency is accessed for which a
 `liveValue` has not been provided, a purple, runtime warning will appear in Xcode letting you know.
 
+There is also a way to force a dependency context in an application target or test target. When
+the environment variable `SWIFT_DEPENDENCIES_CONTEXT` is present, and is equal to either `live`,
+`preview` or `test`, that context will be used. This can be useful in UI tests since the application
+target runs as a separate process outside of the testing process.
+
+In order to force the application target to run with test dependencies during a UI test, simply
+perform the following in your UI test case:
+
+```swift
+func testFeature() {
+  self.app.launchEnvironment["SWIFT_DEPENDENCIES_CONTEXT"] = "test"
+  self.app.launch()
+  …
+}
+```
+
 [unimplemented-docs]: https://pointfreeco.github.io/xctest-dynamic-overlay/main/documentation/xctestdynamicoverlay/unimplemented(_:fileid:line:)-5098a
 [xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay
 

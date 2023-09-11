@@ -623,9 +623,9 @@ final class DependencyValuesTests: XCTestCase {
 
   func testThreadSafety() async {
     #if os(Windows)
-    let runCount = 1_000
+      let runCount = 1_000
     #else
-    let runCount = 100_000
+      let runCount = 100_000
     #endif
     let taskCount = 10
 

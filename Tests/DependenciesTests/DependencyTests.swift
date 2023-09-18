@@ -2,6 +2,18 @@ import Dependencies
 import XCTest
 
 final class DependencyTests: XCTestCase {
+  // NB: It doesn't seem possible to detect a test context from Wasm:
+  //     https://github.com/swiftwasm/carton/issues/400
+  #if os(WASI)
+    override func invokeTest() {
+      withDependencies {
+        $0.context = .test
+      } operation: {
+        super.invokeTest()
+      }
+    }
+  #endif
+
   func testExtendingLifetimeToChildModels() {
     @Dependency(\.int) var int: Int
     XCTAssertEqual(int, 42)
@@ -75,7 +87,7 @@ final class DependencyTests: XCTestCase {
   }
 
   func testInvalidScope() {
-    #if DEBUG && !os(Linux)
+    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
       XCTExpectFailure {
         withDependencies(from: self) {}
       } issueMatcher: {
@@ -170,7 +182,32 @@ final class DependencyTests: XCTestCase {
     XCTAssertEqual(9000, greatGrandchild.int)
     XCTAssertEqual("cool", greatGrandchild.string)
   }
+
+  // NB: `@Dependency` should not be used as a `static var` because of the following behavior.
+  func testStaticDependencyCachesFirstUse() {
+    struct User {
+      @Dependency(\.uuid) static var uuid
+
+      let id: UUID
+
+      init() {
+        self.id = Self.uuid()
+      }
+    }
+
+    let user1 = withDependencies {
+      $0.uuid = .incrementing
+    } operation: {
+      User()
+    }
+
+    let user2 = User()
+
+    XCTAssertEqual(user1.id, UUID(0))
+    XCTAssertEqual(user2.id, UUID(1))
+  }
 }
+
 private class Model {
   @Dependency(\.int) var int
   @Dependency(\.string) var string

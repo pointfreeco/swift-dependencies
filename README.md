@@ -34,7 +34,7 @@ requests to servers, but also seemingly innocuous things such as `UUID` and `Dat
 file access, user defaults, and even clocks and timers, can all be thought of as dependencies.
 
 You can get really far in application development without ever thinking about dependency management 
-(or, as some like to call it, "dependency injection”), but eventually uncontrolled dependencies can 
+(or, as some like to call it, "dependency injection"), but eventually uncontrolled dependencies can 
 cause many problems in your code base and development cycle:
 
   * Uncontrolled dependencies make it **difficult to write fast, deterministic tests** because you 
@@ -222,12 +222,6 @@ and articles:
   Learn about "single entry point" systems, and why they are best suited for this dependencies
   library, although it is possible to use the library with non-single entry point systems.
 
-#### Miscellaneous
-
-* **[Concurrency support][concurrency-support-article]**:
-  Learn about the concurrency tools that come with the library that make writing tests and 
-  implementing dependencies easy.
-  
 ## Examples
 
 We rebuilt Apple's [Scrumdinger][scrumdinger] demo application using modern, best practices for
@@ -250,7 +244,7 @@ simple as adding it to your `Package.swift`:
 
 ``` swift
 dependencies: [
-  .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "0.1.0")
+  .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.0.0")
 ]
 ```
 

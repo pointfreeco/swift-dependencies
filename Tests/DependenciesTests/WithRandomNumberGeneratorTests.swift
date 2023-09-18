@@ -10,11 +10,15 @@ final class WithRandomNumberGeneratorDependencyTests: XCTestCase {
       $0.withRandomNumberGenerator = .init(LCRNG(seed: 0))
     } operation: {
       self.withRandomNumberGenerator { generator -> Void in
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 1)
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 3)
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 6)
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 3)
-        XCTAssertEqual(.random(in: 1...6, using: &generator), 2)
+        // NB: Wasm has different behavior here.
+        #if os(WASI)
+          let sequence = [5, 6, 5, 4, 4]
+        #else
+          let sequence = [1, 3, 6, 3, 2]
+        #endif
+        for expected in sequence {
+          XCTAssertEqual(.random(in: 1...6, using: &generator), expected)
+        }
       }
     }
   }

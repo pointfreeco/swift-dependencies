@@ -2,6 +2,18 @@ import Dependencies
 import XCTest
 
 final class ResolutionTests: XCTestCase {
+  // NB: It doesn't seem possible to detect a test context from Wasm:
+  //     https://github.com/swiftwasm/carton/issues/400
+  #if os(WASI)
+    override func invokeTest() {
+      withDependencies {
+        $0.context = .test
+      } operation: {
+        super.invokeTest()
+      }
+    }
+  #endif
+
   func testDependencyDependingOnDependency_Eager() {
     @Dependency(\.eagerParent) var eagerParent: EagerParentDependency
     @Dependency(\.eagerChild) var eagerChild: EagerChildDependency
@@ -83,8 +95,14 @@ final class ResolutionTests: XCTestCase {
       Model()
     }
 
-    XCTAssertEqual(nestedParent.value(), 1729)
-    XCTAssertEqual(model.nestedParent.value(), 1729)
+    // NB: Wasm has different behavior here.
+    #if os(WASI)
+      let expected = 1
+    #else
+      let expected = 1729
+    #endif
+    XCTAssertEqual(nestedParent.value(), expected)
+    XCTAssertEqual(model.nestedParent.value(), expected)
     XCTAssertEqual(model.nestedChild.value(), 1)
 
     withDependencies {
@@ -174,6 +192,20 @@ final class ResolutionTests: XCTestCase {
     }
   }
 
+  func testClientWithDependency() {
+    @Dependency(\.clientWithDependency) var clientWithDependency: ClientWithDependency
+    withDependencies {
+      $0.eagerChild.value = 99
+    } operation: {
+      XCTAssertEqual(clientWithDependency.value(), 99)
+      withDependencies {
+        $0.eagerChild.value = 42
+      } operation: {
+        XCTAssertEqual(clientWithDependency.value(), 42)
+      }
+    }
+  }
+
   // TODO: investigate using callstack to find dependency cycles
   //  func testCyclic() {
   //    @Dependency(\.cyclic1) var cyclic1: CyclicDependency1
@@ -260,6 +292,14 @@ private struct CyclicDependency2: TestDependencyKey {
     return cyclic1.value() + 2
   }
 }
+private struct ClientWithDependency: TestDependencyKey {
+  @Dependency(\.eagerChild) var eagerChild
+  var onValue: (EagerChildDependency) -> Int = { $0.value }
+  func value() -> Int {
+    self.onValue(self.eagerChild)
+  }
+  static let testValue = Self()
+}
 
 extension DependencyValues {
   fileprivate var eagerParent: EagerParentDependency {
@@ -309,5 +349,9 @@ extension DependencyValues {
   fileprivate var cyclic2: CyclicDependency2 {
     get { self[CyclicDependency2.self] }
     set { self[CyclicDependency2.self] = newValue }
+  }
+  fileprivate var clientWithDependency: ClientWithDependency {
+    get { self[ClientWithDependency.self] }
+    set { self[ClientWithDependency.self] = newValue }
   }
 }

@@ -62,11 +62,11 @@ be executed for a particular request.
 So, there are a lot of examples of "single entry point" systems out there, but it's also not the
 majority. There are plenty of examples that do not fall into this paradigm, such as
 `ObservableObject` conformances, all of UIKit and more. If you _are_ dealing with a single entry
-point system, then there are some really great super powers that can be unlocked...
+point system, then there are some really great superpowers that can be unlocked...
 
 ## Altered execution environments
 
-One of the most interesting aspects of single entry point systems is that they have a well defined
+One of the most interesting aspects of single entry point systems is that they have a well-defined
 scope from beginning to end, and that makes it possible to easily alter their execution context.
 
 For example, SwiftUI views have a powerful feature known as ["environment values"][env-values-docs].
@@ -89,7 +89,7 @@ struct ContentView: View {
 ```
 
 The `.red` foreground color will be applied to every view in `HeaderView`, including deeply nested
-views. And most importantly, that style is applied to only to the header and not to the
+views. And most importantly, that style is applied only to the header and not to the
 `FooterView`.
 
 The `foregroundColor` view modifier is powered by [environment values][env-values-docs] under the

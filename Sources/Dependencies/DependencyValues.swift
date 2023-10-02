@@ -386,12 +386,8 @@ private final class CachedValues: @unchecked Sendable {
     private final class TestObserver: NSObject {}
 
     extension DispatchQueue {
-      private static let key = DispatchSpecificKey<UInt8>()
-      private static let value: UInt8 = 0
-
       fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
-        Self.main.setSpecific(key: Self.key, value: Self.value)
-        if getSpecific(key: Self.key) == Self.value {
+        if Thread.isMainThread {
           return block()
         } else {
           return Self.main.sync(execute: block)

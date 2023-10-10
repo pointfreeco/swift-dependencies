@@ -200,6 +200,11 @@ public struct DependencyValues: Sendable {
     return values
   }
 
+  /// Clears the dependency cache.
+  public func clearCache() {
+      cachedValues.cached = [:]
+  }
+
   func merging(_ other: Self) -> Self {
     var values = self
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })

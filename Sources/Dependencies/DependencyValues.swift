@@ -371,7 +371,7 @@ private final class CachedValues: @unchecked Sendable {
               .takeUnretainedValue()
           else { return }
           let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
-            DependencyValues._current.cachedValues.cached = [:]
+            DependencyValues._current.clearCache()
           }
           let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
           class_addMethod(
@@ -404,7 +404,7 @@ private final class CachedValues: @unchecked Sendable {
 
     private final class TestObserver: NSObject, XCTestObservation {
       func testCaseWillStart(_ testCase: XCTestCase) {
-        DependencyValues._current.cachedValues.cached = [:]
+        DependencyValues._current.clearCache()
       }
     }
   #endif

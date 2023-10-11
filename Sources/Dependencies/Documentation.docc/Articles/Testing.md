@@ -168,4 +168,39 @@ transitively get access to it through the app itself. In Xcode, go to "Build Pha
 "Dependencies" from the "Link Binary With Libraries" section. When using SwiftPM, remove the
 "Dependencies" entry from the `testTarget`'s' `dependencies` array in `Package.swift`.
 
+### Test case leakage
+
+Sometimes it is possible to have tests that pass successfully when run in isolation, but somehow fail
+when run together as a suite. This can happen when using escaping closures in tests, which creates
+an alternate execution flow, allowing a test's code to continue running long after the test has 
+finished.
+
+This can happen in any kind of test, not just when using this dependencies library. For example, 
+each of the following test methods passes when run in isolation, yet running the whole test suite
+fails:
+
+```swift
+final class SomeTest: XCTestCase {
+  func testA() {
+    Task {
+      try await Task.sleep(for: .seconds(0.1))
+      XCTFail()
+    }
+  }
+  func testB() async throws {
+    try await Task.sleep(for: .seconds(0.15))
+  }
+}
+```
+
+This happens because `testA` escapes some work to be executed and then finishes immediately with
+no failure. Then, while `testB` is executing, the escaped work from `testA` finally gets around
+to executing and causes a failure.
+
+You can also run into this issue while using this dependencies library. In particular, you may
+see test a failure for accessing a ``TestDependencyKey/testValue`` of a dependency that your
+test is not even using. If running that test in isolation passes, then you probably have some
+other test accidentally leaking its code into your test. You need to check every other test in the 
+suite to see if any of them use escaping closures causing the leakage.
+
 [xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay

@@ -287,4 +287,102 @@ final class DependencyClientMacroTests: XCTestCase {
       """
     }
   }
+
+  func testComputedProperty() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        var endpoint: @Sendable () -> Void
+
+        var name: String {
+          "Blob"
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+        @DependencyEndpoint
+        var endpoint: @Sendable () -> Void
+
+        var name: String {
+          "Blob"
+        }
+
+        init(
+          endpoint: @Sendable @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
+
+  func testLet_WithDefault() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        let id = UUID()
+        var endpoint: @Sendable () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+        let id = UUID()
+        @DependencyEndpoint
+        var endpoint: @Sendable () -> Void
+
+        init(
+          endpoint: @Sendable @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
+
+  func testLet_WithoutDefault() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        let id: UUID
+        var endpoint: @Sendable () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+        let id: UUID
+        @DependencyEndpoint
+        var endpoint: @Sendable () -> Void
+
+        init(
+          id: UUID,
+          endpoint: @Sendable @escaping () -> Void
+        ) {
+          self.id = id
+          self.endpoint = endpoint
+        }
+
+        init(
+          id: UUID
+        ) {
+          self.id = id
+        }
+      }
+      """
+    }
+  }
 }

@@ -45,6 +45,13 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
       else { return [] }
 
+      if property.bindingSpecifier.tokenKind == .keyword(.let), binding.initializer != nil {
+        continue
+      }
+      if let accessors = binding.accessorBlock?.accessors, case .getter = accessors {
+        continue
+      }
+
       if propertyAccess == .private, binding.initializer != nil { continue }
       accesses.insert(propertyAccess ?? .internal)
 

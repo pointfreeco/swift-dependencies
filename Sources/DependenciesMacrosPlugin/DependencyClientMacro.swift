@@ -76,6 +76,11 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       }
       if isEndpoint {
         binding.initializer = nil
+      } else if binding.initializer == nil, type.is(OptionalTypeSyntax.self) {
+        binding.initializer = InitializerClauseSyntax(
+          equal: .equalToken(trailingTrivia: .space),
+          value: NilLiteralExprSyntax()
+        )
       }
       property.bindings[property.bindings.startIndex] = binding
       properties.append(

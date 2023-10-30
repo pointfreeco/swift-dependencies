@@ -226,4 +226,31 @@ final class DependencyClientMacroTests: XCTestCase {
       """
     }
   }
+
+  func testSendable() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        var endpoint: @Sendable () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+        @DependencyEndpoint
+        var endpoint: @Sendable () -> Void
+
+        init(
+          endpoint: @Sendable @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
 }

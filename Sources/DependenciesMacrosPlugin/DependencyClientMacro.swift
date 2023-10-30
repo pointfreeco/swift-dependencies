@@ -55,7 +55,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         return []
       }
       if var attributedTypeSyntax = type.as(AttributedTypeSyntax.self),
-        attributedTypeSyntax.is(FunctionTypeSyntax.self)
+        attributedTypeSyntax.baseType.is(FunctionTypeSyntax.self)
       {
         attributedTypeSyntax.attributes.append(
           .attribute("@escaping").with(\.trailingTrivia, .space)

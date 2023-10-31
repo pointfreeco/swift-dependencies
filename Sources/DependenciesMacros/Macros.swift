@@ -9,9 +9,3 @@ public macro DependencyClient() = #externalMacro(
 public macro DependencyEndpoint() = #externalMacro(
   module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
 )
-
-@DependencyClient
-struct FileClient {
-  var load: (_ path: String) throws -> String
-  var save: (_ path: String, String) throws -> Void
-}

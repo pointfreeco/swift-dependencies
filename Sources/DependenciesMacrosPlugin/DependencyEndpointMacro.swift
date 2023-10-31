@@ -36,7 +36,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       $\(identifier).rawValue = newValue
       }
       """,
-      // TODO: func \(identifier)
     ]
   }
 
@@ -227,10 +226,13 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       """
       \(access)var $\(identifier) = DependenciesMacros.Endpoint<\(raw: type)>(
       initialValue: \(unimplementedDefault)
-      ) { newValue in
-      let implemented = DependenciesMacros._$Implemented("\(identifier)")
+      ) { configuration, newValue in
+      let expectation = DependenciesMacros._$Expectation(
+      "\(identifier)",
+      configuration: configuration
+      )
       return {
-      implemented.fulfill()
+      expectation.fulfill()
       \(raw: functionReturnTypeIsVoid ? "": "return ")\
       \(raw: effectSpecifiers)newValue(\(raw: parameterList))
       }

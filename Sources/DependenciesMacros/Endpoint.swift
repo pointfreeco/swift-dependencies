@@ -15,12 +15,16 @@ public struct Endpoint<Value> {
   public mutating func set(
     expectedCount: Int = 1,
     exactCount: Bool = false,
-    _ newValue: Value
+    _ newValue: Value,
+    file: StaticString = #filePath,
+    line: UInt = #line
   ) {
     self.rawValue = self._override(
       _$Expectation.Configuration(
         expectedCount: expectedCount,
-        exactCount: exactCount
+        exactCount: exactCount,
+        filePath: file,
+        line: line
       ),
       newValue
     )
@@ -29,20 +33,26 @@ public struct Endpoint<Value> {
   public mutating func callAsFunction(
     expectedCount: Int = 1,
     exactCount: Bool = false,
-    _ newValue: Value
+    _ newValue: Value,
+    file: StaticString = #filePath,
+    line: UInt = #line
   ) {
     self.set(
       expectedCount: expectedCount,
       exactCount: exactCount,
-      newValue
+      newValue,
+      file: file,
+      line: line
     )
   }
 }
 
 public final class _$Expectation: @unchecked Sendable {
   public struct Configuration {
-    var expectedCount: Int
-    var exactCount: Bool
+    let expectedCount: Int
+    let exactCount: Bool
+    let filePath: StaticString
+    let line: UInt
   }
 
   private let description: @Sendable () -> String
@@ -67,7 +77,9 @@ public final class _$Expectation: @unchecked Sendable {
         '\(self.description())' called \(pluralize(self.count)) (expected \
         \(self.configuration.exactCount ? "" : "at least ")\
         \(pluralize(self.configuration.expectedCount)))
-        """
+        """,
+        file: self.configuration.filePath,
+        line: self.configuration.line
       )
     }
   }

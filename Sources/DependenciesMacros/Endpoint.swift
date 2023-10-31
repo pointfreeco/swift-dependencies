@@ -69,7 +69,7 @@ public final class _$Expectation: @unchecked Sendable {
 
   deinit {
     func pluralize(_ count: Int) -> String {
-      count == 1 ? "time" : "times"
+      count == 1 ? "1 time" : "\(count) times"
     }
     if self.isUnderfulfilled || self.isOverfulfilled {
       XCTFail(

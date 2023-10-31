@@ -43,7 +43,8 @@ let package = Package(
     .testTarget(
       name: "DependenciesTests",
       dependencies: [
-        "Dependencies"
+        "Dependencies",
+        "DependenciesMacros",
       ]
     ),
     .target(

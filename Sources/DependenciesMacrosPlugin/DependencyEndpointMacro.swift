@@ -3,6 +3,7 @@ import SwiftOperators
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
+import SwiftSyntaxMacroExpansion
 
 public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
   public static func expansion<D: DeclSyntaxProtocol, C: MacroExpansionContext>(
@@ -54,12 +55,10 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       context.diagnose(
         Diagnostic(
           node: node,
-          message: SimpleDiagnosticMessage(
-            message: """
-              '@DependencyEndpoint' must be attached to closure property
-              """,
-            diagnosticID: "closure-property",
-            severity: .error
+          message: MacroExpansionErrorMessage(
+            """
+            '@DependencyEndpoint' must be attached to closure property
+            """
           )
         )
       )
@@ -150,19 +149,16 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
         context.diagnose(
           Diagnostic(
             node: binding,
-            message: SimpleDiagnosticMessage(
-              message: """
-                Missing initial value for non-throwing '\(identifier)'
-                """,
-              diagnosticID: "missing-default",
-              severity: .error
+            message: MacroExpansionErrorMessage(
+              """
+              Missing initial value for non-throwing '\(identifier)'
+              """
             ),
             fixIt: FixIt(
-              message: SimpleFixItMessage(
-                message: """
-                  Insert '= \(unimplementedDefault.description)'
-                  """,
-                fixItID: "add-missing-default"
+              message: MacroExpansionFixItMessage(
+                """
+                Insert '= \(unimplementedDefault.description)'
+                """
               ),
               changes: [
                 .replace(

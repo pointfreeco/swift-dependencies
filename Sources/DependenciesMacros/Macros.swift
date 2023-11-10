@@ -82,7 +82,11 @@ public macro DependencyClient() = #externalMacro(
 )
 
 @attached(accessor, names: named(init), named(get), named(set))
-@attached(peer, names: overloaded, prefixed(`$`))
+@attached(peer, names: overloaded, prefixed(_))
 public macro DependencyEndpoint() = #externalMacro(
   module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
 )
+
+@DependencyClient struct Client {
+  var endpoint: () -> Int = { 42 }
+}

@@ -24,31 +24,20 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       struct Client {
         var endpoint: () -> Void {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
-        var $endpoint = DependenciesMacros.Endpoint<() -> Void>(
-          initialValue: {
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            newValue()
-          }
+        private var _endpoint: () -> Void = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
         }
       }
       """
@@ -67,32 +56,21 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       struct Client {
         var endpoint: () -> Bool = { _ in false } {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
-        var $endpoint = DependenciesMacros.Endpoint<() -> Bool>(
-          initialValue: { _ in
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-            return false
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            return newValue()
-          }
+        private var _endpoint: () -> Bool = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          return false
         }
       }
       """
@@ -128,32 +106,21 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       struct Client {
         var endpoint: () -> Bool = { <#Bool#> } {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
-        var $endpoint = DependenciesMacros.Endpoint<() -> Bool>(
-          initialValue: {
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-            return <#Bool#>
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            return newValue()
-          }
+        private var _endpoint: () -> Bool = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          return <#Bool#>
         }
       }
       """
@@ -189,32 +156,21 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       struct Client {
         var endpoint: (Int, Bool, String) -> Bool = { _, _, _ in <#Bool#> } {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
-        var $endpoint = DependenciesMacros.Endpoint<(Int, Bool, String) -> Bool>(
-          initialValue: { _, _, _ in
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-            return <#Bool#>
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            return newValue($0, $1, $2)
-          }
+        private var _endpoint: (Int, Bool, String) -> Bool = { _, _, _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          return <#Bool#>
         }
       }
       """
@@ -233,32 +189,21 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       struct Client {
         var endpoint: () throws -> Bool {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
-        var $endpoint = DependenciesMacros.Endpoint<() throws -> Bool>(
-          initialValue: {
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-            throw DependenciesMacros.Unimplemented("endpoint")
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            return try newValue()
-          }
+        private var _endpoint: () throws -> Bool = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          throw DependenciesMacros.Unimplemented("endpoint")
         }
       }
       """
@@ -277,32 +222,21 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       public struct ApiClient {
         public var apiRequest: @Sendable (ServerRoute.Api.Route) async throws -> (Data, URLResponse) {
-          @storageRestrictions(initializes: $apiRequest)
+          @storageRestrictions(initializes: _apiRequest)
           init(initialValue) {
-            $apiRequest = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _apiRequest = initialValue
           }
           get {
-            $apiRequest.rawValue
+            _apiRequest
           }
           set {
-            $apiRequest.rawValue = newValue
+            _apiRequest = newValue
           }
         }
 
-        public var $apiRequest = DependenciesMacros.Endpoint<@Sendable (ServerRoute.Api.Route) async throws -> (Data, URLResponse)>(
-          initialValue: { _ in
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'apiRequest'")
-            throw DependenciesMacros.Unimplemented("apiRequest")
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "apiRequest",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            return try await newValue($0)
-          }
+        private var _apiRequest: @Sendable (ServerRoute.Api.Route) async throws -> (Data, URLResponse) = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'apiRequest'")
+          throw DependenciesMacros.Unimplemented("apiRequest")
         }
       }
       """
@@ -321,31 +255,20 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       struct Client {
         var endpoint: () -> () {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
-        var $endpoint = DependenciesMacros.Endpoint<() -> ()>(
-          initialValue: {
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            newValue()
-          }
+        private var _endpoint: () -> () = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
         }
       }
       """
@@ -364,32 +287,21 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       struct Client {
         var endpoint: () -> Int? {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
-        var $endpoint = DependenciesMacros.Endpoint<() -> Int?>(
-          initialValue: {
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-            return nil
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            return newValue()
-          }
+        private var _endpoint: () -> Int? = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          return nil
         }
       }
       """
@@ -408,32 +320,21 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       struct Client {
         var endpoint: () -> Optional<Int> {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
-        var $endpoint = DependenciesMacros.Endpoint<() -> Optional<Int>>(
-          initialValue: {
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-            return nil
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            return newValue()
-          }
+        private var _endpoint: () -> Optional<Int> = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          return nil
         }
       }
       """
@@ -452,32 +353,21 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
       struct Client {
         var endpoint: @Sendable (Int) -> Void {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
-        var $endpoint = DependenciesMacros.Endpoint<@Sendable (Int) -> Void>(
-          initialValue: { _ in
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            newValue($0)
-          }
-o        }
+        private var _endpoint: @Sendable (Int) -> Void = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+        }
       }
       """
     }
@@ -495,15 +385,15 @@ o        }
       """
       public struct Client {
         public var endpoint: @Sendable (String, _ id: Int, _ progress: Float) async -> Void {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
@@ -512,19 +402,8 @@ o        }
           await self.endpoint(p0, p1, p2)
         }
 
-        public var $endpoint = DependenciesMacros.Endpoint<@Sendable (String, _ id: Int, _ progress: Float) async -> Void>(
-          initialValue: { _, _, _ in
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            await newValue($0, $1, $2)
-          }
+        private var _endpoint: @Sendable (String, _ id: Int, _ progress: Float) async -> Void = { _, _, _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
         }
       }
       """
@@ -543,15 +422,15 @@ o        }
       """
       public struct Client {
         public var endpoint: @MainActor @Sendable (_ id: Int) async -> Void {
-          @storageRestrictions(initializes: $endpoint)
+          @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
-            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+            _endpoint = initialValue
           }
           get {
-            $endpoint.rawValue
+            _endpoint
           }
           set {
-            $endpoint.rawValue = newValue
+            _endpoint = newValue
           }
         }
 
@@ -560,19 +439,8 @@ o        }
           await self.endpoint(p0)
         }
 
-        public var $endpoint = DependenciesMacros.Endpoint<@MainActor @Sendable (_ id: Int) async -> Void>(
-          initialValue: { _ in
-            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
-          }
-        ) { configuration, newValue in
-          let expectation = DependenciesMacros._$Expectation(
-            "endpoint",
-            configuration: configuration
-          )
-          return {
-            expectation.fulfill()
-            await newValue($0)
-          }
+        private var _endpoint: @MainActor @Sendable (_ id: Int) async -> Void = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
         }
       }
       """

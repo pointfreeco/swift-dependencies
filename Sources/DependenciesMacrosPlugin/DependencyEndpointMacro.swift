@@ -22,19 +22,19 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
     return [
       """
-      @storageRestrictions(initializes: $\(identifier))
+      @storageRestrictions(initializes: _\(identifier))
       init(initialValue) {
-      $\(identifier) = DependenciesMacros.Endpoint(initialValue: initialValue)
+      _\(identifier) = initialValue
       }
       """,
       """
       get {
-      $\(identifier).rawValue
+      _\(identifier)
       }
       """,
       """
       set {
-      $\(identifier).rawValue = newValue
+      _\(identifier) = newValue
       }
       """,
     ]
@@ -127,7 +127,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     if functionType.effectSpecifiers?.asyncSpecifier != nil {
       effectSpecifiers.append("await ")
     }
-    let parameterList = (0..<functionType.parameters.count).map { "$\($0)" }.joined(separator: ", ")
     let access = property.modifiers.first { $0.name.tokenKind == .keyword(.public) }
 
     var decls: [DeclSyntax] = []
@@ -165,19 +164,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
     return decls + [
       """
-      \(access)var $\(identifier) = DependenciesMacros.Endpoint<\(raw: type)>(
-      initialValue: \(unimplementedDefault)
-      ) { configuration, newValue in
-      let expectation = DependenciesMacros._$Expectation(
-      "\(identifier)",
-      configuration: configuration
-      )
-      return {
-      expectation.fulfill()
-      \(raw: functionType.isVoid ? "": "return ")\
-      \(raw: effectSpecifiers)newValue(\(raw: parameterList))
-      }
-      }
+      private var _\(identifier): \(raw: type) = \(unimplementedDefault)
       """
     ]
   }

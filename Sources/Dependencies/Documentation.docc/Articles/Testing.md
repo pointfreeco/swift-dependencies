@@ -170,10 +170,10 @@ transitively get access to it through the app itself. In Xcode, go to "Build Pha
 
 ### Test case leakage
 
-Sometimes it is possible to have tests that pass successfully when run in isolation, but somehow fail
-when run together as a suite. This can happen when using escaping closures in tests, which creates
-an alternate execution flow, allowing a test's code to continue running long after the test has 
-finished.
+Sometimes it is possible to have tests that pass successfully when run in isolation, but somehow 
+fail when run together as a suite. This can happen when using escaping closures in tests, which 
+creates an alternate execution flow, allowing a test's code to continue running long after the test 
+has  finished.
 
 This can happen in any kind of test, not just when using this dependencies library. For example, 
 each of the following test methods passes when run in isolation, yet running the whole test suite

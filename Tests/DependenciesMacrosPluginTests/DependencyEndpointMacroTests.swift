@@ -40,10 +40,13 @@ final class DependencyEndpointMacroTests: XCTestCase {
           initialValue: {
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             newValue()
           }
         }
@@ -81,10 +84,13 @@ final class DependencyEndpointMacroTests: XCTestCase {
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
             return false
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             return newValue()
           }
         }
@@ -139,10 +145,13 @@ final class DependencyEndpointMacroTests: XCTestCase {
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
             return <#Bool#>
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             return newValue()
           }
         }
@@ -197,10 +206,13 @@ final class DependencyEndpointMacroTests: XCTestCase {
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
             return <#Bool#>
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             return newValue($0, $1, $2)
           }
         }
@@ -238,10 +250,13 @@ final class DependencyEndpointMacroTests: XCTestCase {
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
             throw DependenciesMacros.Unimplemented("endpoint")
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             return try newValue()
           }
         }
@@ -279,10 +294,13 @@ final class DependencyEndpointMacroTests: XCTestCase {
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'apiRequest'")
             throw DependenciesMacros.Unimplemented("apiRequest")
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("apiRequest")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "apiRequest",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             return try await newValue($0)
           }
         }
@@ -319,10 +337,13 @@ final class DependencyEndpointMacroTests: XCTestCase {
           initialValue: {
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             newValue()
           }
         }
@@ -360,10 +381,13 @@ final class DependencyEndpointMacroTests: XCTestCase {
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
             return nil
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             return newValue()
           }
         }
@@ -401,10 +425,13 @@ final class DependencyEndpointMacroTests: XCTestCase {
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
             return nil
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             return newValue()
           }
         }
@@ -441,13 +468,16 @@ final class DependencyEndpointMacroTests: XCTestCase {
           initialValue: { _ in
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             newValue($0)
           }
-        }
+o        }
       }
       """
     }
@@ -477,7 +507,8 @@ final class DependencyEndpointMacroTests: XCTestCase {
           }
         }
 
-        public func endpoint(_ p0: String, id p1: Int, progress p2: Float) async -> Void {
+        @Sendable
+          public func endpoint(_ p0: String, id p1: Int, progress p2: Float) async -> Void {
           await self.endpoint(p0, p1, p2)
         }
 
@@ -485,11 +516,62 @@ final class DependencyEndpointMacroTests: XCTestCase {
           initialValue: { _, _, _ in
             XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
           }
-        ) { newValue in
-          let implemented = DependenciesMacros._$Implemented("endpoint")
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
           return {
-            implemented.fulfill()
+            expectation.fulfill()
             await newValue($0, $1, $2)
+          }
+        }
+      }
+      """
+    }
+  }
+
+  func testMainActorSendableFunc() {
+    assertMacro {
+      """
+      public struct Client {
+        @DependencyEndpoint
+        public var endpoint: @MainActor @Sendable (_ id: Int) async -> Void
+      }
+      """
+    } expansion: {
+      """
+      public struct Client {
+        public var endpoint: @MainActor @Sendable (_ id: Int) async -> Void {
+          @storageRestrictions(initializes: $endpoint)
+          init(initialValue) {
+            $endpoint = DependenciesMacros.Endpoint(initialValue: initialValue)
+          }
+          get {
+            $endpoint.rawValue
+          }
+          set {
+            $endpoint.rawValue = newValue
+          }
+        }
+
+        @MainActor
+          public func endpoint(id p0: Int) async -> Void {
+          await self.endpoint(p0)
+        }
+
+        public var $endpoint = DependenciesMacros.Endpoint<@MainActor @Sendable (_ id: Int) async -> Void>(
+          initialValue: { _ in
+            XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          }
+        ) { configuration, newValue in
+          let expectation = DependenciesMacros._$Expectation(
+            "endpoint",
+            configuration: configuration
+          )
+          return {
+            expectation.fulfill()
+            await newValue($0)
           }
         }
       }

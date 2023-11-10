@@ -133,6 +133,17 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     var decls: [DeclSyntax] = []
 
     if functionType.parameters.contains(where: { $0.secondName != nil }) {
+      var attributes: [String] = binding.typeAnnotation.flatMap {
+        $0.type.as(AttributedTypeSyntax.self)?.attributes.compactMap {
+          guard case let .attribute(attribute) = $0 else { return nil }
+          return attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+        }
+      }
+      ?? []
+      if attributes.count > 1 {
+        attributes.removeAll(where: { $0 == "Sendable" })
+      }
+
       var parameters = functionType.parameters
       for (offset, i) in parameters.indices.enumerated() {
         parameters[i].firstName = (parameters[i].secondName ?? .wildcardToken())
@@ -143,6 +154,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       let appliedParameters = (0..<parameters.count).map { "p\($0)" }.joined(separator: ", ")
       decls.append(
         """
+        \(raw: attributes.map { "@\($0) " }.joined())\
         \(access)func \(identifier)(\(parameters))\
         \(functionType.effectSpecifiers)\(functionType.returnClause) {
         \(raw: effectSpecifiers)self.\(identifier)(\(raw: appliedParameters))

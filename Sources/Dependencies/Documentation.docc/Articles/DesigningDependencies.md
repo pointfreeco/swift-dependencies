@@ -20,8 +20,8 @@ playing, stopping, and more:
 
 ```swift
 protocol AudioPlayer {
-  func loop(_ url: URL) async throws
-  func play(_ url: URL) async throws
+  func loop(url: URL) async throws
+  func play(url: URL) async throws
   func setVolume(_ volume: Float) async
   func stop() async
 }
@@ -41,7 +41,7 @@ struct MockAudioPlayer: AudioPlayer {
   // ...
 }
 struct UnimplementedAudioPlayer: AudioPlayer {
-  func loop(_ url: URL) async throws {
+  func loop(url: URL) async throws {
     XCTFail("AudioPlayer.loop is unimplemented")
   }
   // ...

@@ -106,7 +106,7 @@ define the live, preview and test values directly in the conformance, all at onc
 extension AudioPlayerClient: DependencyKey {
   static var liveValue: Self {
     let audioEngine: AVAudioEngine
-    return Self(/*...*/)
+    return Self(/* ... */)
   }
 
   static let previewValue = Self(/* ... */)
@@ -172,7 +172,7 @@ instantly get a test failure, letting you know that there is more behavior that 
 
 ## Dependency macros
 
-The library ships with a macro that can help improve the ergonoics of struct-based dependency
+The library ships with a macro that can help improve the ergonomics of struct-based dependency
 interfaces. The macro ships as a separate library within this package because it depends on 
 SwiftSyntax, and that increases the build times by about 20 seconds. We did not want to force
 everyone using this library to incur that cost, so if you want to use the macro you will need to
@@ -213,7 +213,7 @@ information into methods with argument labels. This means you can invoke the `pl
 like so:
 
 ```swift
-try await player.play(url: URL(filePath: "…"))
+try await player.play(url: URL(filePath: "..."))
 ```
 
 And finally, the macro also generates a public initializer for you with all of the client's 

@@ -12,7 +12,7 @@ public struct Endpoint<Value> {
     self._override = override
   }
 
-  public mutating func set(
+  private mutating func set(
     expectedCount: Int = 1,
     exactCount: Bool = false,
     _ newValue: Value,
@@ -27,6 +27,36 @@ public struct Endpoint<Value> {
         line: line
       ),
       newValue
+    )
+  }
+
+  public mutating func callAsFunction(
+    count: Int,
+    _ newValue: Value,
+    file: StaticString = #filePath,
+    line: UInt = #line
+  ) {
+    self.set(
+      expectedCount: count,
+      exactCount: true,
+      newValue,
+      file: file,
+      line: line
+    )
+  }
+
+  public mutating func callAsFunction(
+    count: PartialRangeFrom<Int>,
+    _ newValue: Value,
+    file: StaticString = #filePath,
+    line: UInt = #line
+  ) {
+    self.set(
+      expectedCount: count.lowerBound,
+      exactCount: false,
+      newValue,
+      file: file,
+      line: line
     )
   }
 

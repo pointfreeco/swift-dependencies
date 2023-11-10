@@ -65,14 +65,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       return []
     }
 
-    let functionReturnTypeIsVoid = functionType.returnClause.type.as(IdentifierTypeSyntax.self)
-      .map { ["Void"].qualified("Swift").contains($0.name.text) }
-      ?? functionType.returnClause.type.as(TupleTypeSyntax.self)?.elements.isEmpty == true
-    let functionReturnTypeIsOptional = !functionReturnTypeIsVoid
-      && functionType.returnClause.type.is(OptionalTypeSyntax.self)
-      || functionType.returnClause.type.as(IdentifierTypeSyntax.self)
-      .map { ["Optional"].qualified("Swift").contains($0.name.text) }
-      ?? false
     var unimplementedDefault: ClosureExprSyntax
     if let initializer = binding.initializer {
       guard var closure = initializer.value.as(ClosureExprSyntax.self)
@@ -81,7 +73,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
         return []
       }
       if
-        !functionReturnTypeIsVoid,
+        !functionType.isVoid,
         closure.statements.count == 1,
         var statement = closure.statements.first,
         let expression = statement.item.as(ExprSyntax.self)
@@ -96,86 +88,27 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       }
       unimplementedDefault = closure
     } else {
-      unimplementedDefault = ClosureExprSyntax(
-        leftBrace: .leftBraceToken(trailingTrivia: .space),
-        signature: functionType.parameters.isEmpty
-        ? nil
-        : ClosureSignatureSyntax(
-          attributes: [],
-          parameterClause: .simpleInput(
-            ClosureShorthandParameterListSyntax(
-              (1...functionType.parameters.count).map { n in
-                ClosureShorthandParameterSyntax(
-                  name: .wildcardToken(),
-                  trailingComma: n < functionType.parameters.count
-                    ? .commaToken()
-                    : nil,
-                  trailingTrivia: .space
-                )
-              }
-            )
-          ),
-          inKeyword: .keyword(.in, trailingTrivia: .space)
-        ),
-        statements: []
-      )
+      unimplementedDefault = functionType.unimplementedDefault
       if functionType.effectSpecifiers?.throwsSpecifier != nil {
         unimplementedDefault.statements.append(
           """
           throw DependenciesMacros.Unimplemented("\(identifier)")
           """
         )
-      } else if functionReturnTypeIsVoid {
+      } else if functionType.isVoid {
         // Do nothing...
-      } else if functionReturnTypeIsOptional {
+      } else if functionType.isOptional {
         unimplementedDefault.statements.append(
           """
           return nil
           """
         )
       } else {
-        unimplementedDefault.statements.append(
-          CodeBlockItemSyntax(
-            item: CodeBlockItemSyntax.Item(
-              EditorPlaceholderExprSyntax(
-                placeholder: TokenSyntax(
-                  stringLiteral: "<#\(functionType.returnClause.type.trimmed)#>"
-                ),
-                trailingTrivia: .space
-              )
-            )
-          )
-        )
+        unimplementedDefault.append(placeholder: functionType.returnClause.type.trimmed.description)
         context.diagnose(
-          Diagnostic(
-            node: binding,
-            message: MacroExpansionErrorMessage(
-              """
-              Missing initial value for non-throwing '\(identifier)'
-              """
-            ),
-            fixIt: FixIt(
-              message: MacroExpansionFixItMessage(
-                """
-                Insert '= \(unimplementedDefault.description)'
-                """
-              ),
-              changes: [
-                .replace(
-                  oldNode: Syntax(binding),
-                  newNode: Syntax(
-                    binding.with(
-                      \.initializer, InitializerClauseSyntax(
-                        leadingTrivia: .space,
-                        equal: .equalToken(trailingTrivia: .space),
-                        value: unimplementedDefault
-                      )
-                    )
-                  )
-                )
-              ]
-            )
-          )
+          node: binding,
+          identifier: identifier,
+          unimplementedDefault: unimplementedDefault
         )
         return []
       }
@@ -229,7 +162,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       )
       return {
       expectation.fulfill()
-      \(raw: functionReturnTypeIsVoid ? "": "return ")\
+      \(raw: functionType.isVoid ? "": "return ")\
       \(raw: effectSpecifiers)newValue(\(raw: parameterList))
       }
       }

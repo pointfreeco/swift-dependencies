@@ -385,4 +385,48 @@ final class DependencyClientMacroTests: XCTestCase {
       """
     }
   }
+
+  func testUninitializedEndpointDiagnostic() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        var endpoint: @Sendable () -> Int
+      }
+      """
+    } diagnostics: {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        var endpoint: @Sendable () -> Int
+            ┬────────────────────────────
+            ╰─ 🛑 Missing initial value for non-throwing 'endpoint'
+               ✏️ Insert '= { <#Int#> }'
+      }
+      """
+    } fixes: {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        var endpoint: @Sendable () -> Int = { <#Int#> }
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+        @DependencyEndpoint
+        var endpoint: @Sendable () -> Int = { <#Int#> }
+
+        init(
+          endpoint: @Sendable @escaping () -> Int
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
 }

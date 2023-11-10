@@ -3,6 +3,7 @@ import SwiftOperators
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
+import SwiftSyntaxMacroExpansion
 
 public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
   public static func expansion<D: DeclGroupSyntax, M: DeclSyntaxProtocol, C: MacroExpansionContext>(
@@ -14,8 +15,27 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     guard
       let property = member.as(VariableDeclSyntax.self),
       !property.hasDependencyEndpointMacroAttached,
-      property.isClosure
+      property.isClosure,
+      let binding = property.bindings.first,
+      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed,
+      let functionType = property.asClosureType?.trimmed
     else {
+      return []
+    }
+    // NB: Ideally `@DependencyEndpoint` would handle this for us, but there's a compiler crash.
+    if
+      binding.initializer == nil,
+      functionType.effectSpecifiers?.throwsSpecifier == nil,
+      !functionType.isVoid,
+      !functionType.isOptional
+    {
+      var unimplementedDefault = functionType.unimplementedDefault
+      unimplementedDefault.append(placeholder: functionType.returnClause.type.trimmed.description)
+      context.diagnose(
+        node: binding,
+        identifier: identifier,
+        unimplementedDefault: unimplementedDefault
+      )
       return []
     }
     return [
@@ -30,7 +50,14 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
   ) throws -> [DeclSyntax] {
     guard let declaration = declaration.as(StructDeclSyntax.self)
     else {
-      // TODO: Diagnostic?
+      context.diagnose(
+        Diagnostic(
+          node: declaration,
+          message: MacroExpansionErrorMessage(
+            "'@DependencyClient' can only be applied to struct types"
+          )
+        )
+      )
       return []
     }
     var properties: [Property] = []
@@ -56,7 +83,6 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       accesses.insert(propertyAccess ?? .internal)
 
       guard let type = binding.typeAnnotation?.type ?? binding.initializer?.value.literalType
-      // TODO: Get type from literals
       else {
         // TODO: Diagnostic?
         return []
@@ -97,6 +123,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     }
     guard hasEndpoints else { return [] }
     let access = accesses.min().flatMap { $0.token?.with(\.trailingTrivia, .space) }
+    // TODO: Don't define initializers if any single endpoint is invalid
     return [properties, properties.filter { !$0.isEndpoint }].map {
       $0.isEmpty
         ? "\(access)init() {}"

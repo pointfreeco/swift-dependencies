@@ -483,6 +483,42 @@ final class DependencyEndpointMacroTests: XCTestCase {
     }
   }
 
+  func testMethodName_NoArguments() {
+    assertMacro(record: true) {
+      """
+      struct Client {
+        @DependencyEndpoint(method: "myEndpoint")
+        var endpoint: () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        var endpoint: () -> Void {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
+
+        func myEndpoint() -> Void {
+          self.endpoint()
+        }
+
+        private var _endpoint: () -> Void = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+        }
+      }
+      """
+    }
+  }
+
   func testNilMethodName() {
     assertMacro {
       """

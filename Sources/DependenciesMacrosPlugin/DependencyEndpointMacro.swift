@@ -131,7 +131,10 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
     var decls: [DeclSyntax] = []
 
-    if functionType.parameters.contains(where: { $0.secondName != nil }) {
+    if 
+      functionType.parameters.contains(where: { $0.secondName != nil })
+        || node.methodArgument != nil
+    {
       var attributes: [String] = binding.typeAnnotation.flatMap {
         $0.type.as(AttributedTypeSyntax.self)?.attributes.compactMap {
           guard case let .attribute(attribute) = $0 else { return nil }

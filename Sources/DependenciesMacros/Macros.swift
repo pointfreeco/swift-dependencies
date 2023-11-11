@@ -1,4 +1,4 @@
-/// Improves the ergnomics of dependency clients modeled on structs and closures, as detailed in
+/// Improves the ergonomics of dependency clients modeled on structs and closures, as detailed in
 /// our ["Designing Dependencies"][designing-dependencies] article.
 ///
 /// To use the macro, simply apply it to the struct interface of your dependency:
@@ -86,7 +86,3 @@ public macro DependencyClient() = #externalMacro(
 public macro DependencyEndpoint() = #externalMacro(
   module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
 )
-
-@DependencyClient struct Client {
-  var endpoint: () -> Int = { 42 }
-}

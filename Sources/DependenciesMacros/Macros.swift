@@ -38,7 +38,11 @@
 /// free.
 ///
 /// Second, the macro will generate methods with named arguments for any of your closure endpoints
-/// that have tuple argument labels. For example, if you change the above `APIClient` like so:
+/// that have tuple argument labels. This is done by applying the ``DependencyEndpoint(method:)``
+/// macro to each closure property, so read the documentation for that macro for more
+/// detailed information.
+///
+/// As an example, if you change the above `APIClient` like so:
 ///
 /// ```diff
 ///  @DependencyClient
@@ -88,7 +92,62 @@ public macro DependencyClient() = #externalMacro(
 /// ``DependencyClient``.
 ///
 /// If an "unimplemented" closure is invoked and not overridden, a test failure will be emitted, and
-/// the endpoint will throw an error if it is throwing.
+/// the endpoint will throw an error if it is a throwing closure.
+///
+/// If the closure this macro is applied to provides argument labels for the input tuple, then a
+/// corresponding method will also be generated with named labels. For example, this:
+///
+/// ```swift
+/// @DependencyEndpoint
+/// var fetchUser: (_ id: User.ID) async throws -> User
+/// ```
+///
+/// …expands to this:
+///
+/// ```swift
+/// var fetchUser: (_ id: User.ID) async throws -> User
+/// func fetchUser(id: User.ID) async throws -> User {
+///   try await self.fetchUser(id)
+/// }
+/// ```
+///
+/// Now you can use a clearer syntax at the call site of invoking this endpoint:
+///
+/// ```swift
+/// let client = APIClient()
+/// let user = try await client.fetchUser(id: 42)
+/// ```
+///
+/// You can also modify the name of the generated method, which can be handy for creating overloaded
+/// method names:
+///
+/// ```swift
+/// @DependencyEndpoint(method: "fetchUser")
+/// var fetchUserByID: (_ id: User.ID) async throws -> User
+/// @DependencyEndpoint(method: "fetchUser")
+/// var fetchUserBySubscriptionID: (_ subscriptionID: Subscription.ID) async throws -> User
+/// ```
+///
+/// This expands to:
+///
+/// ```swift
+/// var fetchUserByID: (_ id: User.ID) async throws -> User
+/// func fetchUser(id: User.ID) async throws -> User {
+///   self.fetchUserByID(id)
+/// }
+/// var fetchUserBySubscriptionID: (_ subscriptionID: Subscription.ID) async throws -> User
+/// func fetchUser(subscriptionID: Subscription.ID) async throws -> User {
+///   self.fetchUserBySubscriptionID(subscriptionID)
+/// }
+/// ```
+///
+/// Now you can have an overloaded version of `fetchUser` that takes different arguments:
+///
+/// ```swift
+/// let client = APIClient()
+/// let user1 = try await client.fetchUser(id: 42)
+/// let user2 = try await client.fetchUser(subscriptionID: "sub_deadbeef")
+/// ```
 @attached(accessor, names: named(init), named(get), named(set))
 @attached(peer, names: overloaded, prefixed(_))
 public macro DependencyEndpoint(method: String? = nil) = #externalMacro(

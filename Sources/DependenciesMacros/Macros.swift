@@ -14,7 +14,7 @@
 /// This adds a number of things to your dependency client types.
 ///
 /// First of all, it provides a default, "unimplemented" value for all of the closure endpoints that
-/// do not have one by applying the ``DependencyEndpoint()`` macro. This means you get a very
+/// do not have one by applying the ``DependencyEndpoint(method:)`` macro. This means you get a very
 /// lightweight way to create an instance of this interface:
 ///
 /// ```swift
@@ -154,9 +154,14 @@ public macro DependencyEndpoint(method: String? = nil) = #externalMacro(
   module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
 )
 
-/// Tells the ``DependencyClient()`` to not apply ``DependencyEndpoint()`` to a given closure
+/// Tells the ``DependencyClient()`` to not apply ``DependencyEndpoint(method:)`` to a given closure
 /// property.
 @attached(accessor, names: named(willSet))
 public macro DependencyIgnored() = #externalMacro(
   module: "DependenciesMacrosPlugin", type: "DependencyIgnoredMacro"
 )
+
+@DependencyClient
+struct APIClient {
+  var fetch: (Int) async throws -> Int
+}

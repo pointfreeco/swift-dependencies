@@ -161,7 +161,10 @@ public macro DependencyIgnored() = #externalMacro(
   module: "DependenciesMacrosPlugin", type: "DependencyIgnoredMacro"
 )
 
-@DependencyClient
-struct APIClient {
-  var fetch: (Int) async throws -> Int
+public struct Unimplemented: Error {
+  let endpoint: String
+
+  public init(_ endpoint: String) {
+    self.endpoint = endpoint
+  }
 }

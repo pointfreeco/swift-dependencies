@@ -91,7 +91,7 @@ public macro DependencyClient() = #externalMacro(
 /// the endpoint will throw an error if it is throwing.
 @attached(accessor, names: named(init), named(get), named(set))
 @attached(peer, names: overloaded, prefixed(_))
-public macro DependencyEndpoint() = #externalMacro(
+public macro DependencyEndpoint(method: String? = nil) = #externalMacro(
   module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
 )
 

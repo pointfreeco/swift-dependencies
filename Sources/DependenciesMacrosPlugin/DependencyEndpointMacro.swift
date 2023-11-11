@@ -11,6 +11,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     providingAccessorsOf declaration: D,
     in context: C
   ) throws -> [AccessorDeclSyntax] {
+
     guard
       let property = declaration.as(VariableDeclSyntax.self),
       let binding = property.bindings.first,
@@ -45,6 +46,21 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     providingPeersOf declaration: D,
     in context: C
   ) throws -> [DeclSyntax] {
+
+    let methodName: TokenSyntax?
+    if
+      let arguments = node.arguments?.as(LabeledExprListSyntax.self),
+      arguments.count == 1,
+      let argument = arguments.first,
+      argument.label?.text == "method",
+      let value = argument.expression.as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content,
+      value.text != "nil"
+    {
+      methodName = value
+    } else {
+      methodName = nil
+    }
+
     guard
       let property = declaration.as(VariableDeclSyntax.self),
       let binding = property.bindings.first,
@@ -154,7 +170,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       decls.append(
         """
         \(raw: attributes.map { "@\($0) " }.joined())\
-        \(access)func \(identifier)(\(parameters))\
+        \(access)func \(methodName ?? identifier)(\(parameters))\
         \(functionType.effectSpecifiers)\(functionType.returnClause) {
         \(raw: effectSpecifiers)self.\(identifier)(\(raw: appliedParameters))
         }

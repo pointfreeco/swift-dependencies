@@ -446,4 +446,76 @@ final class DependencyEndpointMacroTests: XCTestCase {
       """
     }
   }
+
+  func testMethodName() {
+    assertMacro {
+      """
+      struct Client {
+        @DependencyEndpoint(method: "myEndpoint")
+        var endpoint: (_ id: Int) -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        var endpoint: (_ id: Int) -> Void {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
+
+        func myEndpoint(id p0: Int) -> Void {
+          self.endpoint(p0)
+        }
+
+        private var _endpoint: (_ id: Int) -> Void = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+        }
+      }
+      """
+    }
+  }
+
+  func testNilMethodName() {
+    assertMacro {
+      """
+      struct Client {
+        @DependencyEndpoint(method: nil)
+        var endpoint: (_ id: Int) -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        var endpoint: (_ id: Int) -> Void {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
+
+        func endpoint(id p0: Int) -> Void {
+          self.endpoint(p0)
+        }
+
+        private var _endpoint: (_ id: Int) -> Void = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+        }
+      }
+      """
+    }
+  }
 }

@@ -519,11 +519,31 @@ final class DependencyEndpointMacroTests: XCTestCase {
     }
   }
 
-  func testNilMethodName() {
+  func testInvalidName() {
     assertMacro {
       """
       struct Client {
-        @DependencyEndpoint(method: nil)
+        @DependencyEndpoint(method: "~ok~")
+        var endpoint: (_ id: Int) -> Void
+      }
+      """
+    } diagnostics: {
+      """
+      struct Client {
+        @DependencyEndpoint(method: "~ok~")
+                                    ┬─────
+                                    ╰─ 🛑 'method' must be a valid identifier
+        var endpoint: (_ id: Int) -> Void
+      }
+      """
+    }
+  }
+
+  func testKeywordName() {
+    assertMacro {
+      """
+      struct Client {
+        @DependencyEndpoint(method: "`class`")
         var endpoint: (_ id: Int) -> Void
       }
       """
@@ -543,7 +563,7 @@ final class DependencyEndpointMacroTests: XCTestCase {
           }
         }
 
-        func endpoint(id p0: Int) -> Void {
+        func `class`(id p0: Int) -> Void {
           self.endpoint(p0)
         }
 
@@ -552,6 +572,26 @@ final class DependencyEndpointMacroTests: XCTestCase {
         }
       }
       """
+    }
+  }
+
+  func testNonStaticString() {
+    assertMacro {
+      #"""
+      struct Client {
+        @DependencyEndpoint(method: "\(Self.self)".lowercased())
+        var endpoint: (_ id: Int) -> Void
+      }
+      """#
+    } diagnostics: {
+      #"""
+      struct Client {
+        @DependencyEndpoint(method: "\(Self.self)".lowercased())
+                                    ┬──────────────────────────
+                                    ╰─ 🛑 'method' must be a static string literal
+        var endpoint: (_ id: Int) -> Void
+      }
+      """#
     }
   }
 }

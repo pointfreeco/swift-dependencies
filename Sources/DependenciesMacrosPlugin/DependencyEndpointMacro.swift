@@ -1,5 +1,6 @@
 import SwiftDiagnostics
 import SwiftOperators
+import SwiftParser
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
@@ -157,7 +158,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       decls.append(
         """
         \(raw: attributes.map { "@\($0) " }.joined())\
-        \(access)func \(node.methodArgument ?? identifier)(\(parameters))\
+        \(access)func \(try node.methodArgument ?? identifier)(\(parameters))\
         \(functionType.effectSpecifiers)\(functionType.returnClause) {
         \(raw: effectSpecifiers)self.\(identifier)(\(raw: appliedParameters))
         }
@@ -175,18 +176,54 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
 extension AttributeSyntax {
   var methodArgument: TokenSyntax? {
-    guard
-      let arguments = self.arguments?.as(LabeledExprListSyntax.self),
-      arguments.count == 1,
-      let argument = arguments.first,
-      argument.label?.text == "method",
-      let value = argument.expression
-        .as(StringLiteralExprSyntax.self)?.segments.first?
-        .as(StringSegmentSyntax.self)?.content,
-      value.text != "nil"
-    else {
-      return nil
+    get throws {
+      guard
+        let arguments = self.arguments?.as(LabeledExprListSyntax.self),
+        arguments.count == 1,
+        let argument = arguments.first,
+        argument.label?.text == "method"
+      else { return nil }
+
+      guard
+        let stringLiteral = argument.expression.as(StringLiteralExprSyntax.self),
+        stringLiteral.segments.count == 1,
+        let name = stringLiteral.segments.first?.as(StringSegmentSyntax.self)?.content.text
+      else {
+        throw DiagnosticsError(
+          diagnostics: [
+            Diagnostic(
+              node: argument.expression,
+              message: MacroExpansionErrorMessage(
+                """
+                'method' must be a static string literal
+                """
+              )
+            )
+          ]
+        )
+      }
+
+      let parsed = Parser.parse(source: name)
+      guard
+        parsed.statements.count == 1,
+        let item = parsed.statements.first?.item,
+        item.is(DeclReferenceExprSyntax.self)
+      else {
+        throw DiagnosticsError(
+          diagnostics: [
+            Diagnostic(
+              node: argument.expression,
+              message: MacroExpansionErrorMessage(
+                """
+                'method' must be a valid identifier
+                """
+              )
+            )
+          ]
+        )
+      }
+
+      return .identifier(name)
     }
-    return value
   }
 }

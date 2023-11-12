@@ -447,6 +447,44 @@ final class DependencyEndpointMacroTests: XCTestCase {
     }
   }
 
+  func testSendableMethod() {
+    assertMacro {
+      """
+      public struct Client {
+        @DependencyEndpoint
+        public var endpoint: @Sendable (_ id: Int) async -> Void
+      }
+      """
+    } expansion: {
+      """
+      public struct Client {
+        public var endpoint: @Sendable (_ id: Int) async -> Void {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
+
+        @Sendable
+          public func endpoint(id p0: Int) async -> Void {
+          await self.endpoint(p0)
+        }
+
+        private var _endpoint: @Sendable (_ id: Int) async -> Void = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+        }
+      }
+      """
+    }
+  }
+
+
   func testMethodName() {
     assertMacro {
       """

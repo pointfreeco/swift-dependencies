@@ -2,7 +2,7 @@ import DependenciesMacrosPlugin
 import MacroTesting
 import XCTest
 
-final class DependencyClientMacroTests: XCTestCase {
+final class DependencyClientMacroTests: BaseTestCase {
   override func invokeTest() {
     withMacroTesting(
       // isRecording: true,
@@ -473,7 +473,11 @@ final class DependencyClientMacroTests: XCTestCase {
       """
     } expansion: {
       """
-      struct Client {@available(iOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(macOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(tvOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(watchOS, deprecated: 9999, message: "Prefer calling the method overload of this property")
+      struct Client {@available(iOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
+        ) @available(macOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
+        ) @available(tvOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
+        ) @available(watchOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
+        )
         var fetch: (_ id: Int) throws -> String {
           @storageRestrictions(initializes: _fetch)
           init(initialValue) {
@@ -522,7 +526,11 @@ final class DependencyClientMacroTests: XCTestCase {
     } expansion: {
       """
       struct Client {
-        @available(iOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(macOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(tvOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(watchOS, deprecated: 9999, message: "Prefer calling the method overload of this property")
+        @available(iOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
+        ) @available(macOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
+        ) @available(tvOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
+        ) @available(watchOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
+        )
         var fetch: (_ id: Int) throws -> String {
           @storageRestrictions(initializes: _fetch)
           init(initialValue) {

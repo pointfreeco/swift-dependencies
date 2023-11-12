@@ -50,7 +50,8 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
           @available(\
           \(raw: $0), \
           deprecated: 9999, \
-          message: "Prefer calling the method overload of this property"\
+          message: "Use this property for overriding only. Prefer calling the method overload of \
+          this property."
           )
           """
         }

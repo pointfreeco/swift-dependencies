@@ -2,7 +2,7 @@ import DependenciesMacrosPlugin
 import MacroTesting
 import XCTest
 
-final class DependencyEndpointMacroTests: XCTestCase {
+final class DependencyEndpointMacroTests: BaseTestCase {
   override func invokeTest() {
     withMacroTesting(
       // isRecording: true,

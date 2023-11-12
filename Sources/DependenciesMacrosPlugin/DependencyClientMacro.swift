@@ -14,7 +14,6 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
   ) throws -> [AttributeSyntax] {
     guard
       let property = member.as(VariableDeclSyntax.self),
-      !property.hasDependencyMacroAttached,
       property.isClosure,
       let binding = property.bindings.first,
       let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed,
@@ -37,7 +36,10 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       )
       return []
     }
-    var attributes: [AttributeSyntax] = ["@DependencyEndpoint"]
+    var attributes: [AttributeSyntax] =
+      property.hasDependencyMacroAttached
+      ? []
+      : ["@DependencyEndpoint"]
     if try functionType.parameters.contains(where: { $0.secondName != nil })
       || node.methodArgument != nil
     {

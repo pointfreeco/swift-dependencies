@@ -467,14 +467,14 @@ final class DependencyClientMacroTests: XCTestCase {
     assertMacro([DependencyClientMacro.self, DependencyEndpointMacro.self]) {
       """
       @DependencyClient
-      struct Client: Sendable {
-        var fetch: @Sendable (_ id: Int) throws -> String
+      struct Client {
+        var fetch: (_ id: Int) throws -> String
       }
       """
     } expansion: {
       """
-      struct Client: Sendable {@available(iOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(macOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(tvOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(watchOS, deprecated: 9999, message: "Prefer calling the method overload of this property")
-        var fetch: @Sendable (_ id: Int) throws -> String {
+      struct Client {@available(iOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(macOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(tvOS, deprecated: 9999, message: "Prefer calling the method overload of this property") @available(watchOS, deprecated: 9999, message: "Prefer calling the method overload of this property")
+        var fetch: (_ id: Int) throws -> String {
           @storageRestrictions(initializes: _fetch)
           init(initialValue) {
             _fetch = initialValue
@@ -487,17 +487,59 @@ final class DependencyClientMacroTests: XCTestCase {
           }
         }
 
-        @Sendable func fetch(id p0: Int) throws -> String {
+        func fetch(id p0: Int) throws -> String {
           try self.fetch(p0)
         }
 
-        private var _fetch: @Sendable (_ id: Int) throws -> String = { _ in
+        private var _fetch: (_ id: Int) throws -> String = { _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'fetch'")
           throw DependenciesMacros.Unimplemented("fetch")
         }
 
         init(
-          fetch: @Sendable @escaping (_ id: Int) throws -> String
+          fetch: @escaping (_ id: Int) throws -> String
+        ) {
+          self.fetch = fetch
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
+
+  func testAvailability_NoMethod() {
+    assertMacro([DependencyClientMacro.self, DependencyEndpointMacro.self]) {
+      """
+      @DependencyClient
+      struct Client {
+        var fetch: (Int) throws -> String
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        var fetch: (Int) throws -> String {
+          @storageRestrictions(initializes: _fetch)
+          init(initialValue) {
+            _fetch = initialValue
+          }
+          get {
+            _fetch
+          }
+          set {
+            _fetch = newValue
+          }
+        }
+
+        private var _fetch: (Int) throws -> String = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'fetch'")
+          throw DependenciesMacros.Unimplemented("fetch")
+        }
+
+        init(
+          fetch: @escaping (Int) throws -> String
         ) {
           self.fetch = fetch
         }

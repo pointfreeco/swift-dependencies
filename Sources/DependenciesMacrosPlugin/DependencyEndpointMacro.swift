@@ -3,8 +3,8 @@ import SwiftOperators
 import SwiftParser
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftSyntaxMacros
 import SwiftSyntaxMacroExpansion
+import SwiftSyntaxMacros
 
 public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
   public static func expansion<D: DeclSyntaxProtocol, C: MacroExpansionContext>(
@@ -73,8 +73,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
         // TODO: Diagnose?
         return []
       }
-      if
-        !functionType.isVoid,
+      if !functionType.isVoid,
         closure.statements.count == 1,
         var statement = closure.statements.first,
         let expression = statement.item.as(ExprSyntax.self)
@@ -132,17 +131,17 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
     var decls: [DeclSyntax] = []
 
-    if try
-      functionType.parameters.contains(where: { $0.secondName != nil })
-        || node.methodArgument != nil
+    if try functionType.parameters.contains(where: { $0.secondName != nil })
+      || node.methodArgument != nil
     {
-      var attributes: [String] = binding.typeAnnotation.flatMap {
-        $0.type.as(AttributedTypeSyntax.self)?.attributes.compactMap {
-          guard case let .attribute(attribute) = $0 else { return nil }
-          return attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+      var attributes: [String] =
+        binding.typeAnnotation.flatMap {
+          $0.type.as(AttributedTypeSyntax.self)?.attributes.compactMap {
+            guard case let .attribute(attribute) = $0 else { return nil }
+            return attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+          }
         }
-      }
-      ?? []
+        ?? []
       if attributes.count > 1 {
         attributes.removeAll(where: { $0 == "Sendable" })
       }

@@ -484,7 +484,7 @@ final class DependencyEndpointMacroTests: XCTestCase {
   }
 
   func testMethodName_NoArguments() {
-    assertMacro(record: true) {
+    assertMacro {
       """
       struct Client {
         @DependencyEndpoint(method: "myEndpoint")

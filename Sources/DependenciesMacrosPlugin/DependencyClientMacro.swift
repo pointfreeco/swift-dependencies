@@ -2,8 +2,8 @@ import SwiftDiagnostics
 import SwiftOperators
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftSyntaxMacros
 import SwiftSyntaxMacroExpansion
+import SwiftSyntaxMacros
 
 public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
   public static func expansion<D: DeclGroupSyntax, M: DeclSyntaxProtocol, C: MacroExpansionContext>(
@@ -23,8 +23,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       return []
     }
     // NB: Ideally `@DependencyEndpoint` would handle this for us, but there's a compiler crash.
-    if
-      binding.initializer == nil,
+    if binding.initializer == nil,
       functionType.effectSpecifiers?.throwsSpecifier == nil,
       !functionType.isVoid,
       !functionType.isOptional
@@ -38,9 +37,24 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       )
       return []
     }
-    return [
-      "@DependencyEndpoint"
-    ]
+    var attributes: [AttributeSyntax] = ["@DependencyEndpoint"]
+    if try functionType.parameters.contains(where: { $0.secondName != nil })
+      || node.methodArgument != nil
+    {
+      attributes.append(
+        contentsOf: ["iOS", "macOS", "tvOS", "watchOS"].map {
+          """
+
+          @available(\
+          \(raw: $0), \
+          deprecated: 9999, \
+          message: "Prefer calling the method overload of this property"\
+          )
+          """
+        }
+      )
+    }
+    return attributes
   }
 
   public static func expansion<D: DeclGroupSyntax, C: MacroExpansionContext>(
@@ -205,8 +219,8 @@ extension VariableDeclSyntax {
   }
 }
 
-private extension ExprSyntax {
-  var literalType: TypeSyntax? {
+extension ExprSyntax {
+  fileprivate var literalType: TypeSyntax? {
     if self.is(BooleanLiteralExprSyntax.self) {
       return TypeSyntax(stringLiteral: "Swift.Bool")
     } else if self.is(FloatLiteralExprSyntax.self) {

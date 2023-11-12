@@ -51,7 +51,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
           \(raw: $0), \
           deprecated: 9999, \
           message: "This property has a method equivalent that is preferred for autocomplete via \
-          this deprecation. It is perfectly fine to use overriding and accessing via \
+          this deprecation. It is perfectly fine to use for overriding and accessing via \
           '@Dependency'."\
           )
           """

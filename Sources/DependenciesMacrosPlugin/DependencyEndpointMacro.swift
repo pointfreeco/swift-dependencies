@@ -132,7 +132,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
     var decls: [DeclSyntax] = []
 
-    if 
+    if try
       functionType.parameters.contains(where: { $0.secondName != nil })
         || node.methodArgument != nil
     {

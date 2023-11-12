@@ -161,6 +161,7 @@ public macro DependencyIgnored() = #externalMacro(
   module: "DependenciesMacrosPlugin", type: "DependencyIgnoredMacro"
 )
 
+/// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
 public struct Unimplemented: Error {
   let endpoint: String
 

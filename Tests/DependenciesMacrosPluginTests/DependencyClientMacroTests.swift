@@ -473,11 +473,7 @@ final class DependencyClientMacroTests: BaseTestCase {
       """
     } expansion: {
       """
-      struct Client {@available(iOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
-        ) @available(macOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
-        ) @available(tvOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
-        ) @available(watchOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
-        )
+      struct Client {@available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use overriding and accessing via '@Dependency'.")
         var fetch: (_ id: Int) throws -> String {
           @storageRestrictions(initializes: _fetch)
           init(initialValue) {
@@ -526,11 +522,7 @@ final class DependencyClientMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Client {
-        @available(iOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
-        ) @available(macOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
-        ) @available(tvOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
-        ) @available(watchOS, deprecated: 9999, message: "Use this property for overriding only. Prefer calling the method overload of this property."
-        )
+        @available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use overriding and accessing via '@Dependency'.")
         var fetch: (_ id: Int) throws -> String {
           @storageRestrictions(initializes: _fetch)
           init(initialValue) {

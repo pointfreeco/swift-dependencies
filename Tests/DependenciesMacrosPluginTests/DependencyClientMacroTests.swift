@@ -476,7 +476,6 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
-
   func testAvailability_WithDependencyEndpoint() {
     assertMacro([DependencyClientMacro.self, DependencyEndpointMacro.self]) {
       """

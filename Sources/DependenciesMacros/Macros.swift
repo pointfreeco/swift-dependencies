@@ -82,9 +82,10 @@
 /// [separating-interface-implementation]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/livepreviewtest#Separating-interface-and-implementation
 @attached(member, names: named(init))
 @attached(memberAttribute)
-public macro DependencyClient() = #externalMacro(
-  module: "DependenciesMacrosPlugin", type: "DependencyClientMacro"
-)
+public macro DependencyClient() =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin", type: "DependencyClientMacro"
+  )
 
 /// Provides a default, "unimplemented" value to a closure property.
 ///
@@ -150,9 +151,10 @@ public macro DependencyClient() = #externalMacro(
 /// ```
 @attached(accessor, names: named(init), named(get), named(set))
 @attached(peer, names: arbitrary)
-public macro DependencyEndpoint(method: String = "") = #externalMacro(
-  module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
-)
+public macro DependencyEndpoint(method: String = "") =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
+  )
 
 /// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
 public struct Unimplemented: Error {

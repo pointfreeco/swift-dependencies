@@ -484,7 +484,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     }
   }
 
-
   func testMethodName() {
     assertMacro {
       """

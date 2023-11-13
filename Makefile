@@ -67,7 +67,7 @@ format:
 		--ignore-unparsable-files \
 		--in-place \
 		--recursive \
-		./Package.swift ./Sources ./Tests
+		./Package.swift ./Sources ./Tests/DependenciesTests
 
 .PHONY: test test-swift test-linux build-for-library-evolution format
 

@@ -197,12 +197,13 @@ for free with no additional work. This allows you to simplify the `testValue` of
 
 ```diff
  extension AudioPlayerClient: TestDependencyKey {
-   static let testValue = Self(
+-  static let testValue = Self(
 -    loop: unimplemented("AudioPlayerClient.loop"),
 -    play: unimplemented("AudioPlayerClient.play"),
 -    setVolume: unimplemented("AudioPlayerClient.setVolume"),
 -    stop: unimplemented("AudioPlayerClient.stop")
-   )
+-  )
++  static let testValue = Self()
  }
 ```
 

@@ -208,7 +208,7 @@ for free with no additional work. This allows you to simplify the `testValue` of
 
 This behaves the exact same as before, but now all of the code is generated for you.
 
-Further, when you provide argument labels the client's closure endpoints, the macro turns that 
+Further, when you provide argument labels to the client's closure endpoints, the macro turns that 
 information into methods with argument labels. This means you can invoke the `play` endpoint
 like so:
 

@@ -1,9 +1,9 @@
 CONFIG = debug
-PLATFORM_IOS = iOS Simulator,id=$(call udid_for,iPhone,iOS-16)
+PLATFORM_IOS = iOS Simulator,id=$(call udid_for,iOS 17,iPhone \d\+ Pro [^M])
 PLATFORM_MACOS = macOS
 PLATFORM_MAC_CATALYST = macOS,variant=Mac Catalyst
-PLATFORM_TVOS = tvOS Simulator,id=$(call udid_for,TV,tvOS-16)
-PLATFORM_WATCHOS = watchOS Simulator,id=$(call udid_for,Watch,watchOS-9)
+PLATFORM_TVOS = tvOS Simulator,id=$(call udid_for,tvOS 17,TV)
+PLATFORM_WATCHOS = watchOS Simulator,id=$(call udid_for,watchOS 10,Watch)
 
 default: test
 
@@ -31,7 +31,7 @@ test-linux:
 		--rm \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.7-focal \
+		swift:5.9-focal \
 		bash -c 'apt-get update && apt-get -y install make && make test-swift'
 
 build-for-static-stdlib:
@@ -54,12 +54,12 @@ build-for-static-stdlib-docker:
 	@docker run \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.8-focal \
+		swift:5.9-focal \
 		bash -c "swift build -c debug --static-swift-stdlib"
 	@docker run \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.8-focal \
+		swift:5.9-focal \
 		bash -c "swift build -c release --static-swift-stdlib"
 
 format:
@@ -72,5 +72,5 @@ format:
 .PHONY: test test-swift test-linux build-for-library-evolution format
 
 define udid_for
-$(shell xcrun simctl list --json devices available $(1) | jq -r '.devices | to_entries | map(select(.value | add)) | sort_by(.key) | .[] | select(.key | contains("$(2)")) | .value | last.udid')
+$(shell xcrun simctl list devices available '$(1)' | grep '$(2)' | sort -r | head -1 | awk -F '[()]' '{ print $$(NF-3) }')
 endef

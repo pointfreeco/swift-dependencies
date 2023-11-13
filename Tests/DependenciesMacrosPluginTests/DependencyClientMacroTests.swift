@@ -430,39 +430,6 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
-  func testIgnored() {
-    assertMacro {
-      """
-      @DependencyClient
-      struct Client: Sendable {
-        var endpoint: @Sendable () -> Void
-        @DependencyIgnored
-        var nonEndpoint: @Sendable () -> Void
-      }
-      """
-    } expansion: {
-      """
-      struct Client: Sendable {
-        @DependencyEndpoint
-        var endpoint: @Sendable () -> Void
-        @DependencyIgnored
-        var nonEndpoint: @Sendable () -> Void
-
-        init(
-          endpoint: @Sendable @escaping () -> Void,
-          nonEndpoint: @Sendable @escaping () -> Void
-        ) {
-          self.endpoint = endpoint
-          self.nonEndpoint = nonEndpoint
-        }
-
-        init() {
-        }
-      }
-      """
-    }
-  }
-
   func testAvailability() {
     assertMacro([DependencyClientMacro.self, DependencyEndpointMacro.self]) {
       """

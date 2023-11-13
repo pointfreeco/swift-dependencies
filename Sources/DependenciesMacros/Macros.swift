@@ -154,13 +154,6 @@ public macro DependencyEndpoint(method: String = "") = #externalMacro(
   module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
 )
 
-/// Tells the ``DependencyClient()`` to not apply ``DependencyEndpoint(method:)`` to a given closure
-/// property.
-@attached(accessor, names: named(willSet))
-public macro DependencyIgnored() = #externalMacro(
-  module: "DependenciesMacrosPlugin", type: "DependencyIgnoredMacro"
-)
-
 /// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
 public struct Unimplemented: Error {
   let endpoint: String

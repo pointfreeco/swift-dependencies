@@ -37,7 +37,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       return []
     }
     var attributes: [AttributeSyntax] =
-      property.hasDependencyMacroAttached
+      property.hasDependencyEndpointMacroAttached
       ? []
       : ["@DependencyEndpoint"]
     if try functionType.parameters.contains(where: { $0.secondName != nil })
@@ -199,18 +199,6 @@ private struct Property {
 }
 
 extension VariableDeclSyntax {
-  fileprivate var hasDependencyMacroAttached: Bool {
-    self.attributes.contains {
-      guard
-        case let .attribute(attribute) = $0,
-        let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
-        ["DependencyEndpoint", "DependencyIgnored"].qualified("DependenciesMacros")
-          .contains(attributeName)
-      else { return false }
-      return true
-    }
-  }
-
   fileprivate var hasDependencyEndpointMacroAttached: Bool {
     self.attributes.contains {
       guard

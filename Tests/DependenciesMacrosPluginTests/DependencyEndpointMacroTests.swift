@@ -91,11 +91,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         @DependencyEndpoint
         var endpoint: () -> Bool
             ┬───────────────────
-            ╰─ 🛑 Missing initial value for non-throwing 'endpoint'
+            ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
                ✏️ Insert '= { <#Bool#> }'
       }
       """
-    } fixes: {
+    }fixes: {
       """
       struct Client {
         @DependencyEndpoint
@@ -141,11 +141,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         @DependencyEndpoint
         var endpoint: (Int, Bool, String) -> Bool
             ┬────────────────────────────────────
-            ╰─ 🛑 Missing initial value for non-throwing 'endpoint'
+            ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
                ✏️ Insert '= { _, _, _ in <#Bool#> }'
       }
       """
-    } fixes: {
+    }fixes: {
       """
       struct Client {
         @DependencyEndpoint

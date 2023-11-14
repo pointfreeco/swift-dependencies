@@ -94,7 +94,7 @@ extension MacroExpansionContext {
         node: node,
         message: MacroExpansionErrorMessage(
           """
-          Missing initial value for non-throwing '\(identifier)'
+          Default value required for non-throwing closure '\(identifier)'
           """
         ),
         fixIt: FixIt(

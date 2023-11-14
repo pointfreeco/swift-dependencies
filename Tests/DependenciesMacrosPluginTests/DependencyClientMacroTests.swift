@@ -400,11 +400,11 @@ final class DependencyClientMacroTests: BaseTestCase {
       struct Client: Sendable {
         var endpoint: @Sendable () -> Int
             ┬────────────────────────────
-            ╰─ 🛑 Missing initial value for non-throwing 'endpoint'
+            ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
                ✏️ Insert '= { <#Int#> }'
       }
       """
-    } fixes: {
+    }fixes: {
       """
       @DependencyClient
       struct Client: Sendable {

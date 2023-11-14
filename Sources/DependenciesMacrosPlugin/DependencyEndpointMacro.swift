@@ -15,7 +15,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     guard
       let property = declaration.as(VariableDeclSyntax.self),
       let binding = property.bindings.first,
-      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed,
+      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription.trimmedBackticks,
       property.isClosure
     else {
       return []
@@ -23,19 +23,19 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
     return [
       """
-      @storageRestrictions(initializes: _\(identifier))
+      @storageRestrictions(initializes: _\(raw: identifier))
       init(initialValue) {
-      _\(identifier) = initialValue
+      _\(raw: identifier) = initialValue
       }
       """,
       """
       get {
-      _\(identifier)
+      _\(raw: identifier)
       }
       """,
       """
       set {
-      _\(identifier) = newValue
+      _\(raw: identifier) = newValue
       }
       """,
     ]
@@ -65,6 +65,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       )
       return []
     }
+    let unescapedIdentifier = identifier.trimmedDescription.trimmedBackticks
 
     var unimplementedDefault: ClosureExprSyntax
     if let initializer = binding.initializer {
@@ -92,7 +93,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       if functionType.effectSpecifiers?.throwsSpecifier != nil {
         unimplementedDefault.statements.append(
           """
-          throw DependenciesMacros.Unimplemented("\(identifier)")
+          throw DependenciesMacros.Unimplemented("\(raw: unescapedIdentifier)")
           """
         )
       } else if functionType.isVoid {
@@ -115,7 +116,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     }
     unimplementedDefault.statements.insert(
       """
-      XCTestDynamicOverlay.XCTFail("Unimplemented: '\(identifier)'")
+      XCTestDynamicOverlay.XCTFail("Unimplemented: '\(raw: unescapedIdentifier)'")
       """,
       at: unimplementedDefault.statements.startIndex
     )
@@ -167,7 +168,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
     return decls + [
       """
-      private var _\(identifier): \(raw: type) = \(unimplementedDefault)
+      private var _\(raw: unescapedIdentifier): \(raw: type) = \(unimplementedDefault)
       """
     ]
   }
@@ -224,5 +225,18 @@ extension AttributeSyntax {
 
       return .identifier(name)
     }
+  }
+}
+
+extension String {
+  var trimmedBackticks: String {
+    var result = self[...]
+    if result.first == "`" {
+      result = result.dropFirst()
+    }
+    if result.last == "`" {
+      result = result.dropLast()
+    }
+    return String(result)
   }
 }

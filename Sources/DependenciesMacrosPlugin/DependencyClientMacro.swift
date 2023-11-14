@@ -102,7 +102,41 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
 
       guard let type = binding.typeAnnotation?.type ?? binding.initializer?.value.literalType
       else {
-        // TODO: Diagnostic?
+        context.diagnose(
+          Diagnostic(
+            node: binding,
+            message: MacroExpansionErrorMessage(
+              """
+              '@DependencyClient' requires '\(identifier)' to have a type annotation in order to \
+              generate a memberwise initializer
+              """
+            ),
+            fixIt: FixIt(
+              message: MacroExpansionFixItMessage(
+                """
+                Insert ': <#Type#>'
+                """
+              ),
+              changes: [
+                .replace(
+                  oldNode: Syntax(binding),
+                  newNode: Syntax(
+                    binding
+                      .with(\.pattern.trailingTrivia, "")
+                      .with(
+                        \.typeAnnotation,
+                        TypeAnnotationSyntax(
+                          colon: .colonToken(trailingTrivia: .space),
+                          type: IdentifierTypeSyntax(name: "<#Type#>"),
+                          trailingTrivia: .space
+                        )
+                      )
+                  )
+                )
+              ]
+            )
+          )
+        )
         return []
       }
       if var attributedTypeSyntax = type.as(AttributedTypeSyntax.self),
@@ -214,11 +248,13 @@ extension VariableDeclSyntax {
 extension ExprSyntax {
   fileprivate var literalType: TypeSyntax? {
     if self.is(BooleanLiteralExprSyntax.self) {
-      return TypeSyntax(stringLiteral: "Swift.Bool")
+      return "Swift.Bool"
     } else if self.is(FloatLiteralExprSyntax.self) {
-      return TypeSyntax(stringLiteral: "Swift.Double")
+      return "Swift.Double"
     } else if self.is(IntegerLiteralExprSyntax.self) {
-      return TypeSyntax(stringLiteral: "Swift.Int")
+      return "Swift.Int"
+    } else if self.is(StringLiteralExprSyntax.self) {
+      return "Swift.String"
     } else {
       return nil
     }

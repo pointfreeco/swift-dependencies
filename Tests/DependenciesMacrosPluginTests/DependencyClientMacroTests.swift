@@ -72,7 +72,7 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
-  func testLiteral() {
+  func testBooleanLiteral() {
     assertMacro {
       """
       @DependencyClient
@@ -98,6 +98,108 @@ final class DependencyClientMacroTests: BaseTestCase {
 
         init(
           config: Swift.Bool = false
+        ) {
+          self.config = config
+        }
+      }
+      """
+    }
+  }
+
+  func testFloatLiteral() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var config = 1.0
+        var endpoint: () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        var config = 1.0
+        @DependencyEndpoint
+        var endpoint: () -> Void
+
+        init(
+          config: Swift.Double = 1.0,
+          endpoint: @escaping () -> Void
+        ) {
+          self.config = config
+          self.endpoint = endpoint
+        }
+
+        init(
+          config: Swift.Double = 1.0
+        ) {
+          self.config = config
+        }
+      }
+      """
+    }
+  }
+
+  func testIntegerLiteral() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var config = 1
+        var endpoint: () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        var config = 1
+        @DependencyEndpoint
+        var endpoint: () -> Void
+
+        init(
+          config: Swift.Int = 1,
+          endpoint: @escaping () -> Void
+        ) {
+          self.config = config
+          self.endpoint = endpoint
+        }
+
+        init(
+          config: Swift.Int = 1
+        ) {
+          self.config = config
+        }
+      }
+      """
+    }
+  }
+
+  func testStringLiteral() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var config = "Blob"
+        var endpoint: () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        var config = "Blob"
+        @DependencyEndpoint
+        var endpoint: () -> Void
+
+        init(
+          config: Swift.String = "Blob",
+          endpoint: @escaping () -> Void
+        ) {
+          self.config = config
+          self.endpoint = endpoint
+        }
+
+        init(
+          config: Swift.String = "Blob"
         ) {
           self.config = config
         }
@@ -561,6 +663,59 @@ final class DependencyClientMacroTests: BaseTestCase {
 
         init() {
         }
+      }
+      """
+    }
+  }
+
+  func testMissingTypeAnnotation() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint: () -> Void
+        var value = Value()
+      }
+      """
+    } diagnostics: {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint: () -> Void
+        var value = Value()
+            ┬──────────────
+            ╰─ 🛑 '@DependencyClient' requires 'value' to have a type annotation in order to generate a memberwise initializer
+               ✏️ Insert ': <#Type#>'
+      }
+      """
+    } fixes: {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint: () -> Void
+        var value: <#Type#> = Value()
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var endpoint: () -> Void
+        var value: <#Type#> 
+
+        init(
+          endpoint: @escaping () -> Void,
+          value: <#Type
+        ) {
+        self.endpoint = endpoint
+        self.value = value
+        }
+
+        init(
+          value: <#Type
+        ) {
+        self.value = value
+        }= Value()
       }
       """
     }

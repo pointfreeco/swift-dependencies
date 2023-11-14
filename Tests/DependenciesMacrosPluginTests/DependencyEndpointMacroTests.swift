@@ -631,4 +631,66 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """#
     }
   }
+
+  func testEscapedIdentifier() {
+    assertMacro {
+      """
+      @DependencyEndpoint
+      var `return`: () throws -> Int
+      """
+    } expansion: {
+      """
+      var `return`: () throws -> Int {
+          @storageRestrictions(initializes: _return)
+          init(initialValue) {
+              _return = initialValue
+          }
+          get {
+              _return
+          }
+          set {
+              _return = newValue
+          }
+      }
+
+      private var _return: () throws -> Int = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'return'")
+          throw DependenciesMacros.Unimplemented("return")
+      }
+      """
+    }
+  }
+
+  func testEscapedIdentifier_ArgumentLabels() {
+    assertMacro {
+      """
+      @DependencyEndpoint
+      var `return`: (_ id: Int) throws -> Int
+      """
+    } expansion: {
+      """
+      var `return`: (_ id: Int) throws -> Int {
+          @storageRestrictions(initializes: _return)
+          init(initialValue) {
+              _return = initialValue
+          }
+          get {
+              _return
+          }
+          set {
+              _return = newValue
+          }
+      }
+
+      func `return`(id p0: Int) throws -> Int {
+          try self.`return`(p0)
+      }
+
+      private var _return: (_ id: Int) throws -> Int = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'return'")
+          throw DependenciesMacros.Unimplemented("return")
+      }
+      """
+    }
+  }
 }

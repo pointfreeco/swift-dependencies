@@ -12,14 +12,16 @@ your dependencies in a way that maximizes their flexibility in tests and other s
 > Tip: We have an [entire series of episodes][designing-deps] dedicated to the topic of dependencies
 > and how to best design and construct them.
 
+## Protocol-based dependencies
+
 The most popular way to design dependencies in Swift is to use protocols. For example, if your
 feature needs to interact with an audio player, you might design a protocol with methods for
 playing, stopping, and more:
 
 ```swift
 protocol AudioPlayer {
-  func loop(_ url: URL) async throws
-  func play(_ url: URL) async throws
+  func loop(url: URL) async throws
+  func play(url: URL) async throws
   func setVolume(_ volume: Float) async
   func stop() async
 }
@@ -39,7 +41,7 @@ struct MockAudioPlayer: AudioPlayer {
   // ...
 }
 struct UnimplementedAudioPlayer: AudioPlayer {
-  func loop(_ url: URL) async throws {
+  func loop(url: URL) async throws {
     XCTFail("AudioPlayer.loop is unimplemented")
   }
   // ...
@@ -62,6 +64,8 @@ private enum AudioPlayerKey: DependencyKey {
 
 This style of dependencies works just fine, and if it is what you are most comfortable with then
 there is no need to change.
+
+## Struct-based dependencies
 
 However, there is a small change one can make to this dependency to unlock even more power. Rather
 than designing the audio player as a protocol, we can use a struct with closure properties to
@@ -102,7 +106,7 @@ define the live, preview and test values directly in the conformance, all at onc
 extension AudioPlayerClient: DependencyKey {
   static var liveValue: Self {
     let audioEngine: AVAudioEngine
-    return Self(/*...*/)
+    return Self(/* ... */)
   }
 
   static let previewValue = Self(/* ... */)
@@ -165,6 +169,59 @@ func testFeature() {
 If this test passes you can be guaranteed that no other endpoints of the dependency are used in the
 user flow you are testing. If someday in the future more of the dependency is used, you will
 instantly get a test failure, letting you know that there is more behavior that you must assert on.
+
+## Dependency macros
+
+The library ships with a macro that can help improve the ergonomics of struct-based dependency
+interfaces. The macro ships as a separate library within this package because it depends on 
+SwiftSyntax, and that increases the build times by about 20 seconds. We did not want to force
+everyone using this library to incur that cost, so if you want to use the macro you will need to
+explicitly add the `DependenciesMacros` product to your targets.
+
+Once that is done you can apply the `@DependencyClient` macro directly to your dependency struct:
+
+```swift
+@DependencyClient
+struct AudioPlayerClient {
+  var loop: (_ url: URL) async throws -> Void
+  var play: (_ url: URL) async throws -> Void
+  var setVolume: (_ volume: Float) async -> Void
+  var stop: () async -> Void
+}
+```
+
+This does a few things for you. First, it automatically provides a default for each endpoint that
+simply throws an error and triggers an XCTest failure. This means you get an "unimplemented" client
+for free with no additional work. This allows you to simplify the `testValue` of your 
+``TestDependencyKey`` conformance like so:
+
+```diff
+ extension AudioPlayerClient: TestDependencyKey {
+-  static let testValue = Self(
+-    loop: unimplemented("AudioPlayerClient.loop"),
+-    play: unimplemented("AudioPlayerClient.play"),
+-    setVolume: unimplemented("AudioPlayerClient.setVolume"),
+-    stop: unimplemented("AudioPlayerClient.stop")
+-  )
++  static let testValue = Self()
+ }
+```
+
+This behaves the exact same as before, but now all of the code is generated for you.
+
+Further, when you provide argument labels to the client's closure endpoints, the macro turns that 
+information into methods with argument labels. This means you can invoke the `play` endpoint
+like so:
+
+```swift
+try await player.play(url: URL(filePath: "..."))
+```
+
+And finally, the macro also generates a public initializer for you with all of the client's 
+endpoints. One typically needs to maintain this initializer when separate the interface of the 
+dependency from the implementation (see 
+<doc:LivePreviewTest#Separating-interface-and-implementation> for more information). But now there
+is no need to maintain that code as it is automatically provided for you by the macro.
 
 [designing-deps]: https://www.pointfree.co/collections/dependencies
 [xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay

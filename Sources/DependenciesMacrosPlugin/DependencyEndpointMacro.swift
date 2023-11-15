@@ -15,7 +15,8 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     guard
       let property = declaration.as(VariableDeclSyntax.self),
       let binding = property.bindings.first,
-      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription.trimmedBackticks,
+      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier
+        .trimmedDescription.trimmedBackticks,
       property.isClosure
     else {
       return []

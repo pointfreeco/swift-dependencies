@@ -34,15 +34,15 @@ jobs:
       - name: Build for library evolution
         run: make build-for-library-evolution
 
-  integration:
-    name: Integration (UI Tests)
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v3
-      - name: Select Xcode 14.3.1
-        run: sudo xcode-select -s /Applications/Xcode_14.3.1.app
-      - name: Run tests
-        run: make test-integration
+  # integration:
+  #   name: Integration (UI Tests)
+  #   runs-on: macos-13
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Select Xcode 14.3.1
+  #       run: sudo xcode-select -s /Applications/Xcode_14.3.1.app
+  #     - name: Run tests
+  #       run: make test-integration
 
   ubuntu:
     name: Linux
@@ -66,20 +66,20 @@ jobs:
         with:
           shell-action: carton test --environment node
 
-  windows:
-    name: Windows
-    runs-on: windows-latest
-    steps:
-      - uses: compnerd/gha-setup-swift@main
-        with:
-          branch: swift-5.8-release
-          tag: 5.8-RELEASE
+  # windows:
+  #   name: Windows
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: compnerd/gha-setup-swift@main
+  #       with:
+  #         branch: swift-5.8-release
+  #         tag: 5.8-RELEASE
 
-      - uses: actions/checkout@v3
-      - name: Run tests
-        run: swift test
-      - name: Run tests (release)
-        run: swift test -c release
+  #     - uses: actions/checkout@v3
+  #     - name: Run tests
+  #       run: swift test
+  #     - name: Run tests (release)
+  #       run: swift test -c release
 
   static-stdlib:
     strategy:

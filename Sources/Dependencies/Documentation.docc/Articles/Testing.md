@@ -130,7 +130,10 @@ your code base.
 However, if you aren't in a position to modularize your code base right now, there is a quick
 fix. Our [XCTest Dynamic Overlay][xctest-dynamic-overlay-gh] library, which is transitively included
 with this library, comes with a property you can check to see if tests are currently running. If
-they are, you can omit the entire entry point of your application:
+they are, you can omit the entire entry point of your application.
+
+For example, for a pure SwiftUI entry point you can do the following to keep your application from
+running during tests:
 
 ```swift
 import SwiftUI
@@ -145,6 +148,18 @@ struct MyApp: App {
       }
     }
   }
+}
+```
+
+And in an `UIApplicationDelegate`-based entry point you can do the following:
+
+```swift
+func application(
+_ application: UIApplication,
+didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+) -> Bool {
+  guard !_XCTIsTesting else { return true }
+  // ...
 }
 ```
 
@@ -202,5 +217,19 @@ see test a failure for accessing a ``TestDependencyKey/testValue`` of a dependen
 test is not even using. If running that test in isolation passes, then you probably have some
 other test accidentally leaking its code into your test. You need to check every other test in the 
 suite to see if any of them use escaping closures causing the leakage.
+
+### Static @Dependency
+
+You should never use the `@Dependency` property wrapper as a static variable:
+
+```swift
+class Model {
+  @Dependency(\.date) static var date
+  // ...
+}
+```
+
+You will not be able to override this dependency in the normal fashion. In general there is no need
+to ever have a static dependency, and so you should avoid this pattern.
 
 [xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay

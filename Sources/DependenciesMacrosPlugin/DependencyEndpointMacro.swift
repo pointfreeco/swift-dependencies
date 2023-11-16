@@ -21,7 +21,9 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     else {
       return []
     }
-
+    if let initializer = binding.initializer {
+      try initializer.diagnose(node)
+    }
     return [
       """
       @storageRestrictions(initializes: _\(raw: identifier))
@@ -72,7 +74,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     if let initializer = binding.initializer {
       guard var closure = initializer.value.as(ClosureExprSyntax.self)
       else {
-        // TODO: Diagnose?
         return []
       }
       if !functionType.isVoid,
@@ -83,7 +84,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
         statement.item = CodeBlockItemSyntax.Item(
           ReturnStmtSyntax(
             returnKeyword: .keyword(.return, trailingTrivia: .space),
-            expression: expression
+            expression: expression.trimmed
           )
         )
         closure.statements = closure.statements.with(\.[closure.statements.startIndex], statement)
@@ -121,7 +122,11 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       """,
       at: unimplementedDefault.statements.startIndex
     )
-
+    for index in unimplementedDefault.statements.indices {
+      unimplementedDefault.statements[index] = unimplementedDefault.statements[index]
+        .trimmed
+        .with(\.leadingTrivia, .newline)
+    }
     var effectSpecifiers = ""
     if functionType.effectSpecifiers?.throwsSpecifier != nil {
       effectSpecifiers.append("try ")

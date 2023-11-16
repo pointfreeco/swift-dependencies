@@ -95,7 +95,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
                ✏️ Insert '= { <#Bool#> }'
       }
       """
-    }fixes: {
+    } fixes: {
       """
       struct Client {
         @DependencyEndpoint
@@ -689,6 +689,68 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       private var _return: (_ id: Int) throws -> Int = { _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'return'")
           throw DependenciesMacros.Unimplemented("return")
+      }
+      """
+    }
+  }
+
+  func testNonClosureDefault() {
+    assertMacro {
+      """
+      struct Foo {
+        @DependencyEndpoint
+        var bar: () -> Int = unimplemented()
+      }
+      """
+    } diagnostics: {
+      """
+      struct Foo {
+        @DependencyEndpoint
+        var bar: () -> Int = unimplemented()
+                             ┬──────────────
+                             ├─ 🛑 '@DependencyEndpoint' default must be closure literal
+                             ╰─ ⚠️ Do not use 'unimplemented' with '@DependencyEndpoint'; it is a replacement and implements the same runtime functionality as 'unimplemented' at compile time
+      }
+      """
+    }
+  }
+
+  func testMultilineClosure() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var doAThing: (_ value: Int) -> String = { _ in
+          "Hello, world"
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var doAThing: (_ value: Int) -> String = { _ in
+          "Hello, world"
+        } {
+          @storageRestrictions(initializes: _doAThing)
+          init(initialValue) {
+            _doAThing = initialValue
+          }
+          get {
+            _doAThing
+          }
+          set {
+            _doAThing = newValue
+          }
+        }
+
+        public func doAThing(value p0: Int) -> String {
+          self.doAThing(p0)
+        }
+
+        private var _doAThing: (_ value: Int) -> String = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
+          return "Hello, world"
+          }
       }
       """
     }

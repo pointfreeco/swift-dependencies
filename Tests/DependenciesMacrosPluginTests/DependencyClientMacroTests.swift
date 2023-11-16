@@ -506,7 +506,7 @@ final class DependencyClientMacroTests: BaseTestCase {
                ✏️ Insert '= { <#Int#> }'
       }
       """
-    }fixes: {
+    } fixes: {
       """
       @DependencyClient
       struct Client: Sendable {
@@ -720,4 +720,26 @@ final class DependencyClientMacroTests: BaseTestCase {
       """
     }
   }
+
+  func testNonClosureDefault() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Foo {
+        var bar: () -> Int = unimplemented()
+      }
+      """
+    } diagnostics: {
+      """
+      @DependencyClient
+      struct Foo {
+        var bar: () -> Int = unimplemented()
+                             ┬──────────────
+                             ├─ 🛑 '@DependencyClient' default must be closure literal
+                             ╰─ ⚠️ Do not use 'unimplemented' with '@DependencyClient'; it is a replacement and implements the same runtime functionality as 'unimplemented' at compile time
+      }
+      """
+    }
+  }
 }
+

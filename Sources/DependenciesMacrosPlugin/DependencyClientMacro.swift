@@ -21,9 +21,10 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     else {
       return []
     }
-    // NB: Ideally `@DependencyEndpoint` would handle this for us, but there's a compiler crash.
-    if binding.initializer == nil,
-      functionType.effectSpecifiers?.throwsSpecifier == nil,
+    // NB: Ideally `@DependencyEndpoint` would handle this for us, but there are compiler crashes
+    if let initializer = binding.initializer {
+      try initializer.diagnose(node)
+    } else if functionType.effectSpecifiers?.throwsSpecifier == nil,
       !functionType.isVoid,
       !functionType.isOptional
     {
@@ -156,12 +157,13 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         binding.pattern.trailingTrivia = ""
         binding.typeAnnotation = TypeAnnotationSyntax(
           colon: .colonToken(trailingTrivia: .space),
-          type: type
+          type: type.with(\.trailingTrivia, .space)
         )
       }
       if isEndpoint {
         binding.initializer = nil
       } else if binding.initializer == nil, type.is(OptionalTypeSyntax.self) {
+        binding.typeAnnotation?.trailingTrivia = .space
         binding.initializer = InitializerClauseSyntax(
           equal: .equalToken(trailingTrivia: .space),
           value: NilLiteralExprSyntax()

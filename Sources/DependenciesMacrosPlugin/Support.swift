@@ -70,6 +70,39 @@ extension FunctionTypeSyntax {
   }
 }
 
+extension InitializerClauseSyntax {
+  func diagnose(_ attribute: AttributeSyntax) throws {
+    guard !self.value.is(ClosureExprSyntax.self) else { return }
+    var diagnostics: [Diagnostic] = [
+      Diagnostic(
+        node: self.value,
+        message: MacroExpansionErrorMessage(
+          """
+          '@\(attribute.attributeName)' default must be closure literal
+          """
+        )
+      )
+    ]
+    if self.value.as(FunctionCallExprSyntax.self)?
+      .calledExpression.as(DeclReferenceExprSyntax.self)?
+      .baseName.tokenKind == .identifier("unimplemented")
+    {
+      diagnostics.append(
+        Diagnostic(
+          node: self.value,
+          message: MacroExpansionWarningMessage(
+            """
+            Do not use 'unimplemented' with '@\(attribute.attributeName)'; it is a replacement and \
+            implements the same runtime functionality as 'unimplemented' at compile time
+            """
+          )
+        )
+      )
+    }
+    throw DiagnosticsError(diagnostics: diagnostics)
+  }
+}
+
 extension VariableDeclSyntax {
   var asClosureType: FunctionTypeSyntax? {
     self.bindings.first?.typeAnnotation.flatMap {

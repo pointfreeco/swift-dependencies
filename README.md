@@ -12,8 +12,11 @@ A dependency management library inspired by SwiftUI's "environment."
   * [Quick start](#quick-start)
   * [Examples](#examples)
   * [Documentation](#documentation)
+  * [Installation](#installation)
   * [Community](#community)
   * [Extensions](#extensions)
+  * [Alternatives](#alternatives)
+  * [License](#license)
 
 ## Learn More
 

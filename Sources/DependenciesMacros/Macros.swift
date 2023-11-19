@@ -78,8 +78,8 @@
 /// instances of the client. Creating that initializer manually is quite laborious, and you have to
 /// update it each time a new endpoint is added to the client.
 ///
-/// [designing-dependencies]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/designingdependencies
-/// [separating-interface-implementation]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/livepreviewtest#Separating-interface-and-implementation
+/// [designing-dependencies]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/designingdependencies
+/// [separating-interface-implementation]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/livepreviewtest#Separating-interface-and-implementation
 @attached(member, names: named(init))
 @attached(memberAttribute)
 public macro DependencyClient() =

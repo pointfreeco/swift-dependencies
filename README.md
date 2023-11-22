@@ -285,7 +285,7 @@ priorities and trade-offs that differ from Dependencies. Here are a few well-kno
 
 This library is released under the MIT license. See [LICENSE](LICENSE) for details.
 
-[docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/
+[docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies
 [concurrency-support-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/concurrencysupport
 [designing-dependencies-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/designingdependencies
 [lifetimes-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/lifetimes

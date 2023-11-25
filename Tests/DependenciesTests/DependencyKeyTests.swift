@@ -111,12 +111,14 @@ final class DependencyKeyTests: XCTestCase {
     #endif
   }
 
-  func testDependencyOverridingProperty() {
-    withDependencies {
+  func testDependencyOverridingProperty() async {
+    await withDependencies {
       $0.numberClient.fetch = { 1729 }
     } operation: {
       @Dependency(\.numberClient) var numberClient: NumberClient
-      XCTAssertEqual(numberClient.fetch(), 1729)
+      await Task {
+        XCTAssertEqual(numberClient.fetch(), 1729)
+      }.value
     }
   }
 
@@ -167,7 +169,7 @@ extension DependencyValues {
   }
 }
 
-private struct NumberClient: DependencyKey, Sendable {
+private struct NumberClient: DependencyKey {
   var fetch: @Sendable () -> Int
   static let liveValue = NumberClient { 42 }
 }

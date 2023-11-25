@@ -1,6 +1,7 @@
 import Dependencies
 import XCTest
 
+@MainActor
 final class DependencyTests: XCTestCase {
   // NB: It doesn't seem possible to detect a test context from Wasm:
   //     https://github.com/swiftwasm/carton/issues/400
@@ -208,6 +209,7 @@ final class DependencyTests: XCTestCase {
   }
 }
 
+@MainActor
 private class Model {
   @Dependency(\.int) var int
   @Dependency(\.string) var string

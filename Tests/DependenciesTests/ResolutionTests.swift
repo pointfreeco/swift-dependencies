@@ -113,6 +113,7 @@ final class ResolutionTests: XCTestCase {
     }
   }
 
+  @MainActor
   func testParentChildScoping() {
     withDependencies {
       $0.context = .live
@@ -120,6 +121,7 @@ final class ResolutionTests: XCTestCase {
       @Dependency(\.date) var date
       let _ = date.now
 
+      @MainActor
       class ParentModel {
         @Dependency(\.date) var date
         var child1: Child1Model?
@@ -131,9 +133,11 @@ final class ResolutionTests: XCTestCase {
           self.child2 = withDependencies(from: self) { Child2Model() }
         }
       }
+      @MainActor
       class Child1Model {
         @Dependency(\.date) var date
       }
+      @MainActor
       class Child2Model {
         @Dependency(\.date) var date
       }

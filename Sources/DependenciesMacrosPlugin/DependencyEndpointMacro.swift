@@ -1,7 +1,7 @@
 import SwiftDiagnostics
 import SwiftOperators
 import SwiftParser
-import SwiftSyntax
+@preconcurrency import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacros

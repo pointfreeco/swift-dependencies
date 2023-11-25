@@ -1,6 +1,7 @@
 import Dependencies
 import XCTest
 
+@MainActor
 final class InvokeTestTests: XCTestCase {
   override func invokeTest() {
     withDependencies {
@@ -11,6 +12,7 @@ final class InvokeTestTests: XCTestCase {
   }
 
   func testOverride() {
+    @MainActor
     class Model {
       @Dependency(\.date.now) var now
       func getDate() -> Date { self.now }

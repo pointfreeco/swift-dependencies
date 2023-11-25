@@ -571,10 +571,13 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(values, [42], "Dependency change does propagate.")
   }
 
+  @MainActor
   func testParentModelWithoutDependencies() {
+    @MainActor
     class Child {
       @Dependency(\.date) var date
     }
+    @MainActor
     class Parent {
       func child() -> Child {
         withDependencies(from: self) {

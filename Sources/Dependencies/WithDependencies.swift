@@ -20,7 +20,7 @@ import Foundation
 ///   - operation: An operation to perform wherein dependencies have been overridden.
 /// - Returns: The result returned from `operation`.
 @discardableResult
-public func withDependencies<R>(
+public func withDependencies<R: Sendable>(
   _ updateValuesForOperation: (inout DependencyValues) throws -> Void,
   operation: () throws -> R
 ) rethrows -> R {
@@ -31,7 +31,7 @@ public func withDependencies<R>(
       try isSetting(false) {
         let result = try operation()
         if R.self is AnyClass {
-          dependencyObjects.store(result as AnyObject)
+          dependencyObjects.store(result as! AnyObject & Sendable)
         }
         return result
       }
@@ -61,7 +61,7 @@ public func withDependencies<R>(
   /// - Returns: The result returned from `operation`.
   @_unsafeInheritExecutor
   @discardableResult
-  public func withDependencies<R>(
+  public func withDependencies<R: Sendable>(
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
     operation: () async throws -> R
   ) async rethrows -> R {
@@ -72,7 +72,7 @@ public func withDependencies<R>(
         try await isSetting(false) {
           let result = try await operation()
           if R.self is AnyClass {
-            dependencyObjects.store(result as AnyObject)
+            dependencyObjects.store(result as! AnyObject & Sendable)
           }
           return result
         }
@@ -112,7 +112,7 @@ public func withDependencies<R>(
 ///   - operation: The operation to run with the updated dependencies.
 /// - Returns: The result returned from `operation`.
 @discardableResult
-public func withDependencies<Model: AnyObject, R>(
+public func withDependencies<Model: AnyObject & Sendable, R: Sendable>(
   from model: Model,
   _ updateValuesForOperation: (inout DependencyValues) throws -> Void,
   operation: () throws -> R,
@@ -138,7 +138,7 @@ public func withDependencies<Model: AnyObject, R>(
   } operation: {
     let result = try operation()
     if R.self is AnyClass {
-      dependencyObjects.store(result as AnyObject)
+      dependencyObjects.store(result as! AnyObject & Sendable)
     }
     return result
   }
@@ -153,7 +153,7 @@ public func withDependencies<Model: AnyObject, R>(
 ///   - operation: The operation to run with the updated dependencies.
 /// - Returns: The result returned from `operation`.
 @discardableResult
-public func withDependencies<Model: AnyObject, R>(
+public func withDependencies<Model: AnyObject & Sendable, R: Sendable>(
   from model: Model,
   operation: () throws -> R,
   file: StaticString? = nil,
@@ -182,7 +182,7 @@ public func withDependencies<Model: AnyObject, R>(
   /// - Returns: The result returned from `operation`.
   @_unsafeInheritExecutor
   @discardableResult
-  public func withDependencies<Model: AnyObject, R>(
+  public func withDependencies<Model: AnyObject & Sendable, R: Sendable>(
     from model: Model,
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
     operation: () async throws -> R,
@@ -208,7 +208,7 @@ public func withDependencies<Model: AnyObject, R>(
     } operation: {
       let result = try await operation()
       if R.self is AnyClass {
-        dependencyObjects.store(result as AnyObject)
+        dependencyObjects.store(result as! AnyObject & Sendable)
       }
       return result
     }
@@ -260,7 +260,7 @@ public func withDependencies<Model: AnyObject, R>(
   /// - Returns: The result returned from `operation`.
   @_unsafeInheritExecutor
   @discardableResult
-  public func withDependencies<Model: AnyObject, R>(
+  public func withDependencies<Model: AnyObject & Sendable, R: Sendable>(
     from model: Model,
     operation: () async throws -> R,
     file: StaticString? = nil,
@@ -370,7 +370,7 @@ extension DependencyValues {
     ///
     /// See the docs of ``withEscapedDependencies(_:)-5xvi3`` for more information.
     /// - Parameter operation: A closure which will have access to the propagated dependencies.
-    public func yield<R>(_ operation: () throws -> R) rethrows -> R {
+    public func yield<R: Sendable>(_ operation: () throws -> R) rethrows -> R {
       // TODO: Should `yield` be renamed to `restore`?
       try withDependencies {
         $0 = self.dependencies
@@ -383,7 +383,7 @@ extension DependencyValues {
     ///
     /// See the docs of ``withEscapedDependencies(_:)-5xvi3`` for more information.
     /// - Parameter operation: A closure which will have access to the propagated dependencies.
-    public func yield<R>(_ operation: () async throws -> R) async rethrows -> R {
+    public func yield<R: Sendable>(_ operation: () async throws -> R) async rethrows -> R {
       try await withDependencies {
         $0 = self.dependencies
       } operation: {
@@ -400,7 +400,7 @@ private class DependencyObjects: @unchecked Sendable {
 
   internal init() {}
 
-  func store(_ object: AnyObject) {
+  func store(_ object: AnyObject & Sendable) {
     self.storage.withValue { storage in
       storage[ObjectIdentifier(object)] = DependencyObject(
         object: object,
@@ -416,7 +416,7 @@ private class DependencyObjects: @unchecked Sendable {
     }
   }
 
-  func values(from object: AnyObject) -> DependencyValues? {
+  func values(from object: AnyObject & Sendable) -> DependencyValues? {
     Mirror(reflecting: object).children
       .lazy
       .compactMap({ $1 as? _HasInitialValues })

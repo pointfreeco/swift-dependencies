@@ -160,9 +160,11 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
         parameters[i].secondName = TokenSyntax(stringLiteral: "p\(offset)")
         parameters[i].colon = parameters[i].colon ?? .colonToken(trailingTrivia: .space)
       }
-      let appliedParameters = parameters
+      let appliedParameters =
+        parameters
         .map {
-          guard let typed = $0.type.as(AttributedTypeSyntax.self), typed.specifier?.tokenKind == .keyword(.inout)
+          guard let typed = $0.type.as(AttributedTypeSyntax.self),
+            typed.specifier?.tokenKind == .keyword(.inout)
           else { return false }
           return true
         }

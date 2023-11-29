@@ -755,4 +755,45 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
     }
   }
+
+  func testInout() {
+    assertMacro {
+    """
+    struct Blah {
+      @DependencyEndpoint
+      public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
+        "Hello, world"
+      }
+    }
+    """
+    } expansion: {
+    """
+    struct Blah {
+      public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
+        "Hello, world"
+      } {
+        @storageRestrictions(initializes: _doAThing)
+        init(initialValue) {
+          _doAThing = initialValue
+        }
+        get {
+          _doAThing
+        }
+        set {
+          _doAThing = newValue
+        }
+      }
+
+      public func doAThing(a p0: inout Int, b p1: Int, c p2: inout Bool) -> String {
+        self.doAThing(&p0, p1, &p2)
+      }
+
+      private var _doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
+        XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
+        return "Hello, world"
+        }
+    }
+    """
+    }
+  }
 }

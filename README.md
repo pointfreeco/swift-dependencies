@@ -272,7 +272,7 @@ following projects all build on top of Dependencies:
 
   * [Dependencies Additions](https://github.com/tgrapperon/swift-dependencies-additions): A
     companion library that provides higher-level dependencies.
-  * [Dependencies Extras](https://github.com/arasan01/swift-dependencies-extras): Macros that make swift-dependencies more useful
+  * [Dependencies Protocol Extras](https://github.com/arasan01/swift-dependencies-extras): Library to make swift-dependencies even more useful when using Protocol
 
 ## Alternatives
 

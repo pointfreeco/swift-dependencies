@@ -17,7 +17,10 @@ external server:
 
 ```swift
 private enum APIClientKey: DependencyKey {
-  static let liveValue = APIClient.live
+  static let liveValue = APIClient(/*
+    Construct the "live" API client that actually makes network 
+    requests and communicates with the outside world.
+  */)
 }
 ```
 
@@ -75,7 +78,10 @@ protocol:
 
 ```swift
 extension APIClient: DependencyKey {
-  static let liveValue = APIClient.live
+  static let liveValue = APIClient(/*
+    Construct the "live" API client that actually makes network 
+    requests and communicates with the outside world.
+  */)
 }
 
 extension DependencyValues {

@@ -5,7 +5,7 @@
 ///
 /// ```swift
 /// import DependenciesMacros
-/// 
+///
 /// @DependencyClient
 /// struct APIClient {
 ///   var fetchUser: (Int) async throws -> User

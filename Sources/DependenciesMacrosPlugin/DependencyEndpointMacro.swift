@@ -81,12 +81,14 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
         var statement = closure.statements.first,
         let expression = statement.item.as(ExprSyntax.self)
       {
-        statement.item = CodeBlockItemSyntax.Item(
-          ReturnStmtSyntax(
-            returnKeyword: .keyword(.return, trailingTrivia: .space),
-            expression: expression.trimmed
+        if !statement.item.description.hasPrefix("fatalError(") {
+          statement.item = CodeBlockItemSyntax.Item(
+            ReturnStmtSyntax(
+              returnKeyword: .keyword(.return, trailingTrivia: .space),
+              expression: expression.trimmed
+            )
           )
-        )
+        }
         closure.statements = closure.statements.with(\.[closure.statements.startIndex], statement)
       }
       unimplementedDefault = closure

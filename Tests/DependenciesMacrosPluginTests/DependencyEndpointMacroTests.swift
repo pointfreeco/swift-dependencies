@@ -796,4 +796,82 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     """
     }
   }
+
+  func testFatalError() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { fatalError() }
+        @DependencyEndpoint
+        public var bar: () -> String = { fatalError("Goodbye") }
+        @DependencyEndpoint
+        public var baz: () -> String = {
+          print("Hello")
+          fatalError("Goodbye")
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var foo: () -> String = { fatalError() } {
+          @storageRestrictions(initializes: _foo)
+          init(initialValue) {
+            _foo = initialValue
+          }
+          get {
+            _foo
+          }
+          set {
+            _foo = newValue
+          }
+        }
+
+        private var _foo: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          fatalError()
+        }
+        public var bar: () -> String = { fatalError("Goodbye") } {
+          @storageRestrictions(initializes: _bar)
+          init(initialValue) {
+            _bar = initialValue
+          }
+          get {
+            _bar
+          }
+          set {
+            _bar = newValue
+          }
+        }
+
+        private var _bar: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+          fatalError("Goodbye")
+        }
+        public var baz: () -> String = {
+          print("Hello")
+          fatalError("Goodbye")
+        } {
+          @storageRestrictions(initializes: _baz)
+          init(initialValue) {
+            _baz = initialValue
+          }
+          get {
+            _baz
+          }
+          set {
+            _baz = newValue
+          }
+        }
+
+        private var _baz: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'baz'")
+          print("Hello")
+          fatalError("Goodbye")
+          }
+      }
+      """
+    }
+  }
 }

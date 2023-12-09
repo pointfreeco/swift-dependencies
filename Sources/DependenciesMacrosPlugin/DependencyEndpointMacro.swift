@@ -172,8 +172,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
         }
         .joined(separator: ", ")
 
-      //(lldb) po $0.type.as(AttributedTypeSyntax.self)?.attributes.contains { $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "autoclosure" }
-
       decls.append(
         """
         \(raw: attributes.map { "@\($0) " }.joined())\
@@ -190,29 +188,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       private var _\(raw: unescapedIdentifier): \(raw: type) = \(unimplementedDefault)
       """
     ]
-  }
-}
-
-extension TupleTypeElementSyntax {
-  fileprivate var isAutoclosure: Bool {
-    self.type
-      .as(AttributedTypeSyntax.self)?
-      .attributes
-      .contains {
-        $0
-          .as(AttributeSyntax.self)?
-          .attributeName
-          .as(IdentifierTypeSyntax.self)?
-          .name
-          .text == "autoclosure"
-      } ?? false
-  }
-
-  fileprivate var isInout: Bool {
-    self.type
-      .as(AttributedTypeSyntax.self)?
-      .specifier?
-      .tokenKind == .keyword(.inout)
   }
 }
 
@@ -280,5 +255,28 @@ extension String {
       result = result.dropLast()
     }
     return String(result)
+  }
+}
+
+extension TupleTypeElementSyntax {
+  fileprivate var isAutoclosure: Bool {
+    self.type
+      .as(AttributedTypeSyntax.self)?
+      .attributes
+      .contains {
+        $0
+          .as(AttributeSyntax.self)?
+          .attributeName
+          .as(IdentifierTypeSyntax.self)?
+          .name
+          .text == "autoclosure"
+      } ?? false
+  }
+
+  fileprivate var isInout: Bool {
+    self.type
+      .as(AttributedTypeSyntax.self)?
+      .specifier?
+      .tokenKind == .keyword(.inout)
   }
 }

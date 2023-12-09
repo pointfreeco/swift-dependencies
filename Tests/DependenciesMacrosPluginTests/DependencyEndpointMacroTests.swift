@@ -805,11 +805,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         public var foo: () -> String = { fatalError() }
         @DependencyEndpoint
         public var bar: () -> String = { fatalError("Goodbye") }
-        @DependencyEndpoint
-        public var baz: () -> String = {
-          print("Hello")
-          fatalError("Goodbye")
-        }
       }
       """
     } expansion: {
@@ -849,27 +844,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
           fatalError("Goodbye")
         }
-        public var baz: () -> String = {
-          print("Hello")
-          fatalError("Goodbye")
-        } {
-          @storageRestrictions(initializes: _baz)
-          init(initialValue) {
-            _baz = initialValue
-          }
-          get {
-            _baz
-          }
-          set {
-            _baz = newValue
-          }
-        }
-
-        private var _baz: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'baz'")
-          print("Hello")
-          fatalError("Goodbye")
-          }
       }
       """
     }

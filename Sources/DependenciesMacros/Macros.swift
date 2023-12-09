@@ -4,6 +4,8 @@
 /// To use the macro, simply apply it to the struct interface of your dependency:
 ///
 /// ```swift
+/// import DependenciesMacros
+/// 
 /// @DependencyClient
 /// struct APIClient {
 ///   var fetchUser: (Int) async throws -> User

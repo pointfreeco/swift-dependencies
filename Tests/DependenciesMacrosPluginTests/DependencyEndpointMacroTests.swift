@@ -796,4 +796,40 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     """
     }
   }
+
+  func testAutoclosure() {
+    assertMacro {
+      """
+      struct Foo {
+        @DependencyEndpoint
+        var bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Foo {
+        var bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void {
+          @storageRestrictions(initializes: _bar)
+          init(initialValue) {
+            _bar = initialValue
+          }
+          get {
+            _bar
+          }
+          set {
+            _bar = newValue
+          }
+        }
+
+        func bar(a p0: @autoclosure () -> Int, b p1: () -> Int, c p2: @autoclosure () -> Int) -> Void {
+          self.bar(p0(), p1, p2())
+        }
+
+        private var _bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void = { _, _, _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+        }
+      }
+      """
+    }
+  }
 }

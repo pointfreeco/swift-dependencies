@@ -62,7 +62,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: echo "${{ matrix.toolchain }}" > .swift-version
-      - uses: swiftwasm/swiftwasm-action@v5.7
+      - uses: swiftwasm/swiftwasm-action@v5.8
         with:
           shell-action: carton test --environment node
 

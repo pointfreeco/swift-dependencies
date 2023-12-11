@@ -22,8 +22,11 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       return []
     }
     // NB: Ideally `@DependencyEndpoint` would handle this for us, but there are compiler crashes
-    if let initializer = binding.initializer {
-      try initializer.diagnose(node)
+    if 
+      let initializer = binding.initializer,
+      try initializer.diagnose(node, context: context).earlyOut
+    {
+      return []
     } else if functionType.effectSpecifiers?.throwsSpecifier == nil,
       !functionType.isVoid,
       !functionType.isOptional

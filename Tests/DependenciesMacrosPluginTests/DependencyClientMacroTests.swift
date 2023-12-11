@@ -513,21 +513,6 @@ final class DependencyClientMacroTests: BaseTestCase {
         var endpoint: @Sendable () -> Int = { <#Int#> }
       }
       """
-    } expansion: {
-      """
-      struct Client: Sendable {
-        var endpoint: @Sendable () -> Int = { <#Int#> }
-
-        init(
-          endpoint: @Sendable @escaping () -> Int
-        ) {
-          self.endpoint = endpoint
-        }
-
-        init() {
-        }
-      }
-      """
     }
   }
 
@@ -774,24 +759,6 @@ final class DependencyClientMacroTests: BaseTestCase {
       struct Blah {
         public var foo: () -> String = { { fatalError() }() }
         public var bar: () -> String = { { fatalError("Goodbye") }() }
-      }
-      """
-    } expansion: {
-      """
-      struct Blah {
-        public var foo: () -> String = { { fatalError() }() }
-        public var bar: () -> String = { { fatalError("Goodbye") }() }
-
-        public init(
-          foo: @escaping () -> String,
-          bar: @escaping () -> String
-        ) {
-          self.foo = foo
-          self.bar = bar
-        }
-
-        public init() {
-        }
       }
       """
     }

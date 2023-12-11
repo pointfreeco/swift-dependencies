@@ -56,13 +56,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
 
       """
-    }fixes: {
-      """
-      struct Client {
-        @DependencyEndpoint
-        var endpoint: () -> Bool = { _ in false }
-      }
-      """
     } expansion: {
       """
       struct Client {
@@ -740,15 +733,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
 
       """
-    }fixes: {
-      """
-      struct Blah {
-        @DependencyEndpoint
-        public var doAThing: (_ value: Int) -> String = { _ in
-          "Hello, world"
-        }
-      }
-      """
     } expansion: {
       """
       struct Blah {
@@ -793,15 +777,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } diagnostics: {
       """
 
-      """
-    }fixes: {
-      """
-      struct Blah {
-        @DependencyEndpoint
-        public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
-          "Hello, world"
-        }
-      }
       """
     } expansion: {
       """
@@ -903,15 +878,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } diagnostics: {
       """
 
-      """
-    }fixes: {
-      """
-      struct Blah {
-        @DependencyEndpoint
-        public var foo: () -> String = { { fatalError() }() }
-        @DependencyEndpoint
-        public var bar: () -> String = { { fatalError("Goodbye") }() }
-      }
       """
     } expansion: {
       """

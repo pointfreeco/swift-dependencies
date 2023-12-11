@@ -21,8 +21,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     else {
       return []
     }
-    if
-      let initializer = binding.initializer,
+    if let initializer = binding.initializer,
       try initializer.diagnose(node, context: context).earlyOut
     {
       return []
@@ -80,10 +79,12 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       else {
         return []
       }
-      if !functionType.isVoid,
-        closure.statements.count == 1,
+      if closure.statements.count == 1,
         var statement = closure.statements.first,
-        let expression = statement.item.as(ExprSyntax.self)
+        let expression = statement.item.as(ExprSyntax.self),
+        !functionType.isVoid
+          || expression.as(FunctionCallExprSyntax.self)?.calledExpression.is(ClosureExprSyntax.self)
+            == true
       {
         if !statement.item.description.hasPrefix("fatalError(") {
           statement.item = CodeBlockItemSyntax.Item(

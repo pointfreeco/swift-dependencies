@@ -145,7 +145,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
                ✏️ Insert '= { _, _, _ in <#Bool#> }'
       }
       """
-    }fixes: {
+    } fixes: {
       """
       struct Client {
         @DependencyEndpoint
@@ -894,7 +894,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
       struct Blah {
         @DependencyEndpoint
-        public var foo: () -> String = { { fatalError() }() }
+        public var foo: () -> Void = { { fatalError() }() }
         @DependencyEndpoint
         public var bar: () -> String = { { fatalError("Goodbye") }() }
       }
@@ -902,7 +902,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Blah {
-        public var foo: () -> String = { { fatalError() }() } {
+        public var foo: () -> Void = { { fatalError() }() } {
           @storageRestrictions(initializes: _foo)
           init(initialValue) {
             _foo = initialValue
@@ -915,7 +915,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
           }
         }
 
-        private var _foo: () -> String = {
+        private var _foo: () -> Void = {
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
           return {
             fatalError()

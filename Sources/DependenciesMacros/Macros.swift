@@ -164,3 +164,10 @@ public struct Unimplemented: Error {
     self.endpoint = endpoint
   }
 }
+
+
+@DependencyClient
+struct Blah {
+  public var foo: () -> String = { fatalError() }
+  public var bar: () -> String = { fatalError("Goodbye") }
+}

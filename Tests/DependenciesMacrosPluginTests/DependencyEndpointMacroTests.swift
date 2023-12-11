@@ -5,7 +5,7 @@ import XCTest
 final class DependencyEndpointMacroTests: BaseTestCase {
   override func invokeTest() {
     withMacroTesting(
-      // isRecording: true,
+      //isRecording: true,
       macros: [DependencyEndpointMacro.self]
     ) {
       super.invokeTest()
@@ -807,10 +807,38 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         public var bar: () -> String = { fatalError("Goodbye") }
       }
       """
-    } expansion: {
+    } diagnostics: {
       """
       struct Blah {
-        public var foo: () -> String = { fatalError() } {
+        @DependencyEndpoint
+        public var foo: () -> String = { fatalError() }
+                                         ┬───────────
+                                         ╰─ ⚠️ Prefer to use a real default value rather than fatalError().
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
+                                            ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.
+        @DependencyEndpoint
+        public var bar: () -> String = { fatalError("Goodbye") }
+                                         ┬────────────────────
+                                         ╰─ ⚠️ Prefer to use a real default value rather than fatalError().
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
+                                            ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.
+      }
+      """
+    }fixes: {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { { fatalError() }() }
+        @DependencyEndpoint
+        public var bar: () -> String = { { fatalError("Goodbye") }() }
+      }
+      """
+    }expansion: {
+      """
+      struct Blah {
+        public var foo: () -> String = { { fatalError() }() } {
           @storageRestrictions(initializes: _foo)
           init(initialValue) {
             _foo = initialValue
@@ -825,9 +853,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
 
         private var _foo: () -> String = {
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
-          fatalError()
+          return {
+            fatalError()
+          }()
         }
-        public var bar: () -> String = { fatalError("Goodbye") } {
+        public var bar: () -> String = { { fatalError("Goodbye") }() } {
           @storageRestrictions(initializes: _bar)
           init(initialValue) {
             _bar = initialValue
@@ -842,7 +872,65 @@ final class DependencyEndpointMacroTests: BaseTestCase {
 
         private var _bar: () -> String = {
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
-          fatalError("Goodbye")
+          return {
+            fatalError("Goodbye")
+          }()
+        }
+      }
+      """
+    }
+  }
+
+  func testFatalError_SilenceWarning() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { { fatalError() }() }
+        @DependencyEndpoint
+        public var bar: () -> String = { { fatalError("Goodbye") }() }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var foo: () -> String = { { fatalError() }() } {
+          @storageRestrictions(initializes: _foo)
+          init(initialValue) {
+            _foo = initialValue
+          }
+          get {
+            _foo
+          }
+          set {
+            _foo = newValue
+          }
+        }
+
+        private var _foo: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          return {
+            fatalError()
+          }()
+        }
+        public var bar: () -> String = { { fatalError("Goodbye") }() } {
+          @storageRestrictions(initializes: _bar)
+          init(initialValue) {
+            _bar = initialValue
+          }
+          get {
+            _bar
+          }
+          set {
+            _bar = newValue
+          }
+        }
+
+        private var _bar: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+          return {
+            fatalError("Goodbye")
+          }()
         }
       }
       """

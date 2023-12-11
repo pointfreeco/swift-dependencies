@@ -88,6 +88,47 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
               expression: expression.trimmed
             )
           )
+        } else {
+          context.diagnose(
+            Diagnostic(
+              node: statement.item,
+              message: MacroExpansionWarningMessage(
+                """
+                Prefer to use a real default value rather than fatalError().
+
+                The default value can be anything and does not need to signify a real value. For \
+                example, if the endpoint returns a boolean, you can return false, or if it \
+                returns an array, you can return [].
+                """
+              ),
+              fixIt: FixIt(
+                message: MacroExpansionFixItMessage(
+                  """
+                  Silence this warning by wrapping fatalError() in a synchronously executed \
+                  closure, but we recommend against this.
+                  """
+                ),
+                changes: [
+                  .replace(
+                    oldNode: Syntax(statement),
+                    newNode: Syntax(
+                      FunctionCallExprSyntax(
+                        calledExpression: ClosureExprSyntax(
+                          statements: [
+                            statement.with(\.leadingTrivia, .space)
+                          ]
+                        ),
+                        leftParen: .leftParenToken(),
+                        arguments: [],
+                        rightParen: .rightParenToken()
+                      )
+                      .with(\.trailingTrivia, .space)
+                    )
+                  )
+                ]
+              )
+            )
+          )
         }
         closure.statements = closure.statements.with(\.[closure.statements.startIndex], statement)
       }

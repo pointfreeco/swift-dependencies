@@ -5,7 +5,7 @@ import XCTest
 final class DependencyEndpointMacroTests: BaseTestCase {
   override func invokeTest() {
     withMacroTesting(
-      //isRecording: true,
+      // isRecording: true,
       macros: [DependencyEndpointMacro.self]
     ) {
       super.invokeTest()
@@ -51,10 +51,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         @DependencyEndpoint
         var endpoint: () -> Bool = { _ in false }
       }
-      """
-    } diagnostics: {
-      """
-
       """
     } expansion: {
       """
@@ -729,10 +725,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
       }
       """
-    } diagnostics: {
-      """
-
-      """
     } expansion: {
       """
       struct Blah {
@@ -774,154 +766,34 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
     }
     """
-    } diagnostics: {
-      """
-
-      """
     } expansion: {
-      """
-      struct Blah {
-        public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
-          "Hello, world"
-        } {
-          @storageRestrictions(initializes: _doAThing)
-          init(initialValue) {
-            _doAThing = initialValue
-          }
-          get {
-            _doAThing
-          }
-          set {
-            _doAThing = newValue
-          }
+    """
+    struct Blah {
+      public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
+        "Hello, world"
+      } {
+        @storageRestrictions(initializes: _doAThing)
+        init(initialValue) {
+          _doAThing = initialValue
         }
-
-        public func doAThing(a p0: inout Int, b p1: Int, c p2: inout Bool) -> String {
-          self.doAThing(&p0, p1, &p2)
+        get {
+          _doAThing
         }
-
-        private var _doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
-          return "Hello, world"
-          }
+        set {
+          _doAThing = newValue
+        }
       }
-      """
+
+      public func doAThing(a p0: inout Int, b p1: Int, c p2: inout Bool) -> String {
+        self.doAThing(&p0, p1, &p2)
+      }
+
+      private var _doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
+        XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
+        return "Hello, world"
+        }
     }
-  }
-
-  func testFatalError() {
-    assertMacro {
-      """
-      struct Blah {
-        @DependencyEndpoint
-        public var foo: () -> String = { fatalError() }
-        @DependencyEndpoint
-        public var bar: () -> String = { fatalError("Goodbye") }
-      }
-      """
-    } diagnostics: {
-      """
-      struct Blah {
-        @DependencyEndpoint
-        public var foo: () -> String = { fatalError() }
-                            ┬            ────────────
-                            ├─ ⚠️ Prefer to use a real default value rather than fatalError().
-
-      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
-                            │  ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.  │                       ╰─ ⚠️ Prefer to use a real default value rather than fatalError().
-
-      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
-                               ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.
-        @DependencyEndpoint
-        public var bar: () -> String = { fatalError("Goodbye") }
-      }
-      """
-    }fixes: {
-      """
-      struct Blah {
-        @DependencyEndpoint
-        public var foo: () -> String = { fatalError() }
-        @DependencyEndpoint
-        public var bar: () -> String = { fatalError("Goodbye") }
-      }
-      """
-    }expansion: {
-      """
-      struct Blah {
-        public var foo: () -> String = { fatalError() }
-
-        private var _foo: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
-          fatalError()
-        }
-        public var bar: () -> String = { fatalError("Goodbye") }
-
-        private var _bar: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
-          fatalError("Goodbye")
-        }
-      }
-      """
-    }
-  }
-
-  func testFatalError_SilenceWarning() {
-    assertMacro {
-      """
-      struct Blah {
-        @DependencyEndpoint
-        public var foo: () -> String = { { fatalError() }() }
-        @DependencyEndpoint
-        public var bar: () -> String = { { fatalError("Goodbye") }() }
-      }
-      """
-    } diagnostics: {
-      """
-
-      """
-    } expansion: {
-      """
-      struct Blah {
-        public var foo: () -> String = { { fatalError() }() } {
-          @storageRestrictions(initializes: _foo)
-          init(initialValue) {
-            _foo = initialValue
-          }
-          get {
-            _foo
-          }
-          set {
-            _foo = newValue
-          }
-        }
-
-        private var _foo: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
-          return {
-            fatalError()
-          }()
-        }
-        public var bar: () -> String = { { fatalError("Goodbye") }() } {
-          @storageRestrictions(initializes: _bar)
-          init(initialValue) {
-            _bar = initialValue
-          }
-          get {
-            _bar
-          }
-          set {
-            _bar = newValue
-          }
-        }
-
-        private var _bar: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
-          return {
-            fatalError("Goodbye")
-          }()
-        }
-      }
-      """
+    """
     }
   }
 

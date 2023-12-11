@@ -162,14 +162,14 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       }
       let appliedParameters =
         parameters
-        .map {
-          guard let typed = $0.type.as(AttributedTypeSyntax.self),
-            typed.specifier?.tokenKind == .keyword(.inout)
-          else { return false }
-          return true
-        }
         .enumerated()
-        .map { $1 ? "&p\($0)" : "p\($0)" }
+        .map {
+          $1.isInout
+          ? "&p\($0)"
+          : $1.isAutoclosure
+          ? "p\($0)()"
+          : "p\($0)"
+        }
         .joined(separator: ", ")
       decls.append(
         """
@@ -254,5 +254,28 @@ extension String {
       result = result.dropLast()
     }
     return String(result)
+  }
+}
+
+extension TupleTypeElementSyntax {
+  fileprivate var isAutoclosure: Bool {
+    self.type
+      .as(AttributedTypeSyntax.self)?
+      .attributes
+      .contains {
+        $0
+          .as(AttributeSyntax.self)?
+          .attributeName
+          .as(IdentifierTypeSyntax.self)?
+          .name
+          .tokenKind == .identifier("autoclosure")
+      } ?? false
+  }
+
+  fileprivate var isInout: Bool {
+    self.type
+      .as(AttributedTypeSyntax.self)?
+      .specifier?
+      .tokenKind == .keyword(.inout)
   }
 }

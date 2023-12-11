@@ -165,10 +165,10 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
         .enumerated()
         .map {
           $1.isInout
-          ? "&p\($0)"
-          : $1.isAutoclosure
-          ? "p\($0)()"
-          : "p\($0)"
+            ? "&p\($0)"
+            : $1.isAutoclosure
+              ? "p\($0)()"
+              : "p\($0)"
         }
         .joined(separator: ", ")
       decls.append(

@@ -92,8 +92,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
               expression: expression.trimmed
             )
           )
-        } else {
-          context.diagnoseFatalErrorDefault(statement: statement)
         }
         closure.statements = closure.statements.with(\.[closure.statements.startIndex], statement)
       }

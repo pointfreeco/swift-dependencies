@@ -70,15 +70,11 @@ extension FunctionTypeSyntax {
   }
 }
 
-struct DiagnoseResult {
-  let earlyOut: Bool
-}
-
 extension InitializerClauseSyntax {
   func diagnose(
     _ attribute: AttributeSyntax,
     context: some MacroExpansionContext
-  ) throws -> DiagnoseResult {
+  ) throws -> DiagnosticAction {
     guard let closure = self.value.as(ClosureExprSyntax.self)
     else {
       var diagnostics: [Diagnostic] = [
@@ -114,7 +110,7 @@ extension InitializerClauseSyntax {
       closure.statements.count == 1,
       let statement = closure.statements.first
     else {
-      return DiagnoseResult(earlyOut: false)
+      return DiagnosticAction(earlyOut: false)
     }
     
     context.diagnose(
@@ -158,8 +154,12 @@ extension InitializerClauseSyntax {
       )
     )
     
-    return DiagnoseResult(earlyOut: true)
+    return DiagnosticAction(earlyOut: true)
   }
+}
+
+struct DiagnosticAction {
+  let earlyOut: Bool
 }
 
 extension VariableDeclSyntax {
@@ -219,11 +219,5 @@ extension MacroExpansionContext {
 extension Array where Element == String {
   func qualified(_ module: String) -> Self {
     self.flatMap { [$0, "\(module).\($0)"] }
-  }
-}
-
-extension MacroExpansionContext {
-  func diagnoseFatalErrorDefault(statement: CodeBlockItemSyntax) {
-
   }
 }

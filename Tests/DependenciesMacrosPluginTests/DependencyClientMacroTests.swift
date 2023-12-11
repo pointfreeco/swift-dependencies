@@ -513,22 +513,6 @@ final class DependencyClientMacroTests: BaseTestCase {
         var endpoint: @Sendable () -> Int = { <#Int#> }
       }
       """
-    } expansion: {
-      """
-      struct Client: Sendable {
-        @DependencyEndpoint
-        var endpoint: @Sendable () -> Int = { <#Int#> }
-
-        init(
-          endpoint: @Sendable @escaping () -> Int
-        ) {
-          self.endpoint = endpoint
-        }
-
-        init() {
-        }
-      }
-      """
     }
   }
 

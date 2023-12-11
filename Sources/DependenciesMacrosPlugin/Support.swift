@@ -81,9 +81,9 @@ extension InitializerClauseSyntax {
         Diagnostic(
           node: self.value,
           message: MacroExpansionErrorMessage(
-          """
-          '@\(attribute.attributeName)' default must be closure literal
-          """
+            """
+            '@\(attribute.attributeName)' default must be closure literal
+            """
           )
         )
       ]
@@ -95,17 +95,17 @@ extension InitializerClauseSyntax {
           Diagnostic(
             node: self.value,
             message: MacroExpansionWarningMessage(
-            """
-            Do not use 'unimplemented' with '@\(attribute.attributeName)'; it is a replacement and \
-            implements the same runtime functionality as 'unimplemented' at compile time
-            """
+              """
+              Do not use 'unimplemented' with '@\(attribute.attributeName)'; it is a replacement and \
+              implements the same runtime functionality as 'unimplemented' at compile time
+              """
             )
           )
         )
       }
       throw DiagnosticsError(diagnostics: diagnostics)
     }
-    
+
     guard
       closure.statements.count == 1,
       let statement = closure.statements.first,
@@ -113,7 +113,7 @@ extension InitializerClauseSyntax {
     else {
       return DiagnosticAction(earlyOut: false)
     }
-    
+
     context.diagnose(
       Diagnostic(
         node: statement.item,
@@ -154,7 +154,7 @@ extension InitializerClauseSyntax {
         )
       )
     )
-    
+
     return DiagnosticAction(earlyOut: true)
   }
 }

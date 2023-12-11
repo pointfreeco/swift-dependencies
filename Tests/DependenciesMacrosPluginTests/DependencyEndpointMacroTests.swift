@@ -849,10 +849,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         @DependencyEndpoint
         public var foo: () -> String = { fatalError() }
                             ┬            ────────────
-                            ├─ ⚠️ Prefer returning a default value over 'fatalError()' to avoid crashes in previews and tests.
+                            ├─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
 
       The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
-                            │  ✏️ Wrap in a synchronously executed closure to silence this warning  │                       ╰─ ⚠️ Prefer returning a default value over 'fatalError()' to avoid crashes in previews and tests.
+                            │  ✏️ Wrap in a synchronously executed closure to silence this warning  │                       ╰─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
 
       The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
                                ✏️ Wrap in a synchronously executed closure to silence this warning

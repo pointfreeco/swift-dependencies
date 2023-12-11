@@ -119,8 +119,8 @@ extension InitializerClauseSyntax {
         node: statement.item,
         message: MacroExpansionWarningMessage(
           """
-          Prefer returning a default value over 'fatalError()' to avoid crashes in previews and \
-          tests.
+          Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews \
+          and tests.
 
           The default value can be anything and does not need to signify a real value. For \
           example, if the endpoint returns a boolean, you can return 'false', or if it returns an \

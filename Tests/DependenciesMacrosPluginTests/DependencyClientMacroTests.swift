@@ -741,5 +741,42 @@ final class DependencyClientMacroTests: BaseTestCase {
       """
     }
   }
-}
 
+  func testFatalError() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Blah {
+        public var foo: () -> String = { fatalError() }
+        public var bar: () -> String = { fatalError("Goodbye") }
+      }
+      """
+    } diagnostics: {
+      """
+      @DependencyClient
+      struct Blah {
+        public var foo: () -> String = { fatalError() }
+                                         ┬───────────
+                                         ╰─ ⚠️ Prefer to use a real default value rather than fatalError().
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
+                                            ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.
+        public var bar: () -> String = { fatalError("Goodbye") }
+                                         ┬────────────────────
+                                         ╰─ ⚠️ Prefer to use a real default value rather than fatalError().
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
+                                            ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.
+      }
+      """
+    } fixes: {
+      """
+      @DependencyClient
+      struct Blah {
+        public var foo: () -> String = { { fatalError() }() }
+        public var bar: () -> String = { { fatalError("Goodbye") }() }
+      }
+      """
+    }
+  }
+}

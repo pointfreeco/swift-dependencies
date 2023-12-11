@@ -54,17 +54,9 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
     } diagnostics: {
       """
-      struct Client {
-        @DependencyEndpoint
-        var endpoint: () -> Bool = { _ in false }
-                           ┬              ─────
-                           ╰─ ⚠️ Prefer to use a real default value rather than fatalError().
 
-      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
-                              ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.
-      }
       """
-    } fixes: {
+    }fixes: {
       """
       struct Client {
         @DependencyEndpoint
@@ -74,7 +66,18 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Client {
-        var endpoint: () -> Bool = { _ in false }
+        var endpoint: () -> Bool = { _ in false } {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
 
         private var _endpoint: () -> Bool = { _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
@@ -113,7 +116,18 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Client {
-        var endpoint: () -> Bool = { <#Bool#> }
+        var endpoint: () -> Bool = { <#Bool#> } {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
 
         private var _endpoint: () -> Bool = {
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
@@ -152,7 +166,18 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Client {
-        var endpoint: (Int, Bool, String) -> Bool = { _, _, _ in <#Bool#> }
+        var endpoint: (Int, Bool, String) -> Bool = { _, _, _ in <#Bool#> } {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
 
         private var _endpoint: (Int, Bool, String) -> Bool = { _, _, _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
@@ -713,18 +738,9 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
     } diagnostics: {
       """
-      struct Blah {
-        @DependencyEndpoint
-        public var doAThing: (_ value: Int) -> String = { _ in
-                                                      ╰─ ⚠️ Prefer to use a real default value rather than fatalError().
 
-      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
-                                                         ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.
-          "Hello, world"
-        }
-      }
       """
-    } fixes: {
+    }fixes: {
       """
       struct Blah {
         @DependencyEndpoint
@@ -738,6 +754,17 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       struct Blah {
         public var doAThing: (_ value: Int) -> String = { _ in
           "Hello, world"
+        } {
+          @storageRestrictions(initializes: _doAThing)
+          init(initialValue) {
+            _doAThing = initialValue
+          }
+          get {
+            _doAThing
+          }
+          set {
+            _doAThing = newValue
+          }
         }
 
         public func doAThing(value p0: Int) -> String {
@@ -765,18 +792,9 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     """
     } diagnostics: {
       """
-      struct Blah {
-        @DependencyEndpoint
-        public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
-                                                                                   ╰─ ⚠️ Prefer to use a real default value rather than fatalError().
 
-      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
-                                                                                      ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.
-          "Hello, world"
-        }
-      }
       """
-    } fixes: {
+    }fixes: {
       """
       struct Blah {
         @DependencyEndpoint
@@ -790,6 +808,17 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       struct Blah {
         public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
           "Hello, world"
+        } {
+          @storageRestrictions(initializes: _doAThing)
+          init(initialValue) {
+            _doAThing = initialValue
+          }
+          get {
+            _doAThing
+          }
+          set {
+            _doAThing = newValue
+          }
         }
 
         public func doAThing(a p0: inout Int, b p1: Int, c p2: inout Bool) -> String {
@@ -873,22 +902,9 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
     } diagnostics: {
       """
-      struct Blah {
-        @DependencyEndpoint
-        public var foo: () -> String = { { fatalError() }() }
-                            ┬            ──────────────────
-                            ├─ ⚠️ Prefer to use a real default value rather than fatalError().
 
-      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
-                            │  ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.  │                       ╰─ ⚠️ Prefer to use a real default value rather than fatalError().
-
-      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return false, or if it returns an array, you can return [].
-                               ✏️ Silence this warning by wrapping fatalError() in a synchronously executed closure, but we recommend against this.
-        @DependencyEndpoint
-        public var bar: () -> String = { { fatalError("Goodbye") }() }
-      }
       """
-    } fixes: {
+    }fixes: {
       """
       struct Blah {
         @DependencyEndpoint
@@ -900,7 +916,18 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Blah {
-        public var foo: () -> String = { { fatalError() }() }
+        public var foo: () -> String = { { fatalError() }() } {
+          @storageRestrictions(initializes: _foo)
+          init(initialValue) {
+            _foo = initialValue
+          }
+          get {
+            _foo
+          }
+          set {
+            _foo = newValue
+          }
+        }
 
         private var _foo: () -> String = {
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
@@ -908,7 +935,18 @@ final class DependencyEndpointMacroTests: BaseTestCase {
             fatalError()
           }()
         }
-        public var bar: () -> String = { { fatalError("Goodbye") }() }
+        public var bar: () -> String = { { fatalError("Goodbye") }() } {
+          @storageRestrictions(initializes: _bar)
+          init(initialValue) {
+            _bar = initialValue
+          }
+          get {
+            _bar
+          }
+          set {
+            _bar = newValue
+          }
+        }
 
         private var _bar: () -> String = {
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")

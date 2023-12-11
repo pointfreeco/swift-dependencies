@@ -108,7 +108,8 @@ extension InitializerClauseSyntax {
     
     guard
       closure.statements.count == 1,
-      let statement = closure.statements.first
+      let statement = closure.statements.first,
+      statement.item.description.hasPrefix("fatalError(")
     else {
       return DiagnosticAction(earlyOut: false)
     }

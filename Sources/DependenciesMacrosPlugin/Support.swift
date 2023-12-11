@@ -71,36 +71,96 @@ extension FunctionTypeSyntax {
 }
 
 extension InitializerClauseSyntax {
-  func diagnose(_ attribute: AttributeSyntax) throws {
-    guard !self.value.is(ClosureExprSyntax.self) else { return }
-    var diagnostics: [Diagnostic] = [
-      Diagnostic(
-        node: self.value,
-        message: MacroExpansionErrorMessage(
+  func diagnose(
+    _ attribute: AttributeSyntax,
+    context: some MacroExpansionContext
+  ) throws -> DiagnosticAction {
+    guard let closure = self.value.as(ClosureExprSyntax.self)
+    else {
+      var diagnostics: [Diagnostic] = [
+        Diagnostic(
+          node: self.value,
+          message: MacroExpansionErrorMessage(
           """
           '@\(attribute.attributeName)' default must be closure literal
           """
+          )
         )
-      )
-    ]
-    if self.value.as(FunctionCallExprSyntax.self)?
-      .calledExpression.as(DeclReferenceExprSyntax.self)?
-      .baseName.tokenKind == .identifier("unimplemented")
-    {
-      diagnostics.append(
-        Diagnostic(
-          node: self.value,
-          message: MacroExpansionWarningMessage(
+      ]
+      if self.value.as(FunctionCallExprSyntax.self)?
+        .calledExpression.as(DeclReferenceExprSyntax.self)?
+        .baseName.tokenKind == .identifier("unimplemented")
+      {
+        diagnostics.append(
+          Diagnostic(
+            node: self.value,
+            message: MacroExpansionWarningMessage(
             """
             Do not use 'unimplemented' with '@\(attribute.attributeName)'; it is a replacement and \
             implements the same runtime functionality as 'unimplemented' at compile time
             """
+            )
           )
         )
-      )
+      }
+      throw DiagnosticsError(diagnostics: diagnostics)
     }
-    throw DiagnosticsError(diagnostics: diagnostics)
+    
+    guard
+      closure.statements.count == 1,
+      let statement = closure.statements.first,
+      statement.item.description.hasPrefix("fatalError(")
+    else {
+      return DiagnosticAction(earlyOut: false)
+    }
+    
+    context.diagnose(
+      Diagnostic(
+        node: statement.item,
+        message: MacroExpansionWarningMessage(
+          """
+          Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews \
+          and tests.
+
+          The default value can be anything and does not need to signify a real value. For \
+          example, if the endpoint returns a boolean, you can return 'false', or if it returns an \
+          array, you can return '[]'.
+          """
+        ),
+        fixIt: FixIt(
+          message: MacroExpansionFixItMessage(
+            """
+            Wrap in a synchronously executed closure to silence this warning
+            """
+          ),
+          changes: [
+            .replace(
+              oldNode: Syntax(statement),
+              newNode: Syntax(
+                FunctionCallExprSyntax(
+                  calledExpression: ClosureExprSyntax(
+                    statements: [
+                      statement.with(\.leadingTrivia, .space)
+                    ]
+                  ),
+                  leftParen: .leftParenToken(),
+                  arguments: [],
+                  rightParen: .rightParenToken()
+                )
+                .with(\.trailingTrivia, .space)
+              )
+            )
+          ]
+        )
+      )
+    )
+    
+    return DiagnosticAction(earlyOut: true)
   }
+}
+
+struct DiagnosticAction {
+  let earlyOut: Bool
 }
 
 extension VariableDeclSyntax {

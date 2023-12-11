@@ -513,22 +513,6 @@ final class DependencyClientMacroTests: BaseTestCase {
         var endpoint: @Sendable () -> Int = { <#Int#> }
       }
       """
-    } expansion: {
-      """
-      struct Client: Sendable {
-        @DependencyEndpoint
-        var endpoint: @Sendable () -> Int = { <#Int#> }
-
-        init(
-          endpoint: @Sendable @escaping () -> Int
-        ) {
-          self.endpoint = endpoint
-        }
-
-        init() {
-        }
-      }
-      """
     }
   }
 
@@ -741,5 +725,42 @@ final class DependencyClientMacroTests: BaseTestCase {
       """
     }
   }
-}
 
+  func testFatalError() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Blah {
+        public var foo: () -> String = { fatalError() }
+        public var bar: () -> String = { fatalError("Goodbye") }
+      }
+      """
+    } diagnostics: {
+      """
+      @DependencyClient
+      struct Blah {
+        public var foo: () -> String = { fatalError() }
+                                         ┬───────────
+                                         ╰─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+                                            ✏️ Wrap in a synchronously executed closure to silence this warning
+        public var bar: () -> String = { fatalError("Goodbye") }
+                                         ┬────────────────────
+                                         ╰─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+                                            ✏️ Wrap in a synchronously executed closure to silence this warning
+      }
+      """
+    } fixes: {
+      """
+      @DependencyClient
+      struct Blah {
+        public var foo: () -> String = { { fatalError() }() }
+        public var bar: () -> String = { { fatalError("Goodbye") }() }
+      }
+      """
+    }
+  }
+}

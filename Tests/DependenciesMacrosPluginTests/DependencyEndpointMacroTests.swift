@@ -145,7 +145,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
                ✏️ Insert '= { _, _, _ in <#Bool#> }'
       }
       """
-    }fixes: {
+    } fixes: {
       """
       struct Client {
         @DependencyEndpoint
@@ -827,6 +827,118 @@ final class DependencyEndpointMacroTests: BaseTestCase {
 
         private var _bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void = { _, _, _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+        }
+      }
+      """
+    }
+  }
+
+  func testFatalError() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { fatalError() }
+        @DependencyEndpoint
+        public var bar: () -> String = { fatalError("Goodbye") }
+      }
+      """
+    } diagnostics: {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { fatalError() }
+                            ┬            ────────────
+                            ├─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+                            │  ✏️ Wrap in a synchronously executed closure to silence this warning  │                       ╰─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+                               ✏️ Wrap in a synchronously executed closure to silence this warning
+        @DependencyEndpoint
+        public var bar: () -> String = { fatalError("Goodbye") }
+      }
+      """
+    } fixes: {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { fatalError() }
+        @DependencyEndpoint
+        public var bar: () -> String = { fatalError("Goodbye") }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var foo: () -> String = { fatalError() }
+
+        private var _foo: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          fatalError()
+        }
+        public var bar: () -> String = { fatalError("Goodbye") }
+
+        private var _bar: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+          fatalError("Goodbye")
+        }
+      }
+      """
+    }
+  }
+
+  func testFatalError_SilenceWarning() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> Void = { { fatalError() }() }
+        @DependencyEndpoint
+        public var bar: () -> String = { { fatalError("Goodbye") }() }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var foo: () -> Void = { { fatalError() }() } {
+          @storageRestrictions(initializes: _foo)
+          init(initialValue) {
+            _foo = initialValue
+          }
+          get {
+            _foo
+          }
+          set {
+            _foo = newValue
+          }
+        }
+
+        private var _foo: () -> Void = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          return {
+            fatalError()
+          }()
+        }
+        public var bar: () -> String = { { fatalError("Goodbye") }() } {
+          @storageRestrictions(initializes: _bar)
+          init(initialValue) {
+            _bar = initialValue
+          }
+          get {
+            _bar
+          }
+          set {
+            _bar = newValue
+          }
+        }
+
+        private var _bar: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+          return {
+            fatalError("Goodbye")
+          }()
         }
       }
       """

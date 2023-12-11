@@ -21,9 +21,12 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     else {
       return []
     }
-    if let initializer = binding.initializer {
-      try initializer.diagnose(node)
+    if let initializer = binding.initializer,
+      try initializer.diagnose(node, context: context).earlyOut
+    {
+      return []
     }
+
     return [
       """
       @storageRestrictions(initializes: _\(raw: identifier))
@@ -76,17 +79,21 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       else {
         return []
       }
-      if !functionType.isVoid,
-        closure.statements.count == 1,
+      if closure.statements.count == 1,
         var statement = closure.statements.first,
-        let expression = statement.item.as(ExprSyntax.self)
+        let expression = statement.item.as(ExprSyntax.self),
+        !functionType.isVoid
+          || expression.as(FunctionCallExprSyntax.self)?.calledExpression.is(ClosureExprSyntax.self)
+            == true
       {
-        statement.item = CodeBlockItemSyntax.Item(
-          ReturnStmtSyntax(
-            returnKeyword: .keyword(.return, trailingTrivia: .space),
-            expression: expression.trimmed
+        if !statement.item.description.hasPrefix("fatalError(") {
+          statement.item = CodeBlockItemSyntax.Item(
+            ReturnStmtSyntax(
+              returnKeyword: .keyword(.return, trailingTrivia: .space),
+              expression: expression.trimmed
+            )
           )
-        )
+        }
         closure.statements = closure.statements.with(\.[closure.statements.startIndex], statement)
       }
       unimplementedDefault = closure

@@ -243,28 +243,27 @@ final class DependencyClientMacroTests: BaseTestCase {
   }
 
   func testDefaultValue() {
-    assertMacro(record: true) {
+    assertMacro {
       """
       @DependencyClient
       struct Client {
         var endpoint: () -> Int = { 42 }
       }
       """
-    } diagnostics: {
+    } expansion: {
       """
-      @DependencyClient
       struct Client {
+        @DependencyEndpoint
         var endpoint: () -> Int = { 42 }
-            ┬───────────────────────────
-            ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
-               ✏️ Insert '= { <#Int#> }'
-      }
-      """
-    } fixes: {
-      """
-      @DependencyClient
-      struct Client {
-        var endpoint: () -> Int  = { <#Int#> }
+
+        init(
+          endpoint: @escaping () -> Int
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
       }
       """
     }

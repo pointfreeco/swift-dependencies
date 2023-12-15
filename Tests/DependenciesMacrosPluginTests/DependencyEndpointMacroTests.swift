@@ -92,10 +92,14 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         var endpoint: () -> Bool
             ┬───────────────────
             ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
+
+      Defaults are required so that the macro can generate a default, "unimplemented" version of the dependency. The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+
+      See the documentation for @DependencyClient for more information: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependenciesmacros/dependencyclient()#Restrictions
                ✏️ Insert '= { <#Bool#> }'
       }
       """
-    } fixes: {
+    }fixes: {
       """
       struct Client {
         @DependencyEndpoint
@@ -142,10 +146,14 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         var endpoint: (Int, Bool, String) -> Bool
             ┬────────────────────────────────────
             ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
+
+      Defaults are required so that the macro can generate a default, "unimplemented" version of the dependency. The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+
+      See the documentation for @DependencyClient for more information: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependenciesmacros/dependencyclient()#Restrictions
                ✏️ Insert '= { _, _, _ in <#Bool#> }'
       }
       """
-    } fixes: {
+    }fixes: {
       """
       struct Client {
         @DependencyEndpoint

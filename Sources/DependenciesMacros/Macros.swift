@@ -111,8 +111,8 @@
 /// ``DependencyClient()`` is to generate a default client that you can immediately access as
 /// `ApiClient()`. This is a client such that when any endpoint is invoked in the simulator a
 /// purple runtime warning is triggered, and when it is invoked in tests a test failure is
-/// triggered. This is a great starting point for your dependency, and then you can override it
-/// as needed.
+/// triggered. This is a great starting point for your dependency in tests and SwiftUI previews,
+/// and then you can override it as needed.
 ///
 /// [designing-dependencies]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/designingdependencies
 /// [separating-interface-implementation]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/livepreviewtest#Separating-interface-and-implementation

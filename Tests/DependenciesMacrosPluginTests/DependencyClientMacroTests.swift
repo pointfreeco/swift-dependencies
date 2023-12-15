@@ -72,6 +72,40 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
+  func testLetBinding() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint: () -> Void
+        let config: () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var endpoint: () -> Void
+        let config: () -> Void
+
+        init(
+          endpoint: @escaping () -> Void,
+          config: @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+          self.config = config
+        }
+
+        init(
+          config: @escaping () -> Void
+        ) {
+          self.config = config
+        }
+      }
+      """
+    }
+  }
+
   func testBooleanLiteral() {
     assertMacro {
       """

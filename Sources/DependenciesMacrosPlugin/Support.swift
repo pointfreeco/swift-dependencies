@@ -191,7 +191,7 @@ extension MacroExpansionContext {
           Default value required for non-throwing closure '\(identifier)'
 
           Defaults are required so that the macro can generate a default, "unimplemented" version \
-          of the dependency\(clientName.map { " via \($0)()"} ?? ""). The default value can be \
+          of the dependency\(clientName.map { " via '\($0)()'"} ?? ""). The default value can be \
           anything and does not need to signify a real value. For example, if the endpoint returns \
           a boolean, you can return 'false', or if it returns an array, you can return '[]'.
 

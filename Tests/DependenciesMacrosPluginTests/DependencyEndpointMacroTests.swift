@@ -944,4 +944,50 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
     }
   }
+
+  func testWillSet() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () throws -> Void {
+          willSet {
+            print("!")
+          }
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var foo: () throws -> Void {
+          willSet {
+            print("!")
+          }
+          @storageRestrictions(initializes: _foo)
+          init(initialValue) {
+            _foo = initialValue
+          }
+
+          get {
+            _foo
+          }
+
+          set {
+            _foo = newValue
+          }
+        }
+
+        private var _foo: () throws -> Void = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          throw DependenciesMacros.Unimplemented("foo")
+        } {
+                willSet {
+                    print("!")
+                }
+          }
+      }
+      """
+    }
+  }
 }

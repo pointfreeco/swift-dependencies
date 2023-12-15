@@ -103,16 +103,13 @@
 /// }
 /// ```
 ///
+/// The reason we require a default for these endpoints is so that you immediately get access to
+/// a default client via `APIClient()`, which is handy to use in tests and SwiftUI previews. The
+/// only way to do this, without crashing at runtime, is if you provide defaults for your endpoints.
+///
 /// To fix you must supply a closure that returns a default value. The default value can be anything
 /// and does not need to signify a real value. For example, if the endpoint returns a boolean, you
 /// can return `false`, or if it returns an array, you can return `[]`.`
-///
-/// The reason we require a default for these endpoints is because one of the primary uses of
-/// ``DependencyClient()`` is to generate a default client that you can immediately access as
-/// `ApiClient()`. This is a client such that when any endpoint is invoked in the simulator a
-/// purple runtime warning is triggered, and when it is invoked in tests a test failure is
-/// triggered. This is a great starting point for your dependency in tests and SwiftUI previews,
-/// and then you can override it as needed.
 ///
 /// [designing-dependencies]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/designingdependencies
 /// [separating-interface-implementation]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/livepreviewtest#Separating-interface-and-implementation

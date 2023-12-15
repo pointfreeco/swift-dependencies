@@ -32,6 +32,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       var unimplementedDefault = functionType.unimplementedDefault
       unimplementedDefault.append(placeholder: functionType.returnClause.type.trimmed.description)
       context.diagnose(
+        clientName: declaration.as(StructDeclSyntax.self)?.name.text,
         node: binding,
         identifier: identifier,
         unimplementedDefault: unimplementedDefault

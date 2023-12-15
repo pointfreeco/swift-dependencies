@@ -80,6 +80,40 @@
 /// instances of the client. Creating that initializer manually is quite laborious, and you have to
 /// update it each time a new endpoint is added to the client.
 ///
+/// ## Restrictions
+///
+/// Usage of the ``DependencyClient()`` macro does have a restriction to be aware of. If your
+/// client has a closure that is non-throwing and non-void returning like below, then you
+/// will get a compile-time error letting you know a default must be provided:
+///
+/// ```swift
+/// @DependencyClient
+/// struct APIClient {
+///   // 🛑 Default value required for non-throwing closure 'isFavorite'
+///   var isFavorite: () -> Bool
+/// }
+/// ```
+///
+/// The error also comes with a helpful fix-it to let you know what needs to be done:
+///
+/// ```swift
+/// @DependencyClient
+/// struct APIClient {
+///   var isFavorite: () -> Bool = { <#Bool#> }
+/// }
+/// ```
+///
+/// To fix you must supply a closure that returns a default value. The default value can be anything
+/// and does not need to signify a real value. For example, if the endpoint returns a boolean, you
+/// can return `false`, or if it returns an array, you can return `[]`.`
+///
+/// The reason we require a default for these endpoints is because one of the primary uses of
+/// ``DependencyClient()`` is to generate a default client that you can immediately access as
+/// `ApiClient()`. This is a client such that when any endpoint is invoked in the simulator a
+/// purple runtime warning is triggered, and when it is invoked in tests a test failure is
+/// triggered. This is a great starting point for your dependency, and then you can override it
+/// as needed.
+///
 /// [designing-dependencies]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/designingdependencies
 /// [separating-interface-implementation]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/livepreviewtest#Separating-interface-and-implementation
 @attached(member, names: named(init))

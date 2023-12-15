@@ -178,6 +178,7 @@ extension VariableDeclSyntax {
 
 extension MacroExpansionContext {
   func diagnose(
+    clientName: String? = nil,
     node: PatternBindingSyntax,
     identifier: TokenSyntax,
     unimplementedDefault: ClosureExprSyntax
@@ -188,6 +189,14 @@ extension MacroExpansionContext {
         message: MacroExpansionErrorMessage(
           """
           Default value required for non-throwing closure '\(identifier)'
+
+          Defaults are required so that the macro can generate a default, "unimplemented" version \
+          of the dependency\(clientName.map { " via \($0)()"} ?? ""). The default value can be \
+          anything and does not need to signify a real value. For example, if the endpoint returns \
+          a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+
+          See the documentation for @DependencyClient for more information: \
+          https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependenciesmacros/dependencyclient()#Restrictions
           """
         ),
         fixIt: FixIt(

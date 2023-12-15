@@ -72,6 +72,40 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
+  func testLetBinding() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint: () -> Void
+        let config: () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var endpoint: () -> Void
+        let config: () -> Void
+
+        init(
+          endpoint: @escaping () -> Void,
+          config: @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+          self.config = config
+        }
+
+        init(
+          config: @escaping () -> Void
+        ) {
+          self.config = config
+        }
+      }
+      """
+    }
+  }
+
   func testBooleanLiteral() {
     assertMacro {
       """
@@ -452,6 +486,80 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
+  func testComputedPropertyGet() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        var endpoint: @Sendable () -> Void
+
+        var name: String {
+          get {
+            "Blob"
+          }
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+        @DependencyEndpoint
+        var endpoint: @Sendable () -> Void
+
+        var name: String {
+          get {
+            "Blob"
+          }
+        }
+
+        init(
+          endpoint: @Sendable @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
+
+  func testComputedPropertyWillSet() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        var endpoint: @Sendable () throws -> Void {
+          willSet {
+            print("!")
+          }
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+        @DependencyEndpoint
+        var endpoint: @Sendable () throws -> Void {
+          willSet {
+            print("!")
+          }
+        }
+
+        init(
+          endpoint: @Sendable @escaping () throws -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
+
   func testLet_WithDefault() {
     assertMacro {
       """
@@ -587,7 +695,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           try self.fetch(p0)
         }
 
-        private var _fetch: (_ id: Int) throws -> String = { _ in
+        @available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") private var _fetch: (_ id: Int) throws -> String = { _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'fetch'")
           throw DependenciesMacros.Unimplemented("fetch")
         }
@@ -635,7 +743,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           try self.fetch(p0)
         }
 
-        private var _fetch: (_ id: Int) throws -> String = { _ in
+        @available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") private var _fetch: (_ id: Int) throws -> String = { _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'fetch'")
           throw DependenciesMacros.Unimplemented("fetch")
         }

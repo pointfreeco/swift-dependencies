@@ -14,6 +14,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
   ) throws -> [AttributeSyntax] {
     guard
       let property = member.as(VariableDeclSyntax.self),
+      property.bindingSpecifier.tokenKind != .keyword(.let),
       property.isClosure,
       let binding = property.bindings.first,
       let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed,
@@ -85,7 +86,8 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     var accesses: Set<Access> = Access(modifiers: declaration.modifiers).map { [$0] } ?? []
     for member in declaration.memberBlock.members {
       guard var property = member.decl.as(VariableDeclSyntax.self) else { continue }
-      let isEndpoint = property.hasDependencyEndpointMacroAttached || property.isClosure
+      let isEndpoint = property.hasDependencyEndpointMacroAttached
+        || property.bindingSpecifier.tokenKind != .keyword(.let) && property.isClosure
       let propertyAccess = Access(modifiers: property.modifiers)
       guard
         var binding = property.bindings.first,
@@ -95,8 +97,15 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       if property.bindingSpecifier.tokenKind == .keyword(.let), binding.initializer != nil {
         continue
       }
-      if let accessors = binding.accessorBlock?.accessors, case .getter = accessors {
-        continue
+      if let accessors = binding.accessorBlock?.accessors {
+        switch accessors {
+        case .getter:
+          continue
+        case let .accessors(accessors):
+          if accessors.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
+            continue
+          }
+        }
       }
 
       if propertyAccess == .private, binding.initializer != nil { continue }
@@ -162,6 +171,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         )
       }
       if isEndpoint {
+        binding.accessorBlock = nil
         binding.initializer = nil
       } else if binding.initializer == nil, type.is(OptionalTypeSyntax.self) {
         binding.typeAnnotation?.trailingTrivia = .space

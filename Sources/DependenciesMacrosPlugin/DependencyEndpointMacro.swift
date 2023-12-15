@@ -56,7 +56,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       let property = declaration.as(VariableDeclSyntax.self),
       let binding = property.bindings.first,
       let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed,
-      let type = binding.typeAnnotation?.type.trimmed,
       let functionType = property.asClosureType?.trimmed
     else {
       context.diagnose(
@@ -71,8 +70,8 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       )
       return []
     }
-    let unescapedIdentifier = identifier.trimmedDescription.trimmedBackticks
 
+    let unescapedIdentifier = identifier.trimmedDescription.trimmedBackticks
     var unimplementedDefault: ClosureExprSyntax
     if let initializer = binding.initializer {
       guard var closure = initializer.value.as(ClosureExprSyntax.self)
@@ -189,11 +188,102 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       )
     }
 
-    return decls + [
-      """
-      private var _\(raw: unescapedIdentifier): \(raw: type) = \(unimplementedDefault)
-      """
-    ]
+    let privateProperty = property.privatePrefixed("_", unimplementedDefault: unimplementedDefault)
+
+    return decls + [privateProperty.cast(DeclSyntax.self)]
+  }
+}
+
+extension TokenSyntax {
+  func privatePrefixed(_ prefix: String) -> TokenSyntax {
+    switch tokenKind {
+    case .identifier(let identifier):
+      return TokenSyntax(
+        .identifier(prefix + identifier.trimmedBackticks), leadingTrivia: leadingTrivia,
+        trailingTrivia: trailingTrivia, presence: presence)
+    default:
+      return self
+    }
+  }
+}
+
+extension PatternBindingListSyntax {
+  func privatePrefixed(
+    _ prefix: String, unimplementedDefault: ClosureExprSyntax
+  ) -> PatternBindingListSyntax {
+    var bindings = self.map { $0 }
+    for index in 0..<bindings.count {
+      let binding = bindings[index]
+      if let identifier = binding.pattern.as(IdentifierPatternSyntax.self) {
+        bindings[index] = PatternBindingSyntax(
+          leadingTrivia: binding.leadingTrivia,
+          pattern: IdentifierPatternSyntax(
+            leadingTrivia: identifier.leadingTrivia,
+            identifier: identifier.identifier.privatePrefixed(prefix),
+            trailingTrivia: identifier.trailingTrivia
+          ),
+          typeAnnotation: binding.typeAnnotation,
+          initializer: InitializerClauseSyntax(value: unimplementedDefault),
+          accessorBlock: binding.accessorBlock,
+          trailingComma: binding.trailingComma,
+          trailingTrivia: binding.trailingTrivia
+        )
+      }
+    }
+
+    return PatternBindingListSyntax(bindings)
+  }
+}
+
+extension DeclModifierListSyntax {
+  func privatePrefixed(_ prefix: String) -> DeclModifierListSyntax {
+    let modifier: DeclModifierSyntax = DeclModifierSyntax(name: "private")
+    return [modifier]
+      + filter {
+        switch $0.name.tokenKind {
+        case .keyword(let keyword):
+          switch keyword {
+          case .fileprivate, .private, .internal, .public:
+            return false
+          default:
+            return true
+          }
+        default:
+          return true
+        }
+      }
+  }
+
+  init(keyword: Keyword) {
+    self.init([DeclModifierSyntax(name: .keyword(keyword))])
+  }
+}
+
+extension VariableDeclSyntax {
+  func privatePrefixed(
+    _ prefix: String, unimplementedDefault: ClosureExprSyntax
+  ) -> VariableDeclSyntax {
+    var attributes = self.attributes
+    for index in attributes.indices.reversed() {
+      if case let .attribute(attribute) = attributes[index],
+        attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "DependencyEndpoint"
+      {
+        attributes.remove(at: index)
+      }
+    }
+    return VariableDeclSyntax(
+      leadingTrivia: leadingTrivia,
+      attributes: attributes,
+      modifiers: modifiers.privatePrefixed(prefix),
+      bindingSpecifier: TokenSyntax(
+        bindingSpecifier.tokenKind,
+        leadingTrivia: .space,
+        trailingTrivia: .space,
+        presence: .present
+      ),
+      bindings: bindings.privatePrefixed(prefix, unimplementedDefault: unimplementedDefault),
+      trailingTrivia: trailingTrivia
+    )
   }
 }
 

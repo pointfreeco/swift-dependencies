@@ -80,6 +80,37 @@
 /// instances of the client. Creating that initializer manually is quite laborious, and you have to
 /// update it each time a new endpoint is added to the client.
 ///
+/// ## Restrictions
+///
+/// Usage of the ``DependencyClient()`` macro does have a restriction to be aware of. If your
+/// client has a closure that is non-throwing and non-void returning like below, then you
+/// will get a compile-time error letting you know a default must be provided:
+///
+/// ```swift
+/// @DependencyClient
+/// struct APIClient {
+///   // 🛑 Default value required for non-throwing closure 'isFavorite'
+///   var isFavorite: () -> Bool
+/// }
+/// ```
+///
+/// The error also comes with a helpful fix-it to let you know what needs to be done:
+///
+/// ```swift
+/// @DependencyClient
+/// struct APIClient {
+///   var isFavorite: () -> Bool = { <#Bool#> }
+/// }
+/// ```
+///
+/// The reason we require a default for these endpoints is so that you immediately get access to
+/// a default client via `APIClient()`, which is handy to use in tests and SwiftUI previews. The
+/// only way to do this, without crashing at runtime, is if you provide defaults for your endpoints.
+///
+/// To fix you must supply a closure that returns a default value. The default value can be anything
+/// and does not need to signify a real value. For example, if the endpoint returns a boolean, you
+/// can return `false`, or if it returns an array, you can return `[]`.`
+///
 /// [designing-dependencies]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/designingdependencies
 /// [separating-interface-implementation]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/livepreviewtest#Separating-interface-and-implementation
 @attached(member, names: named(init))

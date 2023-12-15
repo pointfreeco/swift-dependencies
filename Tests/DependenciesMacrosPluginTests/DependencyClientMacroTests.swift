@@ -638,10 +638,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         var endpoint: @Sendable () -> Int
             ┬────────────────────────────
             ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
+
+      Defaults are required so that the macro can generate a default, "unimplemented" version of the dependency via 'Client()'. The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+
+      See the documentation for @DependencyClient for more information: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependenciesmacros/dependencyclient()#Restrictions
                ✏️ Insert '= { <#Int#> }'
       }
       """
-    } fixes: {
+    }fixes: {
       """
       @DependencyClient
       struct Client: Sendable {

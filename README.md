@@ -305,6 +305,6 @@ This library is released under the MIT license. See [LICENSE](LICENSE) for detai
 [scrumdinger]: https://developer.apple.com/tutorials/app-dev-training/getting-started-with-scrumdinger
 [syncups-demo]: https://github.com/pointfreeco/syncups
 [swiftui-nav-gh]: http://github.com/pointfreeco/swiftui-navigation
-[dep-values-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/dependencyvalues
+[dep-values-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/dependencyvalues#dependency-values
 [withdependencies-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/withdependencies(_:operation:)-4uz6m
 [immediate-clock-docs]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/immediateclock

@@ -717,7 +717,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         var bar: () -> Int = unimplemented()
                              ┬──────────────
                              ├─ 🛑 '@DependencyEndpoint' default must be closure literal
-                             ╰─ ⚠️ Do not use 'unimplemented' with '@DependencyEndpoint'; it is a replacement and implements the same runtime functionality as 'unimplemented' at compile time
+                             ╰─ ⚠️ Do not use 'unimplemented' with '@DependencyEndpoint'; the '@DependencyEndpoint' macro already includes the behavior of 'unimplemented'.
       }
       """
     }

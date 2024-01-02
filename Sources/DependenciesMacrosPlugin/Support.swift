@@ -96,8 +96,9 @@ extension InitializerClauseSyntax {
             node: self.value,
             message: MacroExpansionWarningMessage(
               """
-              Do not use 'unimplemented' with '@\(attribute.attributeName)'; it is a replacement and \
-              implements the same runtime functionality as 'unimplemented' at compile time
+              Do not use 'unimplemented' with '@\(attribute.attributeName)'; the \
+              '@\(attribute.attributeName)' macro already includes the behavior of \
+              'unimplemented'.
               """
             )
           )

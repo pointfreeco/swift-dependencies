@@ -875,7 +875,7 @@ final class DependencyClientMacroTests: BaseTestCase {
         var bar: () -> Int = unimplemented()
                              ┬──────────────
                              ├─ 🛑 '@DependencyClient' default must be closure literal
-                             ╰─ ⚠️ Do not use 'unimplemented' with '@DependencyClient'; it is a replacement and implements the same runtime functionality as 'unimplemented' at compile time
+                             ╰─ ⚠️ Do not use 'unimplemented' with '@DependencyClient'; the '@DependencyClient' macro already includes the behavior of 'unimplemented'.
       }
       """
     }

@@ -97,8 +97,40 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
     self.line = line
   }
 
-  public init(_ type: Value.Type) {
-    self.init(\DependencyValues.[ObjectIdentifier(Value.self)])
+  /// Creates a dependency property to read a dependency object.
+  ///
+  /// Don't call this initializer directly. Instead, declare a property with the `Dependency`
+  /// property wrapper, and provide the dependency key of the value that the property should
+  /// reflect.
+  ///
+  /// For example, given a dependency key:
+  ///
+  /// ```swift
+  /// final class Settings: DependencyKey {
+  ///   static let liveValue = Settings()
+  ///
+  ///   // ...
+  /// }
+  /// ```
+  ///
+  /// One can access the dependency using this property wrapper:
+  ///
+  /// ```swift
+  /// final class FeatureModel: ObservableObject {
+  ///   @Dependency(Settings.self) var settings
+  ///
+  ///   // ...
+  /// }
+  /// ```
+  ///
+  /// - Parameter key: A dependency key to a specific resulting value.
+  public init<Key: TestDependencyKey>(
+    _ key: Key.Type,
+    file: StaticString = #file,
+    fileID: StaticString = #fileID,
+    line: UInt = #line
+  ) where Key.Value == Value {
+    self.init(\DependencyValues.[\Key.self], file: file, fileID: fileID, line: line)
   }
 
   /// The current value of the dependency property.
@@ -120,6 +152,25 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
         DependencyValues._current[keyPath: self.keyPath]
       }
     #endif
+  }
+}
+
+extension Dependency: Equatable where Value: Equatable {
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.wrappedValue == rhs.wrappedValue
+  }
+}
+
+extension Dependency: Hashable where Value: Hashable {
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(self.wrappedValue)
+  }
+}
+
+fileprivate extension DependencyValues {
+  subscript<Key: TestDependencyKey>(_: KeyPath<Key, Key>) -> Key.Value {
+    get { self[Key.self] }
+    set { self[Key.self] = newValue }
   }
 }
 

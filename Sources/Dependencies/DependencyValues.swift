@@ -101,23 +101,9 @@ public struct DependencyValues: Sendable {
   }
 
   @_disfavoredOverload
-  public subscript<Value: Sendable>(type: Value.Type) -> Value {
-    get {
-      self[ObjectIdentifier(type)]
-    }
-    set {
-      self[ObjectIdentifier(type)] = newValue
-    }
-  }
-
-  subscript<Value: Sendable>(id: ObjectIdentifier) -> Value {
-    get {
-      // TODO: better error messaging for type mismatch
-      self.storage[id]?.base as! Value
-    }
-    set {
-      self.storage[id] = AnySendable(newValue)
-    }
+  public subscript<Key: TestDependencyKey>(type: Key.Type) -> Key.Value {
+    get { self[type] }
+    set { self[type] = newValue }
   }
 
   /// Accesses the dependency value associated with a custom key.

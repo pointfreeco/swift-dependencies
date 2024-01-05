@@ -207,13 +207,16 @@ final class DependencyTests: XCTestCase {
     XCTAssertEqual(user2.id, UUID(1))
   }
 
-  func testOptionalDependency() {
-    @Dependency(Int?.self) var int
+  func testDependencyType() {
+    struct MyDependency: TestDependencyKey {
+      static var testValue: Int { 0 }
+    }
+    @Dependency(MyDependency.self) var int
 
-    XCTAssertNil(int)
+    XCTAssertEqual(int, 0)
 
     withDependencies {
-      $0[Int?.self] = 42
+      $0[MyDependency.self] = 42
     } operation: {
       XCTAssertEqual(int, 42)
     }

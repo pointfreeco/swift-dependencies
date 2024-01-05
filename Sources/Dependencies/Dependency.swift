@@ -1,21 +1,3 @@
-struct TrivialHashable<T>: Hashable, DependencyKey {
-  func hash(into hasher: inout Hasher) {
-    hasher.combine(ObjectIdentifier(T.self))
-  }
-  static func == (lhs: Self, rhs: Self) -> Bool {
-    true
-  }
-  static var liveValue: T {
-    fatalError()
-  }
-}
-
-extension Dependency {
-  init(_ type: Value.Type) {
-    self.init(\DependencyValues.[TrivialHashable<Value>()])
-  }
-}
-
 /// A property wrapper for accessing dependencies.
 ///
 /// All dependencies are stored in ``DependencyValues`` and one uses this property wrapper to gain
@@ -113,6 +95,10 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
     self.file = file
     self.fileID = fileID
     self.line = line
+  }
+
+  public init(_ type: Value.Type) {
+    self.init(\DependencyValues.[ObjectIdentifier(Value.self)])
   }
 
   /// The current value of the dependency property.

@@ -100,6 +100,17 @@ public struct DependencyValues: Sendable {
     #endif
   }
 
+  subscript<Value: Sendable>(
+    key: TrivialHashable<Value>
+  ) -> Value {
+    get {
+      self.storage[ObjectIdentifier(TrivialHashable<Value>.self)]!.base as! Value
+    }
+    set {
+      self.storage[ObjectIdentifier(TrivialHashable<Value>.self)] = AnySendable(newValue)
+    }
+  }
+
   /// Accesses the dependency value associated with a custom key.
   ///
   /// This subscript is typically only used when adding a computed property to ``DependencyValues``

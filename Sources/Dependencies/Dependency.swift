@@ -1,3 +1,21 @@
+struct TrivialHashable<T>: Hashable, DependencyKey {
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(T.self))
+  }
+  static func == (lhs: Self, rhs: Self) -> Bool {
+    true
+  }
+  static var liveValue: T {
+    fatalError()
+  }
+}
+
+extension Dependency {
+  init(_ type: Value.Type) {
+    self.init(\DependencyValues.[TrivialHashable<Value>()])
+  }
+}
+
 /// A property wrapper for accessing dependencies.
 ///
 /// All dependencies are stored in ``DependencyValues`` and one uses this property wrapper to gain

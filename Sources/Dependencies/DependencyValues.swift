@@ -344,7 +344,11 @@ private final class CachedValues: @unchecked Sendable {
             )
           }
         #endif
-        return Key.testValue
+        let value = Key.testValue
+        if !DependencyValues.isSetting {
+          self.cached[cacheKey] = AnySendable(value)
+        }
+        return value
       }
 
       self.cached[cacheKey] = AnySendable(value)

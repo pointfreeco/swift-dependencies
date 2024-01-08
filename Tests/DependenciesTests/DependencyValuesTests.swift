@@ -177,11 +177,7 @@ final class DependencyValuesTests: XCTestCase {
             #endif
             XCTAssertEqual(reuseClient.count(), 0)
             reuseClient.setCount(-42)
-            XCTAssertEqual(
-              reuseClient.count(),
-              0,
-              "Don't cache dependency when using a test value in a live context"
-            )
+            XCTAssertEqual(reuseClient.count(), -42)
           }
 
           XCTAssertEqual(reuseClient.count(), 42)

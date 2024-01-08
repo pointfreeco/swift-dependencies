@@ -58,7 +58,7 @@
 /// implementation module.
 ///
 /// See the <doc:LivePreviewTest> article for more information.
-public protocol DependencyKey: TestDependencyKey {
+public protocol DependencyKey<Value>: TestDependencyKey {
   /// The live value for the dependency key.
   ///
   /// This is the value used by default when running the application in a simulator or on a device.
@@ -118,7 +118,7 @@ public protocol DependencyKey: TestDependencyKey {
 /// return a default value suitable for Xcode previews, or the ``testValue``, if left unimplemented.
 ///
 /// See ``DependencyKey`` to define a static, default value for the live application.
-public protocol TestDependencyKey {
+public protocol TestDependencyKey<Value> {
   /// The associated type representing the type of the dependency key's value.
   associatedtype Value: Sendable = Self
 

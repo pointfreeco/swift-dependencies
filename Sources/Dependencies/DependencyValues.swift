@@ -325,10 +325,14 @@ private final class CachedValues: @unchecked Sendable {
                 """
             )
 
+            var argument: String {
+              "\(function)" == "subscript(_:)" ? "\(typeName(Key.self)).self" : "\\.\(function)"
+            }
+
             runtimeWarn(
               """
-              "@Dependency(\\.\(function))" has no live implementation, but was accessed from a \
-              live context.
+              "@Dependency(\(argument))" has no live implementation, but was accessed from a live \
+              context.
 
               \(dependencyDescription)
 

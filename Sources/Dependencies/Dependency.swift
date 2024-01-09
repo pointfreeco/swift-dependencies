@@ -155,18 +155,6 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
   }
 }
 
-extension Dependency: Equatable where Value: Equatable {
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.wrappedValue == rhs.wrappedValue
-  }
-}
-
-extension Dependency: Hashable where Value: Hashable {
-  public func hash(into hasher: inout Hasher) {
-    hasher.combine(self.wrappedValue)
-  }
-}
-
 fileprivate extension DependencyValues {
   subscript<Key: TestDependencyKey>(_: KeyPath<Key, Key>) -> Key.Value {
     get { self[Key.self] }

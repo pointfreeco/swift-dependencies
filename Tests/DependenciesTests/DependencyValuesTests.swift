@@ -604,9 +604,9 @@ final class DependencyValuesTests: XCTestCase {
       let value = await cachedDependency.increment()
       // NB: Wasm has different behavior here.
       #if os(WASI)
-          XCTAssertEqual(value, 2)
+        XCTAssertEqual(value, 2)
       #else
-          XCTAssertEqual(value, 1)
+        XCTAssertEqual(value, 1)
       #endif
     }
   #endif

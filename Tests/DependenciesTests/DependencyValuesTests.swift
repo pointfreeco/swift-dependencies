@@ -589,32 +589,22 @@ final class DependencyValuesTests: XCTestCase {
   }
 
   #if DEBUG
-    // NB: Wasm has different behavior here.
-    #if os(WASI)
-      func testCachePollution1() async {
-        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
-        let value = await cachedDependency.increment()
-        XCTAssertEqual(value, 1)
-      }
+    func testCachePollution1() async {
+      @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+      let value = await cachedDependency.increment()
+      XCTAssertEqual(value, 1)
+    }
 
-      func testCachePollution2() async {
-        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
-        let value = await cachedDependency.increment()
+    func testCachePollution2() async {
+      @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+      let value = await cachedDependency.increment()
+      // NB: Wasm has different behavior here.
+      #if os(WASI)
         XCTAssertEqual(value, 2)
-      }
-    #else
-      func testCachePollution1() async {
-        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
-        let value = await cachedDependency.increment()
+      #else
         XCTAssertEqual(value, 1)
-      }
-
-      func testCachePollution2() async {
-        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
-        let value = await cachedDependency.increment()
-        XCTAssertEqual(value, 1)
-      }
-    #endif
+      #endif
+    }
   #endif
 
   func testThreadSafety() async {

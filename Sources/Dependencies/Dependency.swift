@@ -171,8 +171,8 @@ private struct HashableType<T>: Hashable {
   }
 }
 
-fileprivate extension DependencyValues {
-  subscript<Key: TestDependencyKey>(key: HashableType<Key>) -> Key.Value {
+extension DependencyValues {
+  fileprivate subscript<Key: TestDependencyKey>(key: HashableType<Key>) -> Key.Value {
     get { self[Key.self, file: key.file, line: key.line] }
     set { self[Key.self, file: key.file, line: key.line] = newValue }
   }

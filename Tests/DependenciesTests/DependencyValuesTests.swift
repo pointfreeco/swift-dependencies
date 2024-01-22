@@ -416,7 +416,7 @@ final class DependencyValuesTests: XCTestCase {
       }
 
       model.doSomething(expectation: expectation)
-      self.wait(for: [expectation], timeout: 1)
+      _ = { self.wait(for: [expectation], timeout: 1) }()
     }
 
     func testEscapingInFeatureModel_NotPropagated() async {

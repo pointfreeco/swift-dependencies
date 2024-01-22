@@ -19,7 +19,7 @@ let package = Package(
     .library(
       name: "DependenciesMacros",
       targets: ["DependenciesMacros"]
-    )
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-syntax", from: "509.0.0"),
@@ -31,6 +31,12 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0"),
   ],
   targets: [
+    .target(
+      name: "DependenciesTestObserver",
+      dependencies: [
+        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+      ]
+    ),
     .target(
       name: "Dependencies",
       dependencies: [
@@ -83,6 +89,16 @@ let package = Package(
   package.dependencies.append(
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
   )
+#endif
+
+#if !os(macOS) && !os(WASI)
+package.products.append(
+  .library(
+    name: "DependenciesTestObserver",
+    type: .dynamic,
+    targets: ["DependenciesTestObserver"]
+  )
+)
 #endif
 
 //for target in package.targets {

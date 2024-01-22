@@ -1,5 +1,38 @@
 import Foundation
 import XCTestDynamicOverlay
+#if os(Windows)
+  import WinSDK
+#elseif os(Linux)
+  import Glibc
+#endif
+// WASI does not support dynamic linking
+#if os(WASI)
+  import XCTest
+#endif
+
+#if _runtime(_ObjC)
+  extension DispatchQueue {
+    fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
+      if Thread.isMainThread {
+        return block()
+      } else {
+        return Self.main.sync(execute: block)
+      }
+    }
+  }
+
+  final class TestObserver: NSObject {}
+#elseif os(WASI)
+  final class TestObserver: NSObject, XCTestObservation {
+    private let resetCache: @convention(c) () -> Void
+    internal init(_ resetCache: @convention(c) () -> Void) {
+      self.resetCache = resetCache
+    }
+    public func testCaseWillStart(_ testCase: XCTestCase) {
+      self.resetCache()
+    }
+  }
+#endif
 
 /// A collection of dependencies that is globally available.
 ///
@@ -94,8 +127,52 @@ public struct DependencyValues: Sendable {
   /// provide access only to default values. Instead, you rely on the dependency values' instance
   /// that the library manages for you when you use the ``Dependency`` property wrapper.
   public init() {
-    #if canImport(XCTest)
-      _ = setUpTestObservers
+    #if _runtime(_ObjC)
+      DispatchQueue.mainSync {
+        guard
+          let XCTestObservation = objc_getProtocol("XCTestObservation"),
+          let XCTestObservationCenter = NSClassFromString("XCTestObservationCenter"),
+          let XCTestObservationCenter = XCTestObservationCenter as Any as? NSObjectProtocol,
+          let XCTestObservationCenterShared =
+            XCTestObservationCenter
+            .perform(Selector(("sharedTestObservationCenter")))?
+            .takeUnretainedValue()
+        else { return }
+        let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
+          DependencyValues._current.cachedValues.cached = [:]
+        }
+        let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
+        class_addMethod(
+          TestObserver.self, Selector(("testCaseWillStart:")), testCaseWillStartImp, nil)
+        class_addProtocol(TestObserver.self, XCTestObservation)
+        _ =
+          XCTestObservationCenterShared
+          .perform(Selector(("addTestObserver:")), with: TestObserver())
+      }
+    #elseif os(WASI)
+      if _XCTIsTesting {
+        XCTestObservationCenter.shared.addTestObserver(TestObserver({
+          DependencyValues._current.cachedValues.cached = [:]
+        }))
+      }
+    #else
+      typealias RegisterTestObserver = @convention(thin) (@convention(c) () -> Void) -> Void
+      var pRegisterTestObserver: RegisterTestObserver? = nil
+
+      #if os(Windows)
+        let hModule = LoadLibraryA("DependenciesTestObserver.dll")
+        if let hModule, let pAddress = GetProcAddress(hModule, "$s24DependenciesTestObserver08registerbC0yyyyXCF") {
+          pRegisterTestObserver = unsafeBitCast(pAddress, to: RegisterTestObserver.self)
+        }
+      #else
+        let hModule: UnsafeMutableRawPointer? = dlopen("libDependenciesTestObserver.so", RTLD_NOW)
+        if let hModule, let pAddress = dlsym(hModule, "$s24DependenciesTestObserver08registerbC0yyyyXCF") {
+          pRegisterTestObserver = unsafeBitCast(pAddress, to: RegisterTestObserver.self)
+        }
+      #endif
+      pRegisterTestObserver?({
+        DependencyValues._current.cachedValues.cached = [:]
+      })
     #endif
   }
 
@@ -363,59 +440,3 @@ private final class CachedValues: @unchecked Sendable {
     }
   }
 }
-
-// NB: We cannot statically link/load XCTest on Apple platforms, so we dynamically load things
-//     instead on platforms where XCTest is available.
-#if canImport(XCTest)
-  private let setUpTestObservers: Void = {
-    if _XCTIsTesting {
-      #if canImport(ObjectiveC)
-        DispatchQueue.mainSync {
-          guard
-            let XCTestObservation = objc_getProtocol("XCTestObservation"),
-            let XCTestObservationCenter = NSClassFromString("XCTestObservationCenter"),
-            let XCTestObservationCenter = XCTestObservationCenter as Any as? NSObjectProtocol,
-            let XCTestObservationCenterShared =
-              XCTestObservationCenter
-              .perform(Selector(("sharedTestObservationCenter")))?
-              .takeUnretainedValue()
-          else { return }
-          let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
-            DependencyValues._current.cachedValues.cached = [:]
-          }
-          let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
-          class_addMethod(
-            TestObserver.self, Selector(("testCaseWillStart:")), testCaseWillStartImp, nil)
-          class_addProtocol(TestObserver.self, XCTestObservation)
-          _ =
-            XCTestObservationCenterShared
-            .perform(Selector(("addTestObserver:")), with: TestObserver())
-        }
-      #else
-        XCTestObservationCenter.shared.addTestObserver(TestObserver())
-      #endif
-    }
-  }()
-
-  #if canImport(ObjectiveC)
-    private final class TestObserver: NSObject {}
-
-    extension DispatchQueue {
-      fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
-        if Thread.isMainThread {
-          return block()
-        } else {
-          return Self.main.sync(execute: block)
-        }
-      }
-    }
-  #else
-    import XCTest
-
-    private final class TestObserver: NSObject, XCTestObservation {
-      func testCaseWillStart(_ testCase: XCTestCase) {
-        DependencyValues._current.cachedValues.cached = [:]
-      }
-    }
-  #endif
-#endif

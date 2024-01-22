@@ -1,7 +1,6 @@
 import Dependencies
 import XCTest
 
-@MainActor
 final class DependencyValuesTests: XCTestCase {
   // NB: It doesn't seem possible to detect a test context from WASM:
   //     https://github.com/swiftwasm/carton/issues/400
@@ -395,6 +394,8 @@ final class DependencyValuesTests: XCTestCase {
       self.wait(for: [expectation], timeout: 1)
     }
 
+  #if !os(Linux)
+    @MainActor
     func testEscapingInFeatureModel_InstanceVariablePropagated() {
       let expectation = self.expectation(description: "escape")
 
@@ -418,6 +419,7 @@ final class DependencyValuesTests: XCTestCase {
       model.doSomething(expectation: expectation)
       self.wait(for: [expectation], timeout: 1)
     }
+  #endif
 
     func testEscapingInFeatureModel_NotPropagated() async {
       let expectation = self.expectation(description: "escape")

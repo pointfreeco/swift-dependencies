@@ -1,5 +1,6 @@
 import Foundation
 import XCTestDynamicOverlay
+
 #if os(Windows)
   import WinSDK
 #elseif os(Linux)
@@ -151,9 +152,10 @@ public struct DependencyValues: Sendable {
       }
     #elseif os(WASI)
       if _XCTIsTesting {
-        XCTestObservationCenter.shared.addTestObserver(TestObserver({
-          DependencyValues._current.cachedValues.cached = [:]
-        }))
+        XCTestObservationCenter.shared.addTestObserver(
+          TestObserver({
+            DependencyValues._current.cachedValues.cached = [:]
+          }))
       }
     #else
       typealias RegisterTestObserver = @convention(thin) (@convention(c) () -> Void) -> Void
@@ -161,12 +163,16 @@ public struct DependencyValues: Sendable {
 
       #if os(Windows)
         let hModule = LoadLibraryA("DependenciesTestObserver.dll")
-        if let hModule, let pAddress = GetProcAddress(hModule, "$s24DependenciesTestObserver08registerbC0yyyyXCF") {
+        if let hModule,
+          let pAddress = GetProcAddress(hModule, "$s24DependenciesTestObserver08registerbC0yyyyXCF")
+        {
           pRegisterTestObserver = unsafeBitCast(pAddress, to: RegisterTestObserver.self)
         }
       #else
         let hModule: UnsafeMutableRawPointer? = dlopen("libDependenciesTestObserver.so", RTLD_NOW)
-        if let hModule, let pAddress = dlsym(hModule, "$s24DependenciesTestObserver08registerbC0yyyyXCF") {
+        if let hModule,
+          let pAddress = dlsym(hModule, "$s24DependenciesTestObserver08registerbC0yyyyXCF")
+        {
           pRegisterTestObserver = unsafeBitCast(pAddress, to: RegisterTestObserver.self)
         }
       #endif

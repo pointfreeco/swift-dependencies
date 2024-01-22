@@ -394,9 +394,7 @@ final class DependencyValuesTests: XCTestCase {
       self.wait(for: [expectation], timeout: 1)
     }
 
-    @MainActor
-    func testEscapingInFeatureModel_InstanceVariablePropagated() {
-      let expectation = self.expectation(description: "escape")
+    func testEscapingInFeatureModel_InstanceVariablePropagated() async {
 
       @MainActor
       class FeatureModel /*: ObservableObject*/ {
@@ -409,14 +407,17 @@ final class DependencyValuesTests: XCTestCase {
         }
       }
 
-      let model = withDependencies {
-        $0.fullDependency.value = 42
-      } operation: {
-        FeatureModel()
-      }
+      await MainActor.run {
+        let expectation = self.expectation(description: "escape")
+        let model = withDependencies {
+          $0.fullDependency.value = 42
+        } operation: {
+          FeatureModel()
+        }
 
-      model.doSomething(expectation: expectation)
-      _ = { self.wait(for: [expectation], timeout: 1) }()
+        model.doSomething(expectation: expectation)
+        self.wait(for: [expectation], timeout: 1)
+      }
     }
 
     func testEscapingInFeatureModel_NotPropagated() async {

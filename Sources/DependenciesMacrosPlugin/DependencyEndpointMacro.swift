@@ -1,11 +1,10 @@
 import SwiftDiagnostics
 import SwiftOperators
 import SwiftParser
+import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacros
-
-@preconcurrency import SwiftSyntax
 
 public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
   public static func expansion<D: DeclSyntaxProtocol, C: MacroExpansionContext>(

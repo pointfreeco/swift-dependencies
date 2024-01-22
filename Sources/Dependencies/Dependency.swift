@@ -130,7 +130,12 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
     fileID: StaticString = #fileID,
     line: UInt = #line
   ) where Key.Value == Value {
-    self.init(\DependencyValues.[\Key.self], file: file, fileID: fileID, line: line)
+    self.init(
+      \DependencyValues.[HashableType<Key>(file: file, line: line)],
+      file: file,
+      fileID: fileID,
+      line: line
+    )
   }
 
   /// The current value of the dependency property.
@@ -155,10 +160,21 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
   }
 }
 
+private struct HashableType<T>: Hashable {
+  let file: StaticString
+  let line: UInt
+  static func == (lhs: Self, rhs: Self) -> Bool {
+    true
+  }
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(T.self))
+  }
+}
+
 fileprivate extension DependencyValues {
-  subscript<Key: TestDependencyKey>(_: KeyPath<Key, Key>) -> Key.Value {
-    get { self[Key.self] }
-    set { self[Key.self] = newValue }
+  subscript<Key: TestDependencyKey>(key: HashableType<Key>) -> Key.Value {
+    get { self[Key.self, file: key.file, line: key.line] }
+    set { self[Key.self, file: key.file, line: key.line] = newValue }
   }
 }
 

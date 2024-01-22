@@ -82,9 +82,7 @@ import XCTestDynamicOverlay
 /// Read the article <doc:RegisteringDependencies> for more information.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
-  #if DEBUG
-    @TaskLocal static var isSetting = false
-  #endif
+  @TaskLocal static var isSetting = false
   @TaskLocal static var currentDependency = CurrentDependency()
 
   fileprivate var cachedValues = CachedValues()

@@ -72,6 +72,40 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
+  func testLetBinding() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint: () -> Void
+        let config: () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var endpoint: () -> Void
+        let config: () -> Void
+
+        init(
+          endpoint: @escaping () -> Void,
+          config: @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+          self.config = config
+        }
+
+        init(
+          config: @escaping () -> Void
+        ) {
+          self.config = config
+        }
+      }
+      """
+    }
+  }
+
   func testBooleanLiteral() {
     assertMacro {
       """
@@ -236,6 +270,33 @@ final class DependencyClientMacroTests: BaseTestCase {
           config: Bool
         ) {
           self.config = config
+        }
+      }
+      """
+    }
+  }
+
+  func testDefaultValue() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint: () -> Int = { 42 }
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var endpoint: () -> Int = { 42 }
+
+        init(
+          endpoint: @escaping () -> Int
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
         }
       }
       """
@@ -425,6 +486,80 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
+  func testComputedPropertyGet() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        var endpoint: @Sendable () -> Void
+
+        var name: String {
+          get {
+            "Blob"
+          }
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+        @DependencyEndpoint
+        var endpoint: @Sendable () -> Void
+
+        var name: String {
+          get {
+            "Blob"
+          }
+        }
+
+        init(
+          endpoint: @Sendable @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
+
+  func testComputedPropertyWillSet() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        var endpoint: @Sendable () throws -> Void {
+          willSet {
+            print("!")
+          }
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+        @DependencyEndpoint
+        var endpoint: @Sendable () throws -> Void {
+          willSet {
+            print("!")
+          }
+        }
+
+        init(
+          endpoint: @Sendable @escaping () throws -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
+
   func testLet_WithDefault() {
     assertMacro {
       """
@@ -503,6 +638,10 @@ final class DependencyClientMacroTests: BaseTestCase {
         var endpoint: @Sendable () -> Int
             ┬────────────────────────────
             ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
+
+      Defaults are required so that the macro can generate a default, "unimplemented" version of the dependency via 'Client()'. The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+
+      See the documentation for @DependencyClient for more information: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependenciesmacros/dependencyclient()#Restrictions
                ✏️ Insert '= { <#Int#> }'
       }
       """
@@ -560,7 +699,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           try self.fetch(p0)
         }
 
-        private var _fetch: (_ id: Int) throws -> String = { _ in
+        @available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") private var _fetch: (_ id: Int) throws -> String = { _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'fetch'")
           throw DependenciesMacros.Unimplemented("fetch")
         }
@@ -608,7 +747,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           try self.fetch(p0)
         }
 
-        private var _fetch: (_ id: Int) throws -> String = { _ in
+        @available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") private var _fetch: (_ id: Int) throws -> String = { _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'fetch'")
           throw DependenciesMacros.Unimplemented("fetch")
         }
@@ -716,6 +855,85 @@ final class DependencyClientMacroTests: BaseTestCase {
         ) {
         self.value = value
         }= Value()
+      }
+      """
+    }
+  }
+
+  func testNonClosureDefault() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Foo {
+        var bar: () -> Int = unimplemented()
+      }
+      """
+    } diagnostics: {
+      """
+      @DependencyClient
+      struct Foo {
+        var bar: () -> Int = unimplemented()
+                             ┬──────────────
+                             ├─ 🛑 '@DependencyClient' default must be closure literal
+                             ╰─ ⚠️ Do not use 'unimplemented' with '@DependencyClient'; the '@DependencyClient' macro already includes the behavior of 'unimplemented'.
+      }
+      """
+    }
+  }
+
+  func testFatalError() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Blah {
+        public var foo: () -> String = { fatalError() }
+        public var bar: () -> String = { fatalError("Goodbye") }
+      }
+      """
+    } diagnostics: {
+      """
+      @DependencyClient
+      struct Blah {
+        public var foo: () -> String = { fatalError() }
+                                         ┬───────────
+                                         ╰─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+                                            ✏️ Wrap in a synchronously executed closure to silence this warning
+        public var bar: () -> String = { fatalError("Goodbye") }
+                                         ┬────────────────────
+                                         ╰─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+                                            ✏️ Wrap in a synchronously executed closure to silence this warning
+      }
+      """
+    } fixes: {
+      """
+      @DependencyClient
+      struct Blah {
+        public var foo: () -> String = { { fatalError() }() }
+        public var bar: () -> String = { { fatalError("Goodbye") }() }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { { fatalError() }() }
+        @DependencyEndpoint
+        public var bar: () -> String = { { fatalError("Goodbye") }() }
+
+        public init(
+          foo: @escaping () -> String,
+          bar: @escaping () -> String
+        ) {
+          self.foo = foo
+          self.bar = bar
+        }
+
+        public init() {
+        }
       }
       """
     }

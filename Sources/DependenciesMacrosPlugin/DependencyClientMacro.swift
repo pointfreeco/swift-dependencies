@@ -14,6 +14,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
   ) throws -> [AttributeSyntax] {
     guard
       let property = member.as(VariableDeclSyntax.self),
+      property.bindingSpecifier.tokenKind != .keyword(.let),
       property.isClosure,
       let binding = property.bindings.first,
       let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed,
@@ -21,15 +22,18 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     else {
       return []
     }
-    // NB: Ideally `@DependencyEndpoint` would handle this for us, but there's a compiler crash.
-    if binding.initializer == nil,
-      functionType.effectSpecifiers?.throwsSpecifier == nil,
+    // NB: Ideally `@DependencyEndpoint` would handle this for us, but there are compiler crashes
+    if let initializer = binding.initializer {
+      guard try !initializer.diagnose(node, context: context).earlyOut
+      else { return [] }
+    } else if functionType.effectSpecifiers?.throwsSpecifier == nil,
       !functionType.isVoid,
       !functionType.isOptional
     {
       var unimplementedDefault = functionType.unimplementedDefault
       unimplementedDefault.append(placeholder: functionType.returnClause.type.trimmed.description)
       context.diagnose(
+        clientName: declaration.as(StructDeclSyntax.self)?.name.text,
         node: binding,
         identifier: identifier,
         unimplementedDefault: unimplementedDefault
@@ -83,7 +87,9 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     var accesses: Set<Access> = Access(modifiers: declaration.modifiers).map { [$0] } ?? []
     for member in declaration.memberBlock.members {
       guard var property = member.decl.as(VariableDeclSyntax.self) else { continue }
-      let isEndpoint = property.hasDependencyEndpointMacroAttached || property.isClosure
+      let isEndpoint =
+        property.hasDependencyEndpointMacroAttached
+        || property.bindingSpecifier.tokenKind != .keyword(.let) && property.isClosure
       let propertyAccess = Access(modifiers: property.modifiers)
       guard
         var binding = property.bindings.first,
@@ -93,8 +99,15 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       if property.bindingSpecifier.tokenKind == .keyword(.let), binding.initializer != nil {
         continue
       }
-      if let accessors = binding.accessorBlock?.accessors, case .getter = accessors {
-        continue
+      if let accessors = binding.accessorBlock?.accessors {
+        switch accessors {
+        case .getter:
+          continue
+        case let .accessors(accessors):
+          if accessors.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
+            continue
+          }
+        }
       }
 
       if propertyAccess == .private, binding.initializer != nil { continue }
@@ -156,12 +169,14 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         binding.pattern.trailingTrivia = ""
         binding.typeAnnotation = TypeAnnotationSyntax(
           colon: .colonToken(trailingTrivia: .space),
-          type: type
+          type: type.with(\.trailingTrivia, .space)
         )
       }
       if isEndpoint {
+        binding.accessorBlock = nil
         binding.initializer = nil
       } else if binding.initializer == nil, type.is(OptionalTypeSyntax.self) {
+        binding.typeAnnotation?.trailingTrivia = .space
         binding.initializer = InitializerClauseSyntax(
           equal: .equalToken(trailingTrivia: .space),
           value: NilLiteralExprSyntax()

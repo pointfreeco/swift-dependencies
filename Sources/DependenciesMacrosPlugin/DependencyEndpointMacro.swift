@@ -21,6 +21,11 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     else {
       return []
     }
+    if let initializer = binding.initializer,
+      try initializer.diagnose(node, context: context).earlyOut
+    {
+      return []
+    }
 
     return [
       """
@@ -51,7 +56,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       let property = declaration.as(VariableDeclSyntax.self),
       let binding = property.bindings.first,
       let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed,
-      let type = binding.typeAnnotation?.type.trimmed,
       let functionType = property.asClosureType?.trimmed
     else {
       context.diagnose(
@@ -66,26 +70,29 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       )
       return []
     }
-    let unescapedIdentifier = identifier.trimmedDescription.trimmedBackticks
 
+    let unescapedIdentifier = identifier.trimmedDescription.trimmedBackticks
     var unimplementedDefault: ClosureExprSyntax
     if let initializer = binding.initializer {
       guard var closure = initializer.value.as(ClosureExprSyntax.self)
       else {
-        // TODO: Diagnose?
         return []
       }
-      if !functionType.isVoid,
-        closure.statements.count == 1,
+      if closure.statements.count == 1,
         var statement = closure.statements.first,
-        let expression = statement.item.as(ExprSyntax.self)
+        let expression = statement.item.as(ExprSyntax.self),
+        !functionType.isVoid
+          || expression.as(FunctionCallExprSyntax.self)?.calledExpression.is(ClosureExprSyntax.self)
+            == true
       {
-        statement.item = CodeBlockItemSyntax.Item(
-          ReturnStmtSyntax(
-            returnKeyword: .keyword(.return, trailingTrivia: .space),
-            expression: expression
+        if !statement.item.description.hasPrefix("fatalError(") {
+          statement.item = CodeBlockItemSyntax.Item(
+            ReturnStmtSyntax(
+              returnKeyword: .keyword(.return, trailingTrivia: .space),
+              expression: expression.trimmed
+            )
           )
-        )
+        }
         closure.statements = closure.statements.with(\.[closure.statements.startIndex], statement)
       }
       unimplementedDefault = closure
@@ -121,7 +128,11 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       """,
       at: unimplementedDefault.statements.startIndex
     )
-
+    for index in unimplementedDefault.statements.indices {
+      unimplementedDefault.statements[index] = unimplementedDefault.statements[index]
+        .trimmed
+        .with(\.leadingTrivia, .newline)
+    }
     var effectSpecifiers = ""
     if functionType.effectSpecifiers?.throwsSpecifier != nil {
       effectSpecifiers.append("try ")
@@ -155,7 +166,17 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
         parameters[i].secondName = TokenSyntax(stringLiteral: "p\(offset)")
         parameters[i].colon = parameters[i].colon ?? .colonToken(trailingTrivia: .space)
       }
-      let appliedParameters = (0..<parameters.count).map { "p\($0)" }.joined(separator: ", ")
+      let appliedParameters =
+        parameters
+        .enumerated()
+        .map {
+          $1.isInout
+            ? "&p\($0)"
+            : $1.isAutoclosure
+              ? "p\($0)()"
+              : "p\($0)"
+        }
+        .joined(separator: ", ")
       decls.append(
         """
         \(raw: attributes.map { "@\($0) " }.joined())\
@@ -167,11 +188,102 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       )
     }
 
-    return decls + [
-      """
-      private var _\(raw: unescapedIdentifier): \(raw: type) = \(unimplementedDefault)
-      """
-    ]
+    let privateProperty = property.privatePrefixed("_", unimplementedDefault: unimplementedDefault)
+
+    return decls + [privateProperty.cast(DeclSyntax.self)]
+  }
+}
+
+extension TokenSyntax {
+  func privatePrefixed(_ prefix: String) -> TokenSyntax {
+    switch tokenKind {
+    case .identifier(let identifier):
+      return TokenSyntax(
+        .identifier(prefix + identifier.trimmedBackticks), leadingTrivia: leadingTrivia,
+        trailingTrivia: trailingTrivia, presence: presence)
+    default:
+      return self
+    }
+  }
+}
+
+extension PatternBindingListSyntax {
+  func privatePrefixed(
+    _ prefix: String, unimplementedDefault: ClosureExprSyntax
+  ) -> PatternBindingListSyntax {
+    var bindings = self.map { $0 }
+    for index in 0..<bindings.count {
+      let binding = bindings[index]
+      if let identifier = binding.pattern.as(IdentifierPatternSyntax.self) {
+        bindings[index] = PatternBindingSyntax(
+          leadingTrivia: binding.leadingTrivia,
+          pattern: IdentifierPatternSyntax(
+            leadingTrivia: identifier.leadingTrivia,
+            identifier: identifier.identifier.privatePrefixed(prefix),
+            trailingTrivia: identifier.trailingTrivia
+          ),
+          typeAnnotation: binding.typeAnnotation,
+          initializer: InitializerClauseSyntax(value: unimplementedDefault),
+          accessorBlock: binding.accessorBlock,
+          trailingComma: binding.trailingComma,
+          trailingTrivia: binding.trailingTrivia
+        )
+      }
+    }
+
+    return PatternBindingListSyntax(bindings)
+  }
+}
+
+extension DeclModifierListSyntax {
+  func privatePrefixed(_ prefix: String) -> DeclModifierListSyntax {
+    let modifier: DeclModifierSyntax = DeclModifierSyntax(name: "private")
+    return [modifier]
+      + filter {
+        switch $0.name.tokenKind {
+        case .keyword(let keyword):
+          switch keyword {
+          case .fileprivate, .private, .internal, .public:
+            return false
+          default:
+            return true
+          }
+        default:
+          return true
+        }
+      }
+  }
+
+  init(keyword: Keyword) {
+    self.init([DeclModifierSyntax(name: .keyword(keyword))])
+  }
+}
+
+extension VariableDeclSyntax {
+  func privatePrefixed(
+    _ prefix: String, unimplementedDefault: ClosureExprSyntax
+  ) -> VariableDeclSyntax {
+    var attributes = self.attributes
+    for index in attributes.indices.reversed() {
+      if case let .attribute(attribute) = attributes[index],
+        attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "DependencyEndpoint"
+      {
+        attributes.remove(at: index)
+      }
+    }
+    return VariableDeclSyntax(
+      leadingTrivia: leadingTrivia,
+      attributes: attributes,
+      modifiers: modifiers.privatePrefixed(prefix),
+      bindingSpecifier: TokenSyntax(
+        bindingSpecifier.tokenKind,
+        leadingTrivia: .space,
+        trailingTrivia: .space,
+        presence: .present
+      ),
+      bindings: bindings.privatePrefixed(prefix, unimplementedDefault: unimplementedDefault),
+      trailingTrivia: trailingTrivia
+    )
   }
 }
 
@@ -239,5 +351,28 @@ extension String {
       result = result.dropLast()
     }
     return String(result)
+  }
+}
+
+extension TupleTypeElementSyntax {
+  fileprivate var isAutoclosure: Bool {
+    self.type
+      .as(AttributedTypeSyntax.self)?
+      .attributes
+      .contains {
+        $0
+          .as(AttributeSyntax.self)?
+          .attributeName
+          .as(IdentifierTypeSyntax.self)?
+          .name
+          .tokenKind == .identifier("autoclosure")
+      } ?? false
+  }
+
+  fileprivate var isInout: Bool {
+    self.type
+      .as(AttributedTypeSyntax.self)?
+      .specifier?
+      .tokenKind == .keyword(.inout)
   }
 }

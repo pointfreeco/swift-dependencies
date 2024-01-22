@@ -3,6 +3,10 @@
 Learn techniques on designing your dependencies so that they are most flexible for injecting into
 features and overriding for tests.
 
+* [Protocol-based dependencies](#Protocol-based-dependencies)
+* [Struct-based dependencies](#Struct-based-dependencies)
+* [@DependencyClient macro](#DependencyClient-macro)
+
 ## Overview
 
 Making it possible to control your dependencies is the most important step you can take towards
@@ -170,7 +174,7 @@ If this test passes you can be guaranteed that no other endpoints of the depende
 user flow you are testing. If someday in the future more of the dependency is used, you will
 instantly get a test failure, letting you know that there is more behavior that you must assert on.
 
-## Dependency macros
+## @DependencyClient macro
 
 The library ships with a macro that can help improve the ergonomics of struct-based dependency
 interfaces. The macro ships as a separate library within this package because it depends on 
@@ -181,6 +185,8 @@ explicitly add the `DependenciesMacros` product to your targets.
 Once that is done you can apply the `@DependencyClient` macro directly to your dependency struct:
 
 ```swift
+import DependenciesMacros
+
 @DependencyClient
 struct AudioPlayerClient {
   var loop: (_ url: URL) async throws -> Void

@@ -12,8 +12,11 @@ A dependency management library inspired by SwiftUI's "environment."
   * [Quick start](#quick-start)
   * [Examples](#examples)
   * [Documentation](#documentation)
+  * [Installation](#installation)
   * [Community](#community)
   * [Extensions](#extensions)
+  * [Alternatives](#alternatives)
+  * [License](#license)
 
 ## Learn More
 
@@ -226,8 +229,7 @@ and articles:
 
 We rebuilt Apple's [Scrumdinger][scrumdinger] demo application using modern, best practices for
 SwiftUI development, including using this library to control dependencies on file system access,
-timers and speech recognition APIs. That [demo can be found][standups-demo] in our 
-[SwiftUINavigation][swiftui-nav-gh] library.
+timers and speech recognition APIs. That demo can be found [here][syncups-demo].
 
 ## Documentation
 
@@ -270,6 +272,7 @@ following projects all build on top of Dependencies:
 
   * [Dependencies Additions](https://github.com/tgrapperon/swift-dependencies-additions): A
     companion library that provides higher-level dependencies.
+  * [Dependencies Protocol Extras](https://github.com/arasan01/swift-dependencies-extras): Library to make swift-dependencies even more useful when using Protocol
 
 ## Alternatives
 
@@ -286,22 +289,22 @@ priorities and trade-offs that differ from Dependencies. Here are a few well-kno
 
 This library is released under the MIT license. See [LICENSE](LICENSE) for details.
 
-[docs]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/
-[concurrency-support-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/concurrencysupport
-[designing-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/designingdependencies
-[lifetimes-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/lifetimes
-[live-preview-test-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/livepreviewtest
-[testing-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/testing
-[overriding-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/overridingdependencies
-[registering-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/registeringdependencies
-[single-entry-point-systems-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/singleentrypointsystems
-[using-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/usingdependencies
-[what-are-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/whataredependencies
-[quick-start-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/quickstart
-[registering-dependencies-article]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/registeringdependencies 
+[docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies
+[concurrency-support-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/concurrencysupport
+[designing-dependencies-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/designingdependencies
+[lifetimes-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/lifetimes
+[live-preview-test-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/livepreviewtest
+[testing-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/testing
+[overriding-dependencies-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/overridingdependencies
+[registering-dependencies-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/registeringdependencies
+[single-entry-point-systems-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/singleentrypointsystems
+[using-dependencies-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/usingdependencies
+[what-are-dependencies-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/whataredependencies
+[quick-start-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/quickstart
+[registering-dependencies-article]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/registeringdependencies 
 [scrumdinger]: https://developer.apple.com/tutorials/app-dev-training/getting-started-with-scrumdinger
-[standups-demo]: https://github.com/pointfreeco/swiftui-navigation/tree/main/Examples/Standups
+[syncups-demo]: https://github.com/pointfreeco/syncups
 [swiftui-nav-gh]: http://github.com/pointfreeco/swiftui-navigation
-[dep-values-docs]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/dependencyvalues
-[withdependencies-docs]: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/withdependencies(_:operation:)-4uz6m
+[dep-values-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/dependencyvalues#dependency-values
+[withdependencies-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/withdependencies(_:operation:)-4uz6m
 [immediate-clock-docs]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/immediateclock

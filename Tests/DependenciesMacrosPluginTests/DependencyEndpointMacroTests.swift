@@ -92,6 +92,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         var endpoint: () -> Bool
             ┬───────────────────
             ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
+
+      Defaults are required so that the macro can generate a default, "unimplemented" version of the dependency. The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+
+      See the documentation for @DependencyClient for more information: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependenciesmacros/dependencyclient()#Restrictions
                ✏️ Insert '= { <#Bool#> }'
       }
       """
@@ -142,6 +146,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         var endpoint: (Int, Bool, String) -> Bool
             ┬────────────────────────────────────
             ╰─ 🛑 Default value required for non-throwing closure 'endpoint'
+
+      Defaults are required so that the macro can generate a default, "unimplemented" version of the dependency. The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+
+      See the documentation for @DependencyClient for more information: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependenciesmacros/dependencyclient()#Restrictions
                ✏️ Insert '= { _, _, _ in <#Bool#> }'
       }
       """
@@ -689,6 +697,303 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       private var _return: (_ id: Int) throws -> Int = { _ in
           XCTestDynamicOverlay.XCTFail("Unimplemented: 'return'")
           throw DependenciesMacros.Unimplemented("return")
+      }
+      """
+    }
+  }
+
+  func testNonClosureDefault() {
+    assertMacro {
+      """
+      struct Foo {
+        @DependencyEndpoint
+        var bar: () -> Int = unimplemented()
+      }
+      """
+    } diagnostics: {
+      """
+      struct Foo {
+        @DependencyEndpoint
+        var bar: () -> Int = unimplemented()
+                             ┬──────────────
+                             ├─ 🛑 '@DependencyEndpoint' default must be closure literal
+                             ╰─ ⚠️ Do not use 'unimplemented' with '@DependencyEndpoint'; the '@DependencyEndpoint' macro already includes the behavior of 'unimplemented'.
+      }
+      """
+    }
+  }
+
+  func testMultilineClosure() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var doAThing: (_ value: Int) -> String = { _ in
+          "Hello, world"
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var doAThing: (_ value: Int) -> String = { _ in
+          "Hello, world"
+        } {
+          @storageRestrictions(initializes: _doAThing)
+          init(initialValue) {
+            _doAThing = initialValue
+          }
+          get {
+            _doAThing
+          }
+          set {
+            _doAThing = newValue
+          }
+        }
+
+        public func doAThing(value p0: Int) -> String {
+          self.doAThing(p0)
+        }
+
+        private var _doAThing: (_ value: Int) -> String = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
+          return "Hello, world"
+          }
+      }
+      """
+    }
+  }
+
+  func testInout() {
+    assertMacro {
+    """
+    struct Blah {
+      @DependencyEndpoint
+      public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
+        "Hello, world"
+      }
+    }
+    """
+    } expansion: {
+    """
+    struct Blah {
+      public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
+        "Hello, world"
+      } {
+        @storageRestrictions(initializes: _doAThing)
+        init(initialValue) {
+          _doAThing = initialValue
+        }
+        get {
+          _doAThing
+        }
+        set {
+          _doAThing = newValue
+        }
+      }
+
+      public func doAThing(a p0: inout Int, b p1: Int, c p2: inout Bool) -> String {
+        self.doAThing(&p0, p1, &p2)
+      }
+
+      private var _doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
+        XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
+        return "Hello, world"
+        }
+    }
+    """
+    }
+  }
+
+  func testAutoclosure() {
+    assertMacro {
+      """
+      struct Foo {
+        @DependencyEndpoint
+        var bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Foo {
+        var bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void {
+          @storageRestrictions(initializes: _bar)
+          init(initialValue) {
+            _bar = initialValue
+          }
+          get {
+            _bar
+          }
+          set {
+            _bar = newValue
+          }
+        }
+
+        func bar(a p0: @autoclosure () -> Int, b p1: () -> Int, c p2: @autoclosure () -> Int) -> Void {
+          self.bar(p0(), p1, p2())
+        }
+
+        private var _bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void = { _, _, _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+        }
+      }
+      """
+    }
+  }
+
+  func testFatalError() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { fatalError() }
+        @DependencyEndpoint
+        public var bar: () -> String = { fatalError("Goodbye") }
+      }
+      """
+    } diagnostics: {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { fatalError() }
+                            ┬            ────────────
+                            ├─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+                            │  ✏️ Wrap in a synchronously executed closure to silence this warning  │                       ╰─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
+
+      The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+                               ✏️ Wrap in a synchronously executed closure to silence this warning
+        @DependencyEndpoint
+        public var bar: () -> String = { fatalError("Goodbye") }
+      }
+      """
+    } fixes: {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> String = { fatalError() }
+        @DependencyEndpoint
+        public var bar: () -> String = { fatalError("Goodbye") }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var foo: () -> String = { fatalError() }
+
+        private var _foo: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          fatalError()
+        }
+        public var bar: () -> String = { fatalError("Goodbye") }
+
+        private var _bar: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+          fatalError("Goodbye")
+        }
+      }
+      """
+    }
+  }
+
+  func testFatalError_SilenceWarning() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () -> Void = { { fatalError() }() }
+        @DependencyEndpoint
+        public var bar: () -> String = { { fatalError("Goodbye") }() }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var foo: () -> Void = { { fatalError() }() } {
+          @storageRestrictions(initializes: _foo)
+          init(initialValue) {
+            _foo = initialValue
+          }
+          get {
+            _foo
+          }
+          set {
+            _foo = newValue
+          }
+        }
+
+        private var _foo: () -> Void = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          return {
+            fatalError()
+          }()
+        }
+        public var bar: () -> String = { { fatalError("Goodbye") }() } {
+          @storageRestrictions(initializes: _bar)
+          init(initialValue) {
+            _bar = initialValue
+          }
+          get {
+            _bar
+          }
+          set {
+            _bar = newValue
+          }
+        }
+
+        private var _bar: () -> String = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+          return {
+            fatalError("Goodbye")
+          }()
+        }
+      }
+      """
+    }
+  }
+
+  func testWillSet() {
+    assertMacro {
+      """
+      struct Blah {
+        @DependencyEndpoint
+        public var foo: () throws -> Void {
+          willSet {
+            print("!")
+          }
+        }
+      }
+      """
+    } expansion: {
+      """
+      struct Blah {
+        public var foo: () throws -> Void {
+          willSet {
+            print("!")
+          }
+          @storageRestrictions(initializes: _foo)
+          init(initialValue) {
+            _foo = initialValue
+          }
+
+          get {
+            _foo
+          }
+
+          set {
+            _foo = newValue
+          }
+        }
+
+        private var _foo: () throws -> Void = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          throw DependenciesMacros.Unimplemented("foo")
+        } {
+                willSet {
+                    print("!")
+                }
+          }
       }
       """
     }

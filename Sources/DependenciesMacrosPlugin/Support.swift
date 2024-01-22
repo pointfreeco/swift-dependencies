@@ -70,6 +70,100 @@ extension FunctionTypeSyntax {
   }
 }
 
+extension InitializerClauseSyntax {
+  func diagnose(
+    _ attribute: AttributeSyntax,
+    context: some MacroExpansionContext
+  ) throws -> DiagnosticAction {
+    guard let closure = self.value.as(ClosureExprSyntax.self)
+    else {
+      var diagnostics: [Diagnostic] = [
+        Diagnostic(
+          node: self.value,
+          message: MacroExpansionErrorMessage(
+            """
+            '@\(attribute.attributeName)' default must be closure literal
+            """
+          )
+        )
+      ]
+      if self.value.as(FunctionCallExprSyntax.self)?
+        .calledExpression.as(DeclReferenceExprSyntax.self)?
+        .baseName.tokenKind == .identifier("unimplemented")
+      {
+        diagnostics.append(
+          Diagnostic(
+            node: self.value,
+            message: MacroExpansionWarningMessage(
+              """
+              Do not use 'unimplemented' with '@\(attribute.attributeName)'; the \
+              '@\(attribute.attributeName)' macro already includes the behavior of \
+              'unimplemented'.
+              """
+            )
+          )
+        )
+      }
+      throw DiagnosticsError(diagnostics: diagnostics)
+    }
+
+    guard
+      closure.statements.count == 1,
+      let statement = closure.statements.first,
+      statement.item.description.hasPrefix("fatalError(")
+    else {
+      return DiagnosticAction(earlyOut: false)
+    }
+
+    context.diagnose(
+      Diagnostic(
+        node: statement.item,
+        message: MacroExpansionWarningMessage(
+          """
+          Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews \
+          and tests.
+
+          The default value can be anything and does not need to signify a real value. For \
+          example, if the endpoint returns a boolean, you can return 'false', or if it returns an \
+          array, you can return '[]'.
+          """
+        ),
+        fixIt: FixIt(
+          message: MacroExpansionFixItMessage(
+            """
+            Wrap in a synchronously executed closure to silence this warning
+            """
+          ),
+          changes: [
+            .replace(
+              oldNode: Syntax(statement),
+              newNode: Syntax(
+                FunctionCallExprSyntax(
+                  calledExpression: ClosureExprSyntax(
+                    statements: [
+                      statement.with(\.leadingTrivia, .space)
+                    ]
+                  ),
+                  leftParen: .leftParenToken(),
+                  arguments: [],
+                  rightParen: .rightParenToken()
+                )
+                .with(\.trailingTrivia, .space)
+              )
+            )
+          ]
+        )
+      )
+    )
+
+    return DiagnosticAction(earlyOut: true)
+  }
+}
+
+struct DiagnosticAction {
+  let earlyOut: Bool
+}
+
 extension VariableDeclSyntax {
   var asClosureType: FunctionTypeSyntax? {
     self.bindings.first?.typeAnnotation.flatMap {
@@ -85,6 +179,7 @@ extension VariableDeclSyntax {
 
 extension MacroExpansionContext {
   func diagnose(
+    clientName: String? = nil,
     node: PatternBindingSyntax,
     identifier: TokenSyntax,
     unimplementedDefault: ClosureExprSyntax
@@ -95,6 +190,14 @@ extension MacroExpansionContext {
         message: MacroExpansionErrorMessage(
           """
           Default value required for non-throwing closure '\(identifier)'
+
+          Defaults are required so that the macro can generate a default, "unimplemented" version \
+          of the dependency\(clientName.map { " via '\($0)()'"} ?? ""). The default value can be \
+          anything and does not need to signify a real value. For example, if the endpoint returns \
+          a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+
+          See the documentation for @DependencyClient for more information: \
+          https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependenciesmacros/dependencyclient()#Restrictions
           """
         ),
         fixIt: FixIt(

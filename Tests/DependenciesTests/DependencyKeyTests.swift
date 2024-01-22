@@ -154,6 +154,41 @@ final class DependencyKeyTests: XCTestCase {
       }
     #endif
   }
+
+  func testDependencyKeyCascading_ImplementOnlyLive_NamedType() {
+    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+      withDependencies {
+        $0.context = .test
+      } operation: {
+        @Dependency(LiveKey.self) var missingTestDependency: Int
+        let line = #line - 1
+        XCTExpectFailure {
+          XCTAssertEqual(42, missingTestDependency)
+        } issueMatcher: { issue in
+          issue.compactDescription == """
+            @Dependency(LiveKey.self) has no test implementation, but was accessed from a test \
+            context:
+
+              Location:
+                DependenciesTests/DependencyKeyTests.swift:\(line)
+              Key:
+                LiveKey
+              Value:
+                Int
+
+            Dependencies registered with the library are not allowed to use their default, live \
+            implementations when run from tests.
+
+            To fix, override 'LiveKey.self' with a test value. If you are using the \
+            Composable Architecture, mutate the 'dependencies' property on your 'TestStore'. \
+            Otherwise, use 'withDependencies' to define a scope for the override. If you'd \
+            like to provide a default value for all tests, implement the 'testValue' requirement \
+            of the 'DependencyKey' protocol.
+            """
+        }
+      }
+    #endif
+  }
 }
 
 private enum LiveKey: DependencyKey {

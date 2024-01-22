@@ -1,4 +1,5 @@
 import Foundation
+import XCTestDynamicOverlay
 
 /// A collection of dependencies that is globally available.
 ///
@@ -81,9 +82,7 @@ import Foundation
 /// Read the article <doc:RegisteringDependencies> for more information.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
-  #if DEBUG
-    @TaskLocal static var isSetting = false
-  #endif
+  @TaskLocal static var isSetting = false
   @TaskLocal static var currentDependency = CurrentDependency()
 
   fileprivate var cachedValues = CachedValues()
@@ -98,6 +97,12 @@ public struct DependencyValues: Sendable {
     #if canImport(XCTest)
       _ = setUpTestObservers
     #endif
+  }
+
+  @_disfavoredOverload
+  public subscript<Key: TestDependencyKey>(type: Key.Type) -> Key.Value {
+    get { self[type] }
+    set { self[type] = newValue }
   }
 
   /// Accesses the dependency value associated with a custom key.
@@ -123,9 +128,9 @@ public struct DependencyValues: Sendable {
   /// property wrapper.
   public subscript<Key: TestDependencyKey>(
     key: Key.Type,
-    file: StaticString = #file,
-    function: StaticString = #function,
-    line: UInt = #line
+    file file: StaticString = #file,
+    function function: StaticString = #function,
+    line line: UInt = #line
   ) -> Key.Value where Key.Value: Sendable {
     get {
       guard let base = self.storage[ObjectIdentifier(key)]?.base,
@@ -273,81 +278,89 @@ private final class CachedValues: @unchecked Sendable {
     function: StaticString = #function,
     line: UInt = #line
   ) -> Key.Value where Key.Value: Sendable {
-    self.lock.lock()
-    defer { self.lock.unlock() }
+    XCTFailContext.$current.withValue(XCTFailContext(file: file, line: line)) {
+      self.lock.lock()
+      defer { self.lock.unlock() }
 
-    let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
-    guard let base = self.cached[cacheKey]?.base, let value = base as? Key.Value
-    else {
-      let value: Key.Value?
-      switch context {
-      case .live:
-        value = _liveValue(key) as? Key.Value
-      case .preview:
-        value = Key.previewValue
-      case .test:
-        value = Key.testValue
-      }
-
-      guard let value = value
+      let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
+      guard let base = self.cached[cacheKey]?.base, let value = base as? Key.Value
       else {
-        #if DEBUG
-          if !DependencyValues.isSetting {
-            var dependencyDescription = ""
-            if let fileID = DependencyValues.currentDependency.fileID,
-              let line = DependencyValues.currentDependency.line
-            {
-              dependencyDescription.append(
-                """
-                  Location:
-                    \(fileID):\(line)
+        let value: Key.Value?
+        switch context {
+        case .live:
+          value = _liveValue(key) as? Key.Value
+        case .preview:
+          value = Key.previewValue
+        case .test:
+          value = Key.testValue
+        }
 
+        guard let value = value
+        else {
+          #if DEBUG
+            if !DependencyValues.isSetting {
+              var dependencyDescription = ""
+              if let fileID = DependencyValues.currentDependency.fileID,
+                let line = DependencyValues.currentDependency.line
+              {
+                dependencyDescription.append(
+                  """
+                    Location:
+                      \(fileID):\(line)
+
+                  """
+                )
+              }
+              dependencyDescription.append(
+                Key.self == Key.Value.self
+                  ? """
+                    Dependency:
+                      \(typeName(Key.Value.self))
+                  """
+                  : """
+                    Key:
+                      \(typeName(Key.self))
+                    Value:
+                      \(typeName(Key.Value.self))
+                  """
+              )
+
+              var argument: String {
+                "\(function)" == "subscript(_:)" ? "\(typeName(Key.self)).self" : "\\.\(function)"
+              }
+
+              runtimeWarn(
                 """
+                @Dependency(\(argument)) has no live implementation, but was accessed from a live \
+                context.
+
+                \(dependencyDescription)
+
+                Every dependency registered with the library must conform to 'DependencyKey', and \
+                that conformance must be visible to the running application.
+
+                To fix, make sure that '\(typeName(Key.self))' conforms to 'DependencyKey' by \
+                providing a live implementation of your dependency, and make sure that the \
+                conformance is linked with this current application.
+                """,
+                file: DependencyValues.currentDependency.file ?? file,
+                line: DependencyValues.currentDependency.line ?? line
               )
             }
-            dependencyDescription.append(
-              Key.self == Key.Value.self
-                ? """
-                  Dependency:
-                    \(typeName(Key.Value.self))
-                """
-                : """
-                  Key:
-                    \(typeName(Key.self))
-                  Value:
-                    \(typeName(Key.Value.self))
-                """
-            )
-
-            runtimeWarn(
-              """
-              "@Dependency(\\.\(function))" has no live implementation, but was accessed from a \
-              live context.
-
-              \(dependencyDescription)
-
-              Every dependency registered with the library must conform to "DependencyKey", and \
-              that conformance must be visible to the running application.
-
-              To fix, make sure that "\(typeName(Key.self))" conforms to "DependencyKey" by \
-              providing a live implementation of your dependency, and make sure that the \
-              conformance is linked with this current application.
-              """,
-              file: DependencyValues.currentDependency.file ?? file,
-              line: DependencyValues.currentDependency.line ?? line
-            )
+          #endif
+          let value = Key.testValue
+          if !DependencyValues.isSetting {
+            self.cached[cacheKey] = AnySendable(value)
           }
-        #endif
-        let value = Key.testValue
+          return value
+        }
+
         self.cached[cacheKey] = AnySendable(value)
         return value
       }
 
-      self.cached[cacheKey] = AnySendable(value)
       return value
     }
-
-    return value
   }
 }
 

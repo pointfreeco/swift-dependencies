@@ -211,7 +211,7 @@ final class DependencyTests: XCTestCase {
     struct MyDependency: TestDependencyKey {
       static var testValue: Int { 0 }
     }
-    @Dependency(MyDependency.self) var int
+    @Dependency(MyDependency.self) var int: Int
 
     XCTAssertEqual(int, 0)
 

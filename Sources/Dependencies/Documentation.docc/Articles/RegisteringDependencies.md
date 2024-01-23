@@ -60,36 +60,12 @@ func testFetchUser() async {
 }
 ```
 
-It is not always appropriate to conform your dependency directly to the `DependencyKey` protocol,
-for example if you have multiple dependency values of the same type, or if it is a type you do not
-own. In such cases you can define a separate type that conforms to `DependencyKey` that returns your
-dependency as a live value:
+## Advanced techniques
 
-```diff
--extension APIClient: DependencyKey {
-+enum APIClientKey: DependencyKey {
-   static let liveValue = APIClient(/*
-     Construct the "live" API client that actually makes network 
-     requests and communicates with the outside world.
-   */)
- }
-```
+### Dependency key paths
 
-And you can access and override your dependency through this key type, instead:
-
-```diff
--@Dependency(APIClient.self) var apiClient
-+@Dependency(APIClientKey.self) var apiClient
-
- let model = withDependencies {
--  $0[APIClient.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
-+  $0[APIClientKey.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
- } operation: {
-   TodosModel()
- }
-```
-
-You can take one additional step to register your dependency value at a particular key path:
+You can take one additional step to register your dependency value at a particular key path, and
+that is by extending `DependencyValues` with a property:
 
 ```swift
 extension DependencyValues {
@@ -104,24 +80,48 @@ This allows you to access and override the dependency in way similar to SwiftUI 
 as a property that is discoverable from autocomplete:
 
 ```diff
--@Dependency(APIClientKey.self) var apiClient
+-@Dependency(APIClient.self) var apiClient
 +@Dependency(\.apiClient) var apiClient
 
  let model = withDependencies {
--  $0[APIClientKey.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
+-  $0[APIClient.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
 +  $0.apiClient.fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
  } operation: {
    TodosModel()
  }
 ```
 
-And allows you to make the dependency key private:
+Another benefit of this style is the ability to scope a `@Dependency` to a specific property:
 
-```diff
--enum APIClientKey: DependencyKey {
-+private enum APIClientKey: Dependency Key {
-   // ...
- }
+```swift
+// This feature only needs the API client's logged-in user
+@Dependency(\.apiClient.currentUser) var currentUser
+```
+
+### Indirect dependency key conformances
+
+It is not always appropriate to conform your dependency directly to the `DependencyKey` protocol,
+for example if it is a type you do not own. In such cases you can define a separate type that
+conforms to `DependencyKey`:
+
+```swift
+enum UserDefaultsKey: DependencyKey {
+  static let liveValue = UserDefaults.standard
+}
+```
+
+You can then access and override your dependency through this key type, instead of the value's type:
+
+```swift
+@Dependency(UserDefaultsKey.self) var userDefaults
+
+let model = withDependencies {
+  let defaults = UserDefaults(suiteName: "test-defaults")
+  defaults.removePersistentDomain(forName: "test-defaults")
+  $0[UserDefaultsKey.self] = defaults
+} operation: {
+  TodosModel()
+}
 ```
 
 [environment-values-docs]: https://developer.apple.com/documentation/swiftui/environmentvalues

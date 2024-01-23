@@ -394,9 +394,12 @@ final class DependencyValuesTests: XCTestCase {
       self.wait(for: [expectation], timeout: 1)
     }
 
+  #if !os(Linux)
+    @MainActor
     func testEscapingInFeatureModel_InstanceVariablePropagated() {
       let expectation = self.expectation(description: "escape")
 
+      @MainActor
       class FeatureModel /*: ObservableObject*/ {
         @Dependency(\.fullDependency) var fullDependency
         func doSomething(expectation: XCTestExpectation) {
@@ -416,6 +419,7 @@ final class DependencyValuesTests: XCTestCase {
       model.doSomething(expectation: expectation)
       self.wait(for: [expectation], timeout: 1)
     }
+  #endif
 
     func testEscapingInFeatureModel_NotPropagated() async {
       let expectation = self.expectation(description: "escape")
@@ -654,7 +658,7 @@ final class DependencyValuesTests: XCTestCase {
     let taskCount = 10
 
     for _ in 1...runCount {
-      defer { CountInitDependency.initCount = 0 }
+      defer { CountInitDependency.initCount.setValue(0) }
       await withDependencies {
         $0 = .test
       } operation: {
@@ -667,17 +671,17 @@ final class DependencyValuesTests: XCTestCase {
           }
           for await _ in group {}
         }
-        XCTAssertEqual(CountInitDependency.initCount, 1)
+        XCTAssertEqual(CountInitDependency.initCount.value, 1)
       }
     }
   }
 }
 
 struct CountInitDependency: TestDependencyKey {
-  static var initCount = 0
-  var fetch: () -> Int
+  static let initCount = LockIsolated(0)
+  var fetch: @Sendable () -> Int
   static var testValue: Self {
-    initCount += 1
+    initCount.withValue { $0 += 1 }
     return Self { 42 }
   }
 }
@@ -790,7 +794,7 @@ struct ReuseClient: TestDependencyKey {
   }
 }
 
-private struct FullDependency: DependencyKey {
+private struct FullDependency: DependencyKey, Sendable {
   var value: Int
   static var liveValue: FullDependency {
     Self(value: 1)

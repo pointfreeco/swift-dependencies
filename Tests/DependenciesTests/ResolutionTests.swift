@@ -240,7 +240,7 @@ private struct LazyChildDependency: TestDependencyKey {
   static let testValue = Self { 1729 }
 }
 private struct NestedParentDependency: TestDependencyKey {
-  var value: () -> Int
+  var value: @Sendable () -> Int
   static var testValue: NestedParentDependency {
     @Dependency(\.nestedChild) var child
     return Self {
@@ -249,7 +249,7 @@ private struct NestedParentDependency: TestDependencyKey {
   }
 }
 private struct NestedChildDependency: TestDependencyKey {
-  var value: () -> Int
+  var value: @Sendable () -> Int
   static let testValue = Self { 1729 }
 }
 private struct DiamondDependencyA: TestDependencyKey {
@@ -294,7 +294,7 @@ private struct CyclicDependency2: TestDependencyKey {
 }
 private struct ClientWithDependency: TestDependencyKey {
   @Dependency(\.eagerChild) var eagerChild
-  var onValue: (EagerChildDependency) -> Int = { $0.value }
+  var onValue: @Sendable (EagerChildDependency) -> Int = { $0.value }
   func value() -> Int {
     self.onValue(self.eagerChild)
   }

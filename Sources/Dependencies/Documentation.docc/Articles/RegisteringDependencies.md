@@ -91,10 +91,10 @@ as a property that is discoverable from autocomplete:
  }
 ```
 
-Another benefit of this style is the ability to scope a `@Dependency` to a specific property:
+Another benefit of this style is the ability to scope a `@Dependency` to a specific sub-property:
 
 ```swift
-// This feature only needs the API client's logged-in user
+// This feature only needs to access the API client's logged-in user
 @Dependency(\.apiClient.currentUser) var currentUser
 ```
 

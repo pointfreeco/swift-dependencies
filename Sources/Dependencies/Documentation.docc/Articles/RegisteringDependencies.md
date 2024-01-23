@@ -124,4 +124,18 @@ let model = withDependencies {
 }
 ```
 
+If you extend dependency values with a dedicated key path, you can even make this key private:
+
+```diff
+-enum UserDefaultsKey: DependencyKey { /* ... */ }
++private enum UserDefaultsKey: DependencyKey { /* ... */ }
++
++extension DependencyValues {
++  var userDefaults: APIClient {
++    get { self[UserDefaultsKey.self] }
++    set { self[UserDefaultsKey.self] = newValue }
++  }
++}
+```
+
 [environment-values-docs]: https://developer.apple.com/documentation/swiftui/environmentvalues

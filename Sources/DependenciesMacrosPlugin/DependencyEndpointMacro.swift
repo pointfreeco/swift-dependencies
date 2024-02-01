@@ -243,7 +243,7 @@ extension DeclModifierListSyntax {
         switch $0.name.tokenKind {
         case .keyword(let keyword):
           switch keyword {
-          case .fileprivate, .private, .internal, .public:
+              case .fileprivate, .private, .internal, .package, .public:
             return false
           default:
             return true

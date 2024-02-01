@@ -998,4 +998,36 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
     }
   }
+    
+  func testAccessPackage() {
+    assertMacro {
+      """
+      package struct Client {
+        @DependencyEndpoint
+        package var endpoint: () -> Void
+      }
+      """
+    } expansion: {
+      """
+      package struct Client {
+        package var endpoint: () -> Void {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
+
+        private var _endpoint: () -> Void = {
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+        }
+      }
+      """
+    }
+  }
 }

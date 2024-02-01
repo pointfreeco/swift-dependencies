@@ -6,17 +6,18 @@ available from any part of your code base.
 ## Overview
 
 Although the library comes with many controllable dependencies out of the box, there are still times
-when you want to register your own dependencies with the library so that you can use the
-``Dependency`` property wrapper. Doing this is a two-step process and is quite similar to
-registering an [environment value][environment-values-docs] in SwiftUI.
+when you want to register your own dependencies with the library so that you can use them with the
+``Dependency`` property wrapper. There are a couple ways to achieve this, and the process is quite
+similar to registering a value with [the environment][environment-values-docs] in SwiftUI.
 
-First you create a type that conforms to the ``DependencyKey`` protocol. The minimum implementation
-you must provide is a ``DependencyKey/liveValue``, which is the value used when running the app in a
+First you create a ``DependencyKey`` protocol conformance. The minimum implementation you must
+provide is a ``DependencyKey/liveValue``, which is the value used when running the app in a
 simulator or on device, and so it's appropriate for it to actually make network requests to an
-external server:
+external server. It is usually convenient to conform the type of dependency directly to this
+protocol:
 
 ```swift
-private enum APIClientKey: DependencyKey {
+extension APIClient: DependencyKey {
   static let liveValue = APIClient(/*
     Construct the "live" API client that actually makes network 
     requests and communicates with the outside world.
@@ -30,24 +31,11 @@ private enum APIClientKey: DependencyKey {
 > need to worry about those values when you are just getting started, and instead can add them
 > later. See <Doc:LivePreviewTest> for more information.
 
-Finally, an extension must be made to `DependencyValues` to expose a computed property for the
-dependency:
-
-```swift
-extension DependencyValues {
-  var apiClient: APIClient {
-    get { self[APIClientKey.self] }
-    set { self[APIClientKey.self] = newValue }
-  }
-}
-```
-
-With those few steps completed you can instantly access your API client dependency from any part of
-you code base:
+With that done you can instantly access your API client dependency from any part of your code base:
 
 ```swift
 final class TodosModel: ObservableObject {
-  @Dependency(\.apiClient) var apiClient
+  @Dependency(APIClient.self) var apiClient
   // ...
 }
 ```
@@ -59,7 +47,7 @@ you can override the dependency to return mock data:
 @MainActor
 func testFetchUser() async {
   let model = withDependencies {
-    $0.apiClient.fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
+    $0[APIClient.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
   } operation: {
     TodosModel()
   }
@@ -72,26 +60,82 @@ func testFetchUser() async {
 }
 ```
 
-Often times it is not necessary to create a whole new type to conform to `DependencyKey`. If the
-dependency you are registering is a type that you own, then you can conform it directly to the
-protocol:
+## Advanced techniques
+
+### Dependency key paths
+
+You can take one additional step to register your dependency value at a particular key path, and
+that is by extending `DependencyValues` with a property:
 
 ```swift
-extension APIClient: DependencyKey {
-  static let liveValue = APIClient(/*
-    Construct the "live" API client that actually makes network 
-    requests and communicates with the outside world.
-  */)
-}
-
 extension DependencyValues {
   var apiClient: APIClient {
-    get { self[APIClient.self] }
-    set { self[APIClient.self] = newValue }
+    get { self[APIClientKey.self] }
+    set { self[APIClientKey.self] = newValue }
   }
 }
 ```
 
-That can save a little bit of boilerplate.
+This allows you to access and override the dependency in way similar to SwiftUI environment values,
+as a property that is discoverable from autocomplete:
+
+```diff
+-@Dependency(APIClient.self) var apiClient
++@Dependency(\.apiClient) var apiClient
+
+ let model = withDependencies {
+-  $0[APIClient.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
++  $0.apiClient.fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
+ } operation: {
+   TodosModel()
+ }
+```
+
+Another benefit of this style is the ability to scope a `@Dependency` to a specific sub-property:
+
+```swift
+// This feature only needs to access the API client's logged-in user
+@Dependency(\.apiClient.currentUser) var currentUser
+```
+
+### Indirect dependency key conformances
+
+It is not always appropriate to conform your dependency directly to the `DependencyKey` protocol,
+for example if it is a type you do not own. In such cases you can define a separate type that
+conforms to `DependencyKey`:
+
+```swift
+enum UserDefaultsKey: DependencyKey {
+  static let liveValue = UserDefaults.standard
+}
+```
+
+You can then access and override your dependency through this key type, instead of the value's type:
+
+```swift
+@Dependency(UserDefaultsKey.self) var userDefaults
+
+let model = withDependencies {
+  let defaults = UserDefaults(suiteName: "test-defaults")
+  defaults.removePersistentDomain(forName: "test-defaults")
+  $0[UserDefaultsKey.self] = defaults
+} operation: {
+  TodosModel()
+}
+```
+
+If you extend dependency values with a dedicated key path, you can even make this key private:
+
+```diff
+-enum UserDefaultsKey: DependencyKey { /* ... */ }
++private enum UserDefaultsKey: DependencyKey { /* ... */ }
++
++extension DependencyValues {
++  var userDefaults: APIClient {
++    get { self[UserDefaultsKey.self] }
++    set { self[UserDefaultsKey.self] = newValue }
++  }
++}
+```
 
 [environment-values-docs]: https://developer.apple.com/documentation/swiftui/environmentvalues

@@ -865,30 +865,13 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         public var bar: () -> String = { fatalError("Goodbye") }
       }
       """
-    }fixes: {
+    } fixes: {
       """
       struct Blah {
         @DependencyEndpoint
         public var foo: () -{ fatalError() }() fatalError() }
         @DependencyEndpoint
         public var bar: () -> String = { fatalError("Goodbye") }
-      }
-      """
-    }expansion: {
-      """
-      struct Blah {
-        public var foo: () -> String = { fatalError() }
-
-        private var _foo: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
-          fatalError()
-        }
-        public var bar: () -> String = { fatalError("Goodbye") }
-
-        private var _bar: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
-          fatalError("Goodbye")
-        }
       }
       """
     }

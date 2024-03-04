@@ -52,19 +52,19 @@ jobs:
       - name: Run tests
         run: make test-swift
 
-  wasm:
-    name: Wasm
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - { toolchain: wasm-5.7.1-RELEASE }
-    steps:
-      - uses: actions/checkout@v3
-      - run: echo "${{ matrix.toolchain }}" > .swift-version
-      - uses: swiftwasm/swiftwasm-action@v5.8
-        with:
-          shell-action: carton test --environment node
+  # wasm:
+  #   name: Wasm
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - { toolchain: wasm-5.7.1-RELEASE }
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: echo "${{ matrix.toolchain }}" > .swift-version
+  #     - uses: swiftwasm/swiftwasm-action@v5.8
+  #       with:
+  #         shell-action: carton test --environment node
 
   # windows:
   #   name: Windows

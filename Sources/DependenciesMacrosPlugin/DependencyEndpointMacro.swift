@@ -190,7 +190,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
     let privateProperty = property.privatePrefixed("_", unimplementedDefault: unimplementedDefault)
 
-    return decls + [privateProperty.cast(DeclSyntax.self)]
+    return decls + [DeclSyntax(privateProperty)]
   }
 }
 

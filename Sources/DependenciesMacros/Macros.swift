@@ -111,6 +111,26 @@
 /// and does not need to signify a real value. For example, if the endpoint returns a boolean, you
 /// can return `false`, or if it returns an array, you can return `[]`.`
 ///
+/// > Warning: Due to a [bug in the Swift compiler](https://github.com/apple/swift/issues/71070),
+/// > endpoints that are not throwing will not emit a test failure when invoked. This applies to
+/// > dependencies with endpoints like this:
+/// >
+/// > ```swift
+/// > @DependencyClient
+/// > struct NumberFetcher {
+/// >   var get: () async -> Int = { 42 }
+/// > }
+/// > ```
+/// >
+/// > The workaround is to invoke `XCTFail` directly in the closure:
+/// >
+/// > ```swift
+/// > @DependencyClient
+/// > struct NumberFetcher {
+/// >   var get: () async -> Int = { XCTFail("\(Self.self).get"); return 42 }
+/// > }
+/// > ```
+///
 /// [designing-dependencies]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/designingdependencies
 /// [separating-interface-implementation]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/livepreviewtest#Separating-interface-and-implementation
 @attached(member, names: named(init))

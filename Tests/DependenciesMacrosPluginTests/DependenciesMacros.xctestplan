@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "53C60DBA-2CDB-4A5C-9411-7C681BEAAEF4",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "DependenciesMacrosPluginTests",
+        "name" : "DependenciesMacrosPluginTests"
+      }
+    }
+  ],
+  "version" : 1
+}

@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
-        "branch" : "wasi-fix-2",
-        "revision" : "9dd79e88da43e14b89b7ebf12ac1eb7446a50f3b"
+        "branch" : "main",
+        "revision" : "32f6057b7c642802fe39b93007cb687f80f2e535"
       }
     }
   ],

@@ -21,7 +21,7 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
-    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", branch: "wasi-fix-2"),
+    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", branch: "main"),
   ],
   targets: [
     .target(

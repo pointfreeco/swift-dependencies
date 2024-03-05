@@ -55,7 +55,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Client {
-        var endpoint: () -> Bool = { _ in false } {
+        var endpoint: () -> Bool {
           @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
             _endpoint = initialValue
@@ -109,7 +109,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Client {
-        var endpoint: () -> Bool = { <#Bool#> } {
+        var endpoint: () -> Bool {
           @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
             _endpoint = initialValue
@@ -163,7 +163,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Client {
-        var endpoint: (Int, Bool, String) -> Bool = { _, _, _ in <#Bool#> } {
+        var endpoint: (Int, Bool, String) -> Bool {
           @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
             _endpoint = initialValue
@@ -736,9 +736,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Blah {
-        public var doAThing: (_ value: Int) -> String = { _ in
-          "Hello, world"
-        } {
+        public var doAThing: (_ value: Int) -> String {
           @storageRestrictions(initializes: _doAThing)
           init(initialValue) {
             _doAThing = initialValue
@@ -775,33 +773,31 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     }
     """
     } expansion: {
-    """
-    struct Blah {
-      public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
-        "Hello, world"
-      } {
-        @storageRestrictions(initializes: _doAThing)
-        init(initialValue) {
-          _doAThing = initialValue
+      """
+      struct Blah {
+        public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String {
+          @storageRestrictions(initializes: _doAThing)
+          init(initialValue) {
+            _doAThing = initialValue
+          }
+          get {
+            _doAThing
+          }
+          set {
+            _doAThing = newValue
+          }
         }
-        get {
-          _doAThing
-        }
-        set {
-          _doAThing = newValue
-        }
-      }
 
-      public func doAThing(a p0: inout Int, b p1: Int, c p2: inout Bool) -> String {
-        self.doAThing(&p0, p1, &p2)
-      }
-
-      private var _doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
-        XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
-        return "Hello, world"
+        public func doAThing(a p0: inout Int, b p1: Int, c p2: inout Bool) -> String {
+          self.doAThing(&p0, p1, &p2)
         }
-    }
-    """
+
+        private var _doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
+          XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
+          return "Hello, world"
+          }
+      }
+      """
     }
   }
 
@@ -860,7 +856,8 @@ final class DependencyEndpointMacroTests: BaseTestCase {
                             ├─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
 
       The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
-                            │  ✏️ Wrap in a synchronously executed closure to silence this warning  │                       ╰─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
+                            │  ✏️ Wrap in a synchronously executed closure to silence this warning
+                            ╰─ ⚠️ Prefer returning a default mock value over 'fatalError()' to avoid crashes in previews and tests.
 
       The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
                                ✏️ Wrap in a synchronously executed closure to silence this warning
@@ -872,26 +869,9 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """
       struct Blah {
         @DependencyEndpoint
-        public var foo: () -> String = { fatalError() }
+        public var foo: () -{ fatalError() }() fatalError() }
         @DependencyEndpoint
         public var bar: () -> String = { fatalError("Goodbye") }
-      }
-      """
-    } expansion: {
-      """
-      struct Blah {
-        public var foo: () -> String = { fatalError() }
-
-        private var _foo: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
-          fatalError()
-        }
-        public var bar: () -> String = { fatalError("Goodbye") }
-
-        private var _bar: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
-          fatalError("Goodbye")
-        }
       }
       """
     }
@@ -910,7 +890,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       """
       struct Blah {
-        public var foo: () -> Void = { { fatalError() }() } {
+        public var foo: () -> Void {
           @storageRestrictions(initializes: _foo)
           init(initialValue) {
             _foo = initialValue
@@ -929,7 +909,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
             fatalError()
           }()
         }
-        public var bar: () -> String = { { fatalError("Goodbye") }() } {
+        public var bar: () -> String {
           @storageRestrictions(initializes: _bar)
           init(initialValue) {
             _bar = initialValue

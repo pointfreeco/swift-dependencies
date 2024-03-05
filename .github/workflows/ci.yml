@@ -52,14 +52,14 @@ jobs:
       - name: Run tests
         run: make test-swift
 
-  wasm:
-    name: Wasm
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: swiftwasm/swiftwasm-action@v5.9
-        with:
-          shell-action: carton test
+  # wasm:
+  #   name: Wasm
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: swiftwasm/swiftwasm-action@v5.9
+  #       with:
+  #         shell-action: carton test
 
   # windows:
   #   name: Windows

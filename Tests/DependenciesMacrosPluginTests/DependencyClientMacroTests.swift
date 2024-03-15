@@ -276,6 +276,35 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
+  func testStaticVar() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var config: () -> Void
+        static var value = Client()
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var config: () -> Void
+        static var value = Client()
+
+        init(
+          config: @escaping () -> Void
+        ) {
+          self.config = config
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
+
   func testDefaultValue() {
     assertMacro {
       """

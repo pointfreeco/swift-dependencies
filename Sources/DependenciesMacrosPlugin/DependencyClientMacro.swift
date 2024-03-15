@@ -86,7 +86,11 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     var hasEndpoints = false
     var accesses: Set<Access> = Access(modifiers: declaration.modifiers).map { [$0] } ?? []
     for member in declaration.memberBlock.members {
-      guard var property = member.decl.as(VariableDeclSyntax.self) else { continue }
+      guard
+        var property = member.decl.as(VariableDeclSyntax.self),
+        !property.isStatic
+      else { continue }
+
       let isEndpoint =
         property.hasDependencyEndpointMacroAttached
         || property.bindingSpecifier.tokenKind != .keyword(.let) && property.isClosure
@@ -249,6 +253,12 @@ private struct Property {
 }
 
 extension VariableDeclSyntax {
+  fileprivate var isStatic: Bool {
+    self.modifiers.contains { modifier in
+      modifier.name.tokenKind == .keyword(.static)
+    }
+  }
+
   fileprivate var hasDependencyEndpointMacroAttached: Bool {
     self.attributes.contains {
       guard

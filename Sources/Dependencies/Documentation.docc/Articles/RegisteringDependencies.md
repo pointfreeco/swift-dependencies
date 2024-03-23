@@ -131,7 +131,7 @@ If you extend dependency values with a dedicated key path, you can even make thi
 +private enum UserDefaultsKey: DependencyKey { /* ... */ }
 +
 +extension DependencyValues {
-+  var userDefaults: APIClient {
++  var userDefaults: UserDefaults {
 +    get { self[UserDefaultsKey.self] }
 +    set { self[UserDefaultsKey.self] = newValue }
 +  }

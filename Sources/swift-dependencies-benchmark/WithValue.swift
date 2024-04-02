@@ -7,6 +7,7 @@ let withValueSuite = BenchmarkSuite(name: "Dependencies") { suite in
   _ = DependencyValues._current.calendar
   _ = DependencyValues._current.context
   _ = DependencyValues._current.locale
+  _ = DependencyValues._current.notificationCenter
   _ = DependencyValues._current.timeZone
   _ = DependencyValues._current.urlSession
   _ = DependencyValues._current.uuid

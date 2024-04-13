@@ -43,6 +43,9 @@ let package = Package(
         .product(name: "CombineSchedulers", package: "combine-schedulers"),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+      ],
+      swiftSettings: [
+        .enableExperimentalFeature("StrictConcurrency")
       ]
     ),
     .testTarget(
@@ -50,6 +53,9 @@ let package = Package(
       dependencies: [
         "Dependencies",
         "DependenciesMacros",
+      ],
+      swiftSettings: [
+        .enableExperimentalFeature("StrictConcurrency")
       ]
     ),
     .target(
@@ -57,6 +63,9 @@ let package = Package(
       dependencies: [
         "DependenciesMacrosPlugin",
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+      ],
+      swiftSettings: [
+        .enableExperimentalFeature("StrictConcurrency")
       ]
     ),
     .macro(
@@ -96,6 +105,9 @@ let package = Package(
       dependencies: [
         "DependenciesMacrosPlugin",
         .product(name: "MacroTesting", package: "swift-macro-testing"),
+      ],
+      swiftSettings: [
+        .enableExperimentalFeature("StrictConcurrency")
       ]
     ),
   ])

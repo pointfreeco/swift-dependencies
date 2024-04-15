@@ -113,7 +113,6 @@ for target in package.targets {
   target.swiftSettings?.append(.enableExperimentalFeature("StrictConcurrency"))
 //  target.swiftSettings?.append(
 //    .unsafeFlags([
-//      "-Xfrontend", "-enable-actor-data-race-checks",
 //      "-enable-library-evolution",
 //    ])
 //  )

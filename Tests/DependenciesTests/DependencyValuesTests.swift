@@ -37,12 +37,14 @@ final class DependencyValuesTests: XCTestCase {
             Value:
               Int
 
-          Every dependency registered with the library must conform to 'DependencyKey', and that \
-          conformance must be visible to the running application.
+          To fix you can do one of two things:
 
-          To fix, make sure that 'TestKey' conforms to 'DependencyKey' by providing a live \
-          implementation of your dependency, and make sure that the conformance is linked with \
-          this current application.
+          * Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
+          of your dependency, and make sure that the conformance is linked with this current \
+          application.
+
+          * Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
+          done at the entry point of your application, but can be done later too.
           """
       }
     #endif
@@ -71,12 +73,14 @@ final class DependencyValuesTests: XCTestCase {
             Value:
               Int
 
-          Every dependency registered with the library must conform to 'DependencyKey', and that \
-          conformance must be visible to the running application.
+          To fix you can do one of two things:
 
-          To fix, make sure that 'TestKey' conforms to 'DependencyKey' by providing a live \
-          implementation of your dependency, and make sure that the conformance is linked with \
-          this current application.
+          * Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
+          of your dependency, and make sure that the conformance is linked with this current \
+          application.
+
+          * Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
+          done at the entry point of your application, but can be done later too.
           """
       }
     #endif

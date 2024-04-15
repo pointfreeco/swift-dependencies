@@ -419,12 +419,15 @@ private final class CachedValues: @unchecked Sendable {
 
                 \(dependencyDescription)
 
-                Every dependency registered with the library must conform to 'DependencyKey', and \
-                that conformance must be visible to the running application.
+                To fix you can do one of two things:
 
-                To fix, make sure that '\(typeName(Key.self))' conforms to 'DependencyKey' by \
-                providing a live implementation of your dependency, and make sure that the \
-                conformance is linked with this current application.
+                * Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
+                a live implementation of your dependency, and make sure that the conformance is \
+                linked with this current application.
+
+                * Override the implementation of '\(typeName(Key.self))' using 'withDependencies'. \
+                This is typically done at the entry point of your application, but can be done \
+                later too.
                 """,
                 file: DependencyValues.currentDependency.file ?? file,
                 line: DependencyValues.currentDependency.line ?? line

@@ -170,9 +170,9 @@ public func withDependencies<Model: AnyObject, R>(
   else {
     runtimeWarn(
       """
-      You are trying to propagate dependencies to a child model from a model with no dependencies. \
-      To fix this, the given '\(Model.self)' must be returned from another 'withDependencies' \
-      closure, or the class must hold at least one '@Dependency' property.
+      You are trying to propagate dependencies to a child model from a model with no \
+      dependencies. To fix this, the given '\(Model.self)' must be returned from another \
+      'withDependencies' closure, or the class must hold at least one '@Dependency' property.
       """,
       file: file,
       line: line
@@ -326,8 +326,8 @@ private class DependencyObjects: @unchecked Sendable {
   internal init() {}
 
   func store(_ object: AnyObject) {
-    self.storage.withValue { [id = ObjectIdentifier(object)] storage in
-      storage[id] = DependencyObject(
+    self.storage.withValue { storage in
+      storage[ObjectIdentifier(object)] = DependencyObject(
         object: object,
         dependencyValues: DependencyValues._current
       )
@@ -347,9 +347,7 @@ private class DependencyObjects: @unchecked Sendable {
       .compactMap({ $1 as? _HasInitialValues })
       .first?
       .initialValues
-      ?? self.storage.withValue({ [id = ObjectIdentifier(object)] in
-        $0[id]?.dependencyValues
-      })
+      ?? self.storage.withValue({ $0[ObjectIdentifier(object)]?.dependencyValues })
   }
 }
 

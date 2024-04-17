@@ -21,7 +21,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: () -> Void {
           @storageRestrictions(initializes: _endpoint)
@@ -37,10 +37,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Void = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -53,7 +53,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: () -> Bool {
           @storageRestrictions(initializes: _endpoint)
@@ -69,11 +69,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Bool = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
           return false
         }
       }
-      """
+      """#
     }
   }
 
@@ -107,7 +107,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: () -> Bool {
           @storageRestrictions(initializes: _endpoint)
@@ -123,11 +123,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Bool = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
           return <#Bool#>
         }
       }
-      """
+      """#
     }
   }
 
@@ -161,7 +161,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: (Int, Bool, String) -> Bool {
           @storageRestrictions(initializes: _endpoint)
@@ -177,11 +177,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: (Int, Bool, String) -> Bool = { _, _, _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
           return <#Bool#>
         }
       }
-      """
+      """#
     }
   }
 
@@ -194,7 +194,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: () throws -> Bool {
           @storageRestrictions(initializes: _endpoint)
@@ -210,11 +210,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () throws -> Bool = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
           throw DependenciesMacros.Unimplemented("endpoint")
         }
       }
-      """
+      """#
     }
   }
 
@@ -227,7 +227,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       public struct ApiClient {
         public var apiRequest: @Sendable (ServerRoute.Api.Route) async throws -> (Data, URLResponse) {
           @storageRestrictions(initializes: _apiRequest)
@@ -243,11 +243,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _apiRequest: @Sendable (ServerRoute.Api.Route) async throws -> (Data, URLResponse) = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'apiRequest'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).apiRequest'")
           throw DependenciesMacros.Unimplemented("apiRequest")
         }
       }
-      """
+      """#
     }
   }
 
@@ -260,7 +260,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: () -> () {
           @storageRestrictions(initializes: _endpoint)
@@ -276,10 +276,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> () = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -292,7 +292,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: () -> Int? {
           @storageRestrictions(initializes: _endpoint)
@@ -308,11 +308,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Int? = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
           return nil
         }
       }
-      """
+      """#
     }
   }
 
@@ -325,7 +325,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: () -> Optional<Int> {
           @storageRestrictions(initializes: _endpoint)
@@ -341,11 +341,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Optional<Int> = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
           return nil
         }
       }
-      """
+      """#
     }
   }
 
@@ -358,7 +358,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: @Sendable (Int) -> Void {
           @storageRestrictions(initializes: _endpoint)
@@ -374,10 +374,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: @Sendable (Int) -> Void = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -390,7 +390,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       public struct Client {
         public var endpoint: @Sendable (String, _ id: Int, _ progress: Float) async -> Void {
           @storageRestrictions(initializes: _endpoint)
@@ -411,10 +411,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: @Sendable (String, _ id: Int, _ progress: Float) async -> Void = { _, _, _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -427,7 +427,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       public struct Client {
         public var endpoint: @MainActor @Sendable (_ id: Int) async -> Void {
           @storageRestrictions(initializes: _endpoint)
@@ -448,10 +448,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: @MainActor @Sendable (_ id: Int) async -> Void = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -464,7 +464,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       public struct Client {
         public var endpoint: @Sendable (_ id: Int) async -> Void {
           @storageRestrictions(initializes: _endpoint)
@@ -485,10 +485,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: @Sendable (_ id: Int) async -> Void = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -501,7 +501,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: (_ id: Int) -> Void {
           @storageRestrictions(initializes: _endpoint)
@@ -521,10 +521,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: (_ id: Int) -> Void = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -537,7 +537,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: () -> Void {
           @storageRestrictions(initializes: _endpoint)
@@ -557,10 +557,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Void = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -593,7 +593,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var endpoint: (_ id: Int) -> Void {
           @storageRestrictions(initializes: _endpoint)
@@ -613,10 +613,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: (_ id: Int) -> Void = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -647,7 +647,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       var `return`: () throws -> Int
       """
     } expansion: {
-      """
+      #"""
       var `return`: () throws -> Int {
           @storageRestrictions(initializes: _return)
           init(initialValue) {
@@ -662,10 +662,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
 
       private var _return: () throws -> Int = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'return'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).return'")
           throw DependenciesMacros.Unimplemented("return")
       }
-      """
+      """#
     }
   }
 
@@ -676,7 +676,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       var `return`: (_ id: Int) throws -> Int
       """
     } expansion: {
-      """
+      #"""
       var `return`: (_ id: Int) throws -> Int {
           @storageRestrictions(initializes: _return)
           init(initialValue) {
@@ -695,10 +695,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
 
       private var _return: (_ id: Int) throws -> Int = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'return'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).return'")
           throw DependenciesMacros.Unimplemented("return")
       }
-      """
+      """#
     }
   }
 
@@ -734,7 +734,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Blah {
         public var doAThing: (_ value: Int) -> String {
           @storageRestrictions(initializes: _doAThing)
@@ -754,11 +754,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _doAThing: (_ value: Int) -> String = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).doAThing'")
           return "Hello, world"
           }
       }
-      """
+      """#
     }
   }
 
@@ -773,7 +773,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     }
     """
     } expansion: {
-      """
+      #"""
       struct Blah {
         public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String {
           @storageRestrictions(initializes: _doAThing)
@@ -793,11 +793,11 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'doAThing'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).doAThing'")
           return "Hello, world"
           }
       }
-      """
+      """#
     }
   }
 
@@ -810,7 +810,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Foo {
         var bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void {
           @storageRestrictions(initializes: _bar)
@@ -830,10 +830,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void = { _, _, _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).bar'")
         }
       }
-      """
+      """#
     }
   }
 
@@ -888,7 +888,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Blah {
         public var foo: () -> Void {
           @storageRestrictions(initializes: _foo)
@@ -904,7 +904,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _foo: () -> Void = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).foo'")
           return {
             fatalError()
           }()
@@ -923,13 +923,13 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _bar: () -> String = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'bar'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).bar'")
           return {
             fatalError("Goodbye")
           }()
         }
       }
-      """
+      """#
     }
   }
 
@@ -946,7 +946,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Blah {
         public var foo: () throws -> Void {
           willSet {
@@ -967,7 +967,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _foo: () throws -> Void = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'foo'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).foo'")
           throw DependenciesMacros.Unimplemented("foo")
         } {
                 willSet {
@@ -975,7 +975,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
                 }
           }
       }
-      """
+      """#
     }
   }
     
@@ -988,7 +988,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       package struct Client {
         package var endpoint: () -> Void {
           @storageRestrictions(initializes: _endpoint)
@@ -1004,10 +1004,10 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Void = {
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'endpoint'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).endpoint'")
         }
       }
-      """
+      """#
     }
   }
 }

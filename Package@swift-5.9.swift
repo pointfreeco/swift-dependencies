@@ -94,6 +94,7 @@ let package = Package(
     .testTarget(
       name: "DependenciesMacrosPluginTests",
       dependencies: [
+        "DependenciesMacros",
         "DependenciesMacrosPlugin",
         .product(name: "MacroTesting", package: "swift-macro-testing"),
       ]

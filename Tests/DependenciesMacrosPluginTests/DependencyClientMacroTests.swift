@@ -709,7 +709,7 @@ final class DependencyClientMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {@available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.")
         var fetch: (_ id: Int) throws -> String {
           @storageRestrictions(initializes: _fetch)
@@ -729,7 +729,7 @@ final class DependencyClientMacroTests: BaseTestCase {
         }
 
         @available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") private var _fetch: (_ id: Int) throws -> String = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'fetch'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).fetch'")
           throw DependenciesMacros.Unimplemented("fetch")
         }
 
@@ -742,7 +742,7 @@ final class DependencyClientMacroTests: BaseTestCase {
         init() {
         }
       }
-      """
+      """#
     }
   }
 
@@ -756,7 +756,7 @@ final class DependencyClientMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         @available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.")
         var fetch: (_ id: Int) throws -> String {
@@ -777,7 +777,7 @@ final class DependencyClientMacroTests: BaseTestCase {
         }
 
         @available(iOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(macOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(tvOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") @available(watchOS, deprecated: 9999, message: "This property has a method equivalent that is preferred for autocomplete via this deprecation. It is perfectly fine to use for overriding and accessing via '@Dependency'.") private var _fetch: (_ id: Int) throws -> String = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'fetch'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).fetch'")
           throw DependenciesMacros.Unimplemented("fetch")
         }
 
@@ -790,7 +790,7 @@ final class DependencyClientMacroTests: BaseTestCase {
         init() {
         }
       }
-      """
+      """#
     }
   }
 
@@ -803,7 +803,7 @@ final class DependencyClientMacroTests: BaseTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       struct Client {
         var fetch: (Int) throws -> String {
           @storageRestrictions(initializes: _fetch)
@@ -819,7 +819,7 @@ final class DependencyClientMacroTests: BaseTestCase {
         }
 
         private var _fetch: (Int) throws -> String = { _ in
-          XCTestDynamicOverlay.XCTFail("Unimplemented: 'fetch'")
+          XCTestDynamicOverlay.XCTFail("Unimplemented: '\(Self.self).fetch'")
           throw DependenciesMacros.Unimplemented("fetch")
         }
 
@@ -832,7 +832,7 @@ final class DependencyClientMacroTests: BaseTestCase {
         init() {
         }
       }
-      """
+      """#
     }
   }
 

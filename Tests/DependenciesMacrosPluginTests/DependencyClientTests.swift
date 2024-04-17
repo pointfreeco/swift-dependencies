@@ -1,3 +1,4 @@
+#if canImport(ObjectiveC)
 import DependenciesMacros
 import XCTest
 
@@ -49,3 +50,4 @@ struct ClientWithNonThrowingEndpoint {
   static let line = #line
   var fetchWithUnimplemented: () -> Int = { unimplemented(placeholder: 42) }
 }
+#endif

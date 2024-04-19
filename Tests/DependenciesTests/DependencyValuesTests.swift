@@ -436,10 +436,10 @@ final class DependencyValuesTests: XCTestCase {
         }
       }
 
-      let model = withDependencies {
+      let model = await withDependencies {
         $0.fullDependency.value = 42
       } operation: {
-        FeatureModel()
+        await FeatureModel()
       }
 
       await model.doSomething(expectation: expectation)
@@ -466,7 +466,7 @@ final class DependencyValuesTests: XCTestCase {
         }
       }
 
-      let model = FeatureModel()
+      let model = await FeatureModel()
 
       await withDependencies {
         $0.fullDependency.value = 42
@@ -499,7 +499,7 @@ final class DependencyValuesTests: XCTestCase {
         }
       }
 
-      let model = FeatureModel()
+      let model = await FeatureModel()
 
       await withDependencies {
         $0.fullDependency.value = 42
@@ -526,7 +526,7 @@ final class DependencyValuesTests: XCTestCase {
         }
       }
 
-      let model = FeatureModel()
+      let model = await FeatureModel()
 
       await withDependencies {
         $0.fullDependency.value = 42

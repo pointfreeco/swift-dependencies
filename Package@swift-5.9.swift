@@ -109,13 +109,14 @@ let package = Package(
   )
 #endif
 
-//for target in package.targets {
-//  target.swiftSettings = target.swiftSettings ?? []
+for target in package.targets {
+  target.swiftSettings = target.swiftSettings ?? []
+  target.swiftSettings?.append(contentsOf: [
+    .enableExperimentalFeature("StrictConcurrency")
+  ])
 //  target.swiftSettings?.append(
 //    .unsafeFlags([
-//      "-Xfrontend", "-warn-concurrency",
-//      "-Xfrontend", "-enable-actor-data-race-checks",
 //      "-enable-library-evolution",
 //    ])
 //  )
-//}
+}

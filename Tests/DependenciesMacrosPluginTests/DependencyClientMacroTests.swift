@@ -419,6 +419,33 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
+  func testPackage() {
+    assertMacro {
+      """
+      @DependencyClient
+      package struct Client {
+        package var endpoint: () -> Void
+      }
+      """
+    } expansion: {
+      """
+      package struct Client {
+        @DependencyEndpoint
+        package var endpoint: () -> Void
+
+        package init(
+          endpoint: @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        package init() {
+        }
+      }
+      """
+    }
+  }
+
   func testSendable() {
     assertMacro {
       """

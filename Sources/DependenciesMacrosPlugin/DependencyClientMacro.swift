@@ -213,6 +213,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
 private enum Access: Comparable {
   case `private`
   case `internal`
+  case `package`
   case `public`
 
   init?(modifiers: DeclModifierListSyntax) {
@@ -223,6 +224,9 @@ private enum Access: Comparable {
         return
       case .keyword(.internal):
         self = .internal
+        return
+      case .keyword(.package):
+        self = .package
         return
       case .keyword(.public):
         self = .public
@@ -240,6 +244,8 @@ private enum Access: Comparable {
       return .keyword(.private)
     case .internal:
       return nil
+    case .package:
+      return .keyword(.package)
     case .public:
       return .keyword(.public)
     }

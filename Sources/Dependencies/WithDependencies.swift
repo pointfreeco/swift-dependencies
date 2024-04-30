@@ -326,7 +326,8 @@ private class DependencyObjects: @unchecked Sendable {
   internal init() {}
 
   func store(_ object: AnyObject) {
-    self.storage.withValue { [id = ObjectIdentifier(object), object = UncheckedSendable(object)] storage in
+    self.storage.withValue {
+      [id = ObjectIdentifier(object), object = UncheckedSendable(object)] storage in
       storage[id] = DependencyObject(
         object: object.wrappedValue,
         dependencyValues: DependencyValues._current
@@ -347,9 +348,9 @@ private class DependencyObjects: @unchecked Sendable {
       .compactMap({ $1 as? _HasInitialValues })
       .first?
       .initialValues
-    ?? self.storage.withValue({ [id = ObjectIdentifier(object)] in
-      $0[id]?.dependencyValues
-    })
+      ?? self.storage.withValue({ [id = ObjectIdentifier(object)] in
+        $0[id]?.dependencyValues
+      })
   }
 }
 

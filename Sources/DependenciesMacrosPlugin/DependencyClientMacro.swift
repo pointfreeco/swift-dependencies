@@ -267,18 +267,18 @@ private struct Property {
   var isEndpoint: Bool
 }
 
-fileprivate extension VariableDeclSyntax {
-  var isStatic: Bool {
+extension VariableDeclSyntax {
+  fileprivate var isStatic: Bool {
     self.modifiers.contains { modifier in
       modifier.name.tokenKind == .keyword(.static)
     }
   }
 
-  static let dependencyEndpointName = "DependencyEndpoint"
-  static let dependencyEndpointIgnoredName = "DependencyEndpointIgnored"
-  static let dependencyName = "Dependency"
+  fileprivate static let dependencyEndpointName = "DependencyEndpoint"
+  fileprivate static let dependencyEndpointIgnoredName = "DependencyEndpointIgnored"
+  fileprivate static let dependencyName = "Dependency"
 
-  func hasMacroAttached(_ macro: String) -> Bool {
+  fileprivate func hasMacroAttached(_ macro: String) -> Bool {
     self.attributes.contains {
       guard
         case let .attribute(attribute) = $0,
@@ -289,19 +289,19 @@ fileprivate extension VariableDeclSyntax {
     }
   }
 
-  var hasDependencyEndpointMacroAttached: Bool {
+  fileprivate var hasDependencyEndpointMacroAttached: Bool {
     hasMacroAttached(Self.dependencyEndpointName)
   }
-  
-  var hasDependencyEndpointIgnoredMacroAttached: Bool {
+
+  fileprivate var hasDependencyEndpointIgnoredMacroAttached: Bool {
     hasMacroAttached(Self.dependencyEndpointIgnoredName)
   }
 
-  var hasDependencyMacroAttached: Bool {
+  fileprivate var hasDependencyMacroAttached: Bool {
     hasMacroAttached(Self.dependencyName)
   }
 
-  var isIgnored: Bool {
+  fileprivate var isIgnored: Bool {
     hasDependencyMacroAttached || hasDependencyEndpointIgnoredMacroAttached
   }
 }

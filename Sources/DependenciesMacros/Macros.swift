@@ -209,6 +209,10 @@ public macro DependencyEndpoint(method: String = "") =
     module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
   )
 
+@attached(accessor, names: named(willSet))
+public macro DependencyEndpointIgnored() =
+  #externalMacro(module: "DependenciesMacrosPlugin", type: "DependencyEndpointIgnoredMacro")
+
 /// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
 public struct Unimplemented: Error {
   let endpoint: String

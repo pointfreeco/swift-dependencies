@@ -13,6 +13,7 @@ final class DependencyClientMacroTests: BaseTestCase {
   }
 
   func testBasics() {
+    
     assertMacro {
       """
       @DependencyClient
@@ -613,6 +614,82 @@ final class DependencyClientMacroTests: BaseTestCase {
         }
       }
       """
+    }
+  }
+
+  func testWithDependencyEndpointIgnored() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+      
+        let id = UUID()
+        var endpoint: @Sendable () -> Void
+
+        @DependencyEndpointIgnored
+        var ignoredVar: @Sendable () -> Void
+      }
+      """
+    } expansion: {
+      """
+      struct Client: Sendable {
+
+        let id = UUID()
+        @DependencyEndpoint
+        var endpoint: @Sendable () -> Void
+
+        @DependencyEndpointIgnored
+        var ignoredVar: @Sendable () -> Void
+
+        init(
+          endpoint: @Sendable @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """
+    }
+  }
+
+  func testWithDependencyMacro() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client: Sendable {
+        @Dependency(TypedDependency.self) var typedDependency
+        @Dependency(TypedDependency.self) var typedDependency: TypedDependency
+        @Dependency(\\.dependency1) var dependency1
+        @Dependency(\\.dependency2) var dependency2: DependencyTwo
+
+        let id = UUID()
+        var endpoint: @Sendable () -> Void
+      }
+      """
+    } expansion: {
+      #"""
+      struct Client: Sendable {
+        @Dependency(TypedDependency.self) var typedDependency
+        @Dependency(TypedDependency.self) var typedDependency: TypedDependency
+        @Dependency(\.dependency1) var dependency1
+        @Dependency(\.dependency2) var dependency2: DependencyTwo
+
+        let id = UUID()
+        @DependencyEndpoint
+        var endpoint: @Sendable () -> Void
+
+        init(
+          endpoint: @Sendable @escaping () -> Void
+        ) {
+          self.endpoint = endpoint
+        }
+
+        init() {
+        }
+      }
+      """#
     }
   }
 

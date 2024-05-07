@@ -21,9 +21,16 @@ extension DependencyValues {
   ///   $0.compactDescription = "Number must be greater than zero"
   /// }
   /// ```
-  public var assert: Assert {
+  public var assert: any AssertionEffect {
     get { self[AssertKey.self] }
     set { self[AssertKey.self] = newValue }
+  }
+
+  /// A dependency for failing an assertion.
+  ///
+  /// Equivalent to passing a `false` condition to ``DependencyValues/assert``.
+  public var assertionFailure: any AssertionFailureEffect {
+    AssertionFailure(base: self.assert)
   }
 
   /// A dependency for handling preconditions.
@@ -48,16 +55,124 @@ extension DependencyValues {
   ///   $0.compactDescription = "Number must be greater than zero"
   /// }
   /// ```
-  public var precondition: Assert {
+  public var precondition: any AssertionEffect {
     get { self[PreconditionKey.self] }
     set { self[PreconditionKey.self] = newValue }
-  }}
+  }
+
+  /// A dependency for failing a precondition.
+  ///
+  /// Equivalent to passing a `false` condition to ``DependencyValues/precondition``.
+  public var preconditionFailure: any AssertionFailureEffect {
+    AssertionFailure(base: self.assert)
+  }
+}
 
 /// A type for creating an assertion or precondition.
 ///
 /// See ``DependencyValues/assert`` or ``DependencyValues/precondition`` for more information.
-public struct Assert: Sendable {
-  public let assert: @Sendable (
+public protocol AssertionEffect: Sendable {
+  func callAsFunction(
+    _ condition: @autoclosure () -> Bool,
+    _ message: @autoclosure () -> String,
+    file: StaticString,
+    line: UInt
+  )
+}
+
+extension AssertionEffect {
+  @_transparent
+  public func callAsFunction(
+    _ condition: @autoclosure () -> Bool,
+    _ message: @autoclosure () -> String = "",
+    file: StaticString = #file,
+    line: UInt = #line
+  ) {
+    self.callAsFunction(condition(), "", file: file, line: line)
+  }
+}
+
+private struct LiveAssertionEffect: AssertionEffect {
+  @_transparent
+  func callAsFunction(
+    _ condition: @autoclosure () -> Bool,
+    _ message: @autoclosure () -> String,
+    file: StaticString,
+    line: UInt
+  ) {
+    Swift.assert(condition(), message(), file: file, line: line)
+  }
+}
+
+private struct LivePreconditionEffect: AssertionEffect {
+  @_transparent
+  func callAsFunction(
+    _ condition: @autoclosure () -> Bool,
+    _ message: @autoclosure () -> String,
+    file: StaticString,
+    line: UInt
+  ) {
+    Swift.precondition(condition(), message(), file: file, line: line)
+  }
+}
+
+private struct TestAssertionEffect: AssertionEffect {
+  @_transparent
+  func callAsFunction(
+    _ condition: @autoclosure () -> Bool,
+    _ message: @autoclosure () -> String,
+    file: StaticString,
+    line: UInt
+  ) {
+    guard condition() else { return XCTFail(message(), file: file, line: line) }
+  }
+}
+
+public protocol AssertionFailureEffect: Sendable {
+  func callAsFunction(
+    _ message: @autoclosure () -> String,
+    file: StaticString,
+    line: UInt
+  )
+}
+
+extension AssertionFailureEffect {
+  @_transparent
+  public func callAsFunction(
+    _ message: @autoclosure () -> String = "",
+    file: StaticString = #file,
+    line: UInt = #line
+  ) {
+    self.callAsFunction("", file: file, line: line)
+  }
+}
+
+private struct AssertionFailure: AssertionFailureEffect {
+  let base: any AssertionEffect
+
+  @_transparent
+  func callAsFunction(
+    _ message: @autoclosure () -> String,
+    file: StaticString,
+    line: UInt
+  ) {
+    self.base(false, message(), file: file, line: line)
+  }
+}
+
+private enum AssertKey: DependencyKey {
+  public static let liveValue: any AssertionEffect = LiveAssertionEffect()
+  public static let testValue: any AssertionEffect = TestAssertionEffect()
+}
+
+private enum PreconditionKey: DependencyKey {
+  public static let liveValue: any AssertionEffect = LivePreconditionEffect()
+  public static let testValue: any AssertionEffect = TestAssertionEffect()
+}
+
+/// An ``AssertionEffect`` that invokes the given closure.
+public struct AnyAssertionEffect: AssertionEffect {
+  private let assert: @Sendable (
     _ condition: @autoclosure () -> Bool,
     _ message: @autoclosure () -> String,
     _ file: StaticString,
@@ -77,28 +192,10 @@ public struct Assert: Sendable {
 
   public func callAsFunction(
     _ condition: @autoclosure () -> Bool,
-    _ message: @autoclosure () -> String = "",
-    file: StaticString = #file,
-    line: UInt = #line
+    _ message: @autoclosure () -> String,
+    file: StaticString,
+    line: UInt
   ) {
     self.assert(condition(), message(), file, line)
-  }
-}
-
-private enum AssertKey: DependencyKey {
-  public static let liveValue = Assert { condition, message, file, line in
-    Swift.assert(condition(), message(), file: file, line: line)
-  }
-  public static let testValue = Assert { condition, message, file, line in
-    guard condition() else { return XCTFail(message(), file: file, line: line) }
-  }
-}
-
-private enum PreconditionKey: DependencyKey {
-  public static let liveValue = Assert { condition, message, file, line in
-    Swift.precondition(condition(), message(), file: file, line: line)
-  }
-  public static let testValue = Assert { condition, message, file, line in
-    guard condition() else { return XCTFail(message(), file: file, line: line) }
   }
 }

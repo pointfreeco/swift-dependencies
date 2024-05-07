@@ -64,7 +64,7 @@ extension DependencyValues {
   ///
   /// Equivalent to passing a `false` condition to ``DependencyValues/precondition``.
   public var preconditionFailure: any AssertionFailureEffect {
-    AssertionFailure(base: self.assert)
+    AssertionFailure(base: self.precondition)
   }
 }
 

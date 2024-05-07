@@ -74,6 +74,7 @@ public protocol AssertionEffect: Sendable {
 }
 
 extension AssertionEffect {
+  @_disfavoredOverload
   @_transparent
   public func callAsFunction(
     _ condition: @autoclosure () -> Bool,
@@ -81,7 +82,7 @@ extension AssertionEffect {
     file: StaticString = #file,
     line: UInt = #line
   ) {
-    self.callAsFunction(condition(), "", file: file, line: line)
+    self.callAsFunction(condition(), message(), file: file, line: line)
   }
 }
 
@@ -130,13 +131,14 @@ public protocol AssertionFailureEffect: Sendable {
 }
 
 extension AssertionFailureEffect {
+  @_disfavoredOverload
   @_transparent
   public func callAsFunction(
     _ message: @autoclosure () -> String = "",
     file: StaticString = #file,
     line: UInt = #line
   ) {
-    self.callAsFunction("", file: file, line: line)
+    self.callAsFunction(message(), file: file, line: line)
   }
 }
 

@@ -3,6 +3,7 @@ import XCTest
 
 final class AssertTests: XCTestCase {
   @Dependency(\.assert) var assert
+  @Dependency(\.assertionFailure) var assertionFailure
   @Dependency(\.precondition) var precondition
 
   func testPass() {
@@ -21,6 +22,11 @@ final class AssertTests: XCTestCase {
         assert(false, "Must be true")
       } issueMatcher: {
         $0.compactDescription == "Must be true"
+      }
+      XCTExpectFailure {
+        assertionFailure("Failure")
+      } issueMatcher: {
+        $0.compactDescription == "Failure"
       }
       XCTExpectFailure {
         precondition(false)

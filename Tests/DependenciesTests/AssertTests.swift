@@ -12,24 +12,26 @@ final class AssertTests: XCTestCase {
     precondition(true, "Must be true")
   }
 
-  func testFail() {
-    XCTExpectFailure {
-      assert(false)
+  #if os(iOS) || os(macOS) || os(tvOS) || os(watchOS)
+    func testFail() {
+      XCTExpectFailure {
+        assert(false)
+      }
+      XCTExpectFailure {
+        assert(false, "Must be true")
+      } issueMatcher: {
+        $0.compactDescription == "Must be true"
+      }
+      XCTExpectFailure {
+        precondition(false)
+      }
+      XCTExpectFailure {
+        precondition(false, "Must be true")
+      } issueMatcher: {
+        $0.compactDescription == "Must be true"
+      }
     }
-    XCTExpectFailure {
-      assert(false, "Must be true")
-    } issueMatcher: {
-      $0.compactDescription == "Must be true"
-    }
-    XCTExpectFailure {
-      precondition(false)
-    }
-    XCTExpectFailure {
-      precondition(false, "Must be true")
-    } issueMatcher: {
-      $0.compactDescription == "Must be true"
-    }
-  }
+  #endif
 
   func testCustom() {
     let expectation = self.expectation(description: "assert")

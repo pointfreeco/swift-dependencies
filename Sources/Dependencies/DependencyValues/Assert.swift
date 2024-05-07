@@ -59,13 +59,6 @@ extension DependencyValues {
     get { self[PreconditionKey.self] }
     set { self[PreconditionKey.self] = newValue }
   }
-
-  /// A dependency for failing a precondition.
-  ///
-  /// Equivalent to passing a `false` condition to ``DependencyValues/precondition``.
-  public var preconditionFailure: any AssertionFailureEffect {
-    AssertionFailure(base: self.precondition)
-  }
 }
 
 /// A type for creating an assertion or precondition.

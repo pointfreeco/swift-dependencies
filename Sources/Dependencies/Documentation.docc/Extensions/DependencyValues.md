@@ -30,7 +30,6 @@
 - ``mainRunLoop``
 - ``openURL``
 - ``precondition``
-- ``preconditionFailure``
 - ``suspendingClock``
 - ``timeZone``
 - ``urlSession``

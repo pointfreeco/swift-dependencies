@@ -45,8 +45,7 @@ extension DependencyValues {
   /// Now this is easy to test. We just have to `await` for the code to finish, and once it does
   /// we can verify that the email was sent.
   public var fireAndForget: FireAndForget {
-    get { self[FireAndForgetKey.self] }
-    set { self[FireAndForgetKey.self] = newValue }
+    self[FireAndForgetKey.self]
   }
 }
 

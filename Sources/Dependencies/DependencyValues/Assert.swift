@@ -22,8 +22,7 @@ extension DependencyValues {
   /// }
   /// ```
   public var assert: any AssertionEffect {
-    get { self[AssertKey.self] }
-    set { self[AssertKey.self] = newValue }
+    self[AssertKey.self]
   }
 
   /// A dependency for failing an assertion.
@@ -56,8 +55,7 @@ extension DependencyValues {
   /// }
   /// ```
   public var precondition: any AssertionEffect {
-    get { self[PreconditionKey.self] }
-    set { self[PreconditionKey.self] = newValue }
+    self[PreconditionKey.self]
   }
 }
 
@@ -163,35 +161,4 @@ private enum AssertKey: DependencyKey {
 private enum PreconditionKey: DependencyKey {
   public static let liveValue: any AssertionEffect = LivePreconditionEffect()
   public static let testValue: any AssertionEffect = TestAssertionEffect()
-}
-
-/// An ``AssertionEffect`` that invokes the given closure.
-public struct AnyAssertionEffect: AssertionEffect {
-  private let assert:
-    @Sendable (
-      _ condition: @autoclosure () -> Bool,
-      _ message: @autoclosure () -> String,
-      _ file: StaticString,
-      _ line: UInt
-    ) -> Void
-
-  public init(
-    _ assert: @escaping @Sendable (
-      _ condition: @autoclosure () -> Bool,
-      _ message: @autoclosure () -> String,
-      _ file: StaticString,
-      _ line: UInt
-    ) -> Void
-  ) {
-    self.assert = assert
-  }
-
-  public func callAsFunction(
-    _ condition: @autoclosure () -> Bool,
-    _ message: @autoclosure () -> String,
-    file: StaticString,
-    line: UInt
-  ) {
-    self.assert(condition(), message(), file, line)
-  }
 }

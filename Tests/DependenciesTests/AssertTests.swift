@@ -38,16 +38,4 @@ final class AssertTests: XCTestCase {
       }
     }
   #endif
-
-  func testCustom() {
-    let expectation = self.expectation(description: "assert")
-    withDependencies {
-      $0.assert = AnyAssertionEffect { condition, message, file, line in
-        expectation.fulfill()
-      }
-    } operation: {
-      assert(true)
-      self.wait(for: [expectation], timeout: 0)
-    }
-  }
 }

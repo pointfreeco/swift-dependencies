@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser",
       "state" : {
-        "revision" : "fddd1c00396eed152c45a46bea9f47b98e59301d",
-        "version" : "1.2.0"
+        "revision" : "46989693916f56d1186bd59ac15124caef896560",
+        "version" : "1.3.1"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-clocks",
       "state" : {
-        "revision" : "d1fd837326aa719bee979bdde1f53cd5797443eb",
-        "version" : "1.0.0"
+        "revision" : "a8421d68068d8f45fbceb418fbf22c5dad4afd33",
+        "version" : "1.0.2"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-concurrency-extras",
       "state" : {
-        "revision" : "ea631ce892687f5432a833312292b80db238186a",
-        "version" : "1.0.0"
+        "revision" : "bb5059bde9022d69ac516803f4f227d8ac967f71",
+        "version" : "1.1.0"
       }
     },
     {
@@ -50,7 +50,16 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-docc-plugin",
       "state" : {
-        "revision" : "3303b164430d9a7055ba484c8ead67a52f7b74f6",
+        "revision" : "26ac5758409154cc448d7ab82389c520fa8a8247",
+        "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "swift-docc-symbolkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-docc-symbolkit",
+      "state" : {
+        "revision" : "b45d1f2ed151d057b54504d653e0da5552844e34",
         "version" : "1.0.0"
       }
     },
@@ -59,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-macro-testing",
       "state" : {
-        "revision" : "35acd9468d40ae87e75991a18af6271e8124c261",
-        "version" : "0.2.1"
+        "revision" : "5c4a1b9d7c23cd5c08ea50677d8e89080365cb00",
+        "version" : "0.4.0"
       }
     },
     {
@@ -68,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
       "state" : {
-        "revision" : "bb0ea08db8e73324fe6c3727f755ca41a23ff2f4",
-        "version" : "1.14.2"
+        "revision" : "625ccca8570773dd84a34ee51a81aa2bc5a4f97a",
+        "version" : "1.16.0"
       }
     },
     {
@@ -77,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-syntax",
       "state" : {
-        "revision" : "ffa3cd6fc2aa62adbedd31d3efaf7c0d86a9f029",
-        "version" : "509.0.1"
+        "revision" : "303e5c5c36d6a558407d364878df131c3546fad8",
+        "version" : "510.0.2"
       }
     },
     {
@@ -86,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
-        "revision" : "b13b1d1a8e787a5ffc71ac19dcaf52183ab27ba2",
-        "version" : "1.1.1"
+        "revision" : "6f30bdba373bbd7fbfe241dddd732651f2fbd1e2",
+        "version" : "1.1.2"
       }
     }
   ],

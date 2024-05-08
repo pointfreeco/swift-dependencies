@@ -5,7 +5,7 @@
 ### Creating and accessing values
 
 - ``init()``
-- ``subscript(_:_:_:_:)``
+- ``subscript(key:file:function:line:)
 
 ### Overriding values
 
@@ -18,6 +18,8 @@
 
 ### Dependency values
 
+- ``assert``
+- ``assertionFailure``
 - ``calendar``
 - ``context``
 - ``continuousClock``
@@ -27,6 +29,7 @@
 - ``mainQueue``
 - ``mainRunLoop``
 - ``openURL``
+- ``precondition``
 - ``suspendingClock``
 - ``timeZone``
 - ``urlSession``

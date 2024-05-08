@@ -167,12 +167,13 @@ private enum PreconditionKey: DependencyKey {
 
 /// An ``AssertionEffect`` that invokes the given closure.
 public struct AnyAssertionEffect: AssertionEffect {
-  private let assert: @Sendable (
-    _ condition: @autoclosure () -> Bool,
-    _ message: @autoclosure () -> String,
-    _ file: StaticString,
-    _ line: UInt
-  ) -> Void
+  private let assert:
+    @Sendable (
+      _ condition: @autoclosure () -> Bool,
+      _ message: @autoclosure () -> String,
+      _ file: StaticString,
+      _ line: UInt
+    ) -> Void
 
   public init(
     _ assert: @escaping @Sendable (

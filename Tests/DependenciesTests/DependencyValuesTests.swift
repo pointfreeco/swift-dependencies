@@ -679,6 +679,19 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
   }
+
+  @MainActor
+  func testDeadlock() {
+    DispatchQueue(label: "queue", qos: .utility).async {
+      @Dependency(\.date) var date
+      _ = date
+    }
+
+    Thread.sleep(forTimeInterval: 0.2)
+
+    @Dependency(\.date) var date
+    _ = date
+  }
 }
 
 struct CountInitDependency: TestDependencyKey {

@@ -687,7 +687,7 @@ final class DependencyValuesTests: XCTestCase {
       _ = date
     }
 
-    Thread.sleep(forTimeInterval: 0.2)
+    Thread.sleep(forTimeInterval: 0.1)
 
     @Dependency(\.date) var date
     _ = date

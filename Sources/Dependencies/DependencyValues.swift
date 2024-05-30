@@ -13,11 +13,11 @@ import XCTestDynamicOverlay
 
 #if _runtime(_ObjC)
   extension DispatchQueue {
-    fileprivate static func mainSync<R>(execute block: @Sendable () -> R) -> R {
+    fileprivate static func mainASAP(execute block: @escaping @Sendable () -> Void) {
       if Thread.isMainThread {
         return block()
       } else {
-        return Self.main.sync(execute: block)
+        return Self.main.async(execute: block)
       }
     }
   }
@@ -129,7 +129,7 @@ public struct DependencyValues: Sendable {
   /// that the library manages for you when you use the ``Dependency`` property wrapper.
   public init() {
     #if _runtime(_ObjC)
-      DispatchQueue.mainSync {
+      DispatchQueue.mainASAP {
         guard
           let XCTestObservation = objc_getProtocol("XCTestObservation"),
           let XCTestObservationCenter = NSClassFromString("XCTestObservationCenter"),

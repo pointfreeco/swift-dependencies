@@ -1,12 +1,12 @@
 import Dependencies
 import XCTest
 
-@MainActor
 final class FireAndForgetTests: XCTestCase {
   @Dependency(\.fireAndForget) var fireAndForget
 
   // NB: These tests fail/crash in Wasm.
   #if !os(WASI)
+    @MainActor
     func testTestContext() async throws {
       let didExecute = ActorIsolated(false)
 
@@ -19,6 +19,7 @@ final class FireAndForgetTests: XCTestCase {
       XCTAssertEqual(value, true)
     }
 
+    @MainActor
     func testTestContext_Cancellation() async throws {
       let didExecute = ActorIsolated(false)
 
@@ -36,6 +37,7 @@ final class FireAndForgetTests: XCTestCase {
       XCTAssertEqual(value, true)
     }
 
+    @MainActor
     func testLiveContext() async throws {
       try await withDependencies {
         $0.context = .live
@@ -58,6 +60,7 @@ final class FireAndForgetTests: XCTestCase {
   #endif
 
   #if !os(Linux) && !os(WASI) && !os(Windows)
+    @MainActor
     func testLiveContext_DependencyAccess() async {
       await withDependencies {
         $0.context = .live

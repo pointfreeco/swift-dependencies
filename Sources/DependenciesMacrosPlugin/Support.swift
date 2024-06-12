@@ -1,8 +1,11 @@
 import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacros
+
+#if !canImport(SwiftSyntax600)
+  import SwiftSyntaxMacroExpansion
+#endif
 
 extension SyntaxStringInterpolation {
   mutating func appendInterpolation<Node: SyntaxProtocol>(_ node: Node?) {
@@ -230,5 +233,15 @@ extension MacroExpansionContext {
 extension Array where Element == String {
   func qualified(_ module: String) -> Self {
     self.flatMap { [$0, "\(module).\($0)"] }
+  }
+}
+
+extension TypeEffectSpecifiersSyntax {
+  var hasThrowsClause: Bool {
+    #if canImport(SwiftSyntax600)
+      throwsClause != nil
+    #else
+      throwsSpecifier != nil
+    #endif
   }
 }

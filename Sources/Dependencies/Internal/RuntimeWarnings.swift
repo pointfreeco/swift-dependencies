@@ -53,7 +53,7 @@ func runtimeWarn(
     //     To work around this, we hook into SwiftUI's runtime issue delivery mechanism, instead.
     //
     // Feedback filed: https://gist.github.com/stephencelis/a8d06383ed6ccde3e5ef5d1b3ad52bbc
-    #if swift(>=5.10)
+    #if compiler(>=5.10)
       @usableFromInline
       nonisolated(unsafe) let dso = getSwiftUIDSO()
     #else

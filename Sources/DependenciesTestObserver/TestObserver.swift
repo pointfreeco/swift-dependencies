@@ -1,6 +1,6 @@
 import XCTestDynamicOverlay
 
-#if !_runtime(_ObjC)
+#if !_runtime(_ObjC) && canImport(XCTest)
   import XCTest
 
   final class TestObserver: NSObject, XCTestObservation {
@@ -16,7 +16,7 @@ import XCTestDynamicOverlay
 
 public func registerTestObserver(_ resetCache: @convention(c) () -> Void) {
   guard _XCTIsTesting else { return }
-  #if !_runtime(_ObjC)
+  #if !_runtime(_ObjC) && canImport(XCTest)
     XCTestObservationCenter.shared.addTestObserver(TestObserver(resetCache))
   #endif
 }

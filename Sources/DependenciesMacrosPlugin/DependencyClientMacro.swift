@@ -2,8 +2,11 @@ import SwiftDiagnostics
 import SwiftOperators
 import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacros
+
+#if !canImport(SwiftSyntax600)
+  import SwiftSyntaxMacroExpansion
+#endif
 
 public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
   public static func expansion<D: DeclGroupSyntax, M: DeclSyntaxProtocol, C: MacroExpansionContext>(
@@ -30,7 +33,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     if let initializer = binding.initializer {
       guard try !initializer.diagnose(node, context: context).earlyOut
       else { return [] }
-    } else if functionType.effectSpecifiers?.throwsSpecifier == nil,
+    } else if functionType.effectSpecifiers?.hasThrowsClause != true,
       !functionType.isVoid,
       !functionType.isOptional
     {
@@ -173,12 +176,22 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         )
         binding.typeAnnotation?.type = TypeSyntax(attributedTypeSyntax)
       } else if let typeSyntax = type.as(FunctionTypeSyntax.self) {
-        binding.typeAnnotation?.type = TypeSyntax(
-          AttributedTypeSyntax(
-            attributes: [.attribute("@escaping").with(\.trailingTrivia, .space)],
-            baseType: typeSyntax
+        #if canImport(SwiftSyntax600)
+          binding.typeAnnotation?.type = TypeSyntax(
+            AttributedTypeSyntax(
+              specifiers: [],
+              attributes: [.attribute("@escaping").with(\.trailingTrivia, .space)],
+              baseType: typeSyntax
+            )
           )
-        )
+        #else
+          binding.typeAnnotation?.type = TypeSyntax(
+            AttributedTypeSyntax(
+              attributes: [.attribute("@escaping").with(\.trailingTrivia, .space)],
+              baseType: typeSyntax
+            )
+          )
+        #endif
       } else if binding.typeAnnotation == nil {
         binding.pattern.trailingTrivia = ""
         binding.typeAnnotation = TypeAnnotationSyntax(

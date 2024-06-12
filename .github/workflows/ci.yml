@@ -16,11 +16,11 @@ concurrency:
 jobs:
   macos:
     name: macOS
-    runs-on: macos-13
+    runs-on: macos-14
     strategy:
       matrix:
         config: ['debug', 'release']
-        xcode: ['14.3.1', '15.0.1']
+        xcode: ['14.3.1', '15.4.0']
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
@@ -45,12 +45,19 @@ jobs:
   #       run: make test-integration
 
   ubuntu:
-    name: Linux
+    strategy:
+      matrix:
+        swift:
+          - '5.10'
+    name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
+    container: swift:${{ matrix.swift }}
     steps:
       - uses: actions/checkout@v4
       - name: Run tests
-        run: make test-swift
+        run: swift test --parallel
+      - name: Run tests (release)
+        run: swift test -c release --parallel
 
   # wasm:
   #   name: Wasm
@@ -75,17 +82,3 @@ jobs:
   #       run: swift test
   #     - name: Run tests (release)
   #       run: swift test -c release
-
-  static-stdlib:
-    strategy:
-      matrix:
-        image: ['swift:5.7-focal', 'swift:5.8-focal']
-    runs-on: ubuntu-latest
-    container:
-      image: ${{ matrix.image }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build for static-stdlib (debug)
-        run: swift build -c debug --static-swift-stdlib
-      - name: Build for static-stdlib (release)
-        run: swift build -c release --static-swift-stdlib

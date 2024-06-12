@@ -30,9 +30,9 @@ extension ActorIsolated {
     deprecated,
     message: "Use the non-async version of 'withValue'."
   )
-  public func withValue<T>(
+  public func withValue<T: Sendable>(
     _ operation: @Sendable (inout Value) async throws -> T
-  ) async rethrows -> T {
+  ) async rethrows -> T where Value: Sendable {
     var value = self.value
     defer { self.value = value }
     return try await operation(&value)

@@ -1,7 +1,8 @@
-import XCTest
 import XCTestDynamicOverlay
 
 #if !_runtime(_ObjC)
+  import XCTest
+
   final class TestObserver: NSObject, XCTestObservation {
     private let resetCache: @convention(c) () -> Void
     internal init(_ resetCache: @convention(c) () -> Void) {

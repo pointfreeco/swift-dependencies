@@ -20,7 +20,7 @@ func runtimeWarn(
       #if canImport(os)
         os_log(
           .fault,
-          dso: dso,
+          dso: dso.wrappedValue,
           log: OSLog(subsystem: "com.apple.runtime-issues", category: category),
           "%@",
           message
@@ -55,15 +55,8 @@ func runtimeWarn(
     //     To work around this, we hook into SwiftUI's runtime issue delivery mechanism, instead.
     //
     // Feedback filed: https://gist.github.com/stephencelis/a8d06383ed6ccde3e5ef5d1b3ad52bbc
-    #if swift(>=5.10)
-      @usableFromInline
-      nonisolated(unsafe) let dso = getSwiftUIDSO()
-    #else
-      @usableFromInline
-      let dso = getSwiftUIDSO()
-    #endif
-
-    private func getSwiftUIDSO() -> UnsafeMutableRawPointer {
+    @usableFromInline
+    let dso = UncheckedSendable({
       let count = _dyld_image_count()
       for i in 0..<count {
         if let name = _dyld_get_image_name(i) {
@@ -76,7 +69,7 @@ func runtimeWarn(
         }
       }
       return UnsafeMutableRawPointer(mutating: #dsohandle)
-    }
+    }())
   #elseif os(WASI)
     #if canImport(JavaScriptCore)
       import JavaScriptCore

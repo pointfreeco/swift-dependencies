@@ -69,7 +69,7 @@ jobs:
     steps:
       - uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-5.19-release
+          branch: swift-5.10-release
           tag: 5.10-RELEASE
 
       - uses: actions/checkout@v4

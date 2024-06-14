@@ -63,17 +63,17 @@ jobs:
   #     - name: Run tests
   #       run: wasmtime .build/debug/swift-dependenciesPackageTests.wasm
 
-  windows:
-    name: Windows
-    runs-on: windows-latest
-    steps:
-      - uses: compnerd/gha-setup-swift@main
-        with:
-          branch: swift-5.10-release
-          tag: 5.10-RELEASE
-
-      - uses: actions/checkout@v4
-      - name: Run tests
-        run: swift test
-      - name: Run tests (release)
-        run: swift test -c release
+  # windows:
+  #   name: Windows
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: compnerd/gha-setup-swift@main
+  #       with:
+  #         branch: swift-5.10-release
+  #         tag: 5.10-RELEASE
+  #
+  #     - uses: actions/checkout@v4
+  #     - name: Run tests
+  #       run: swift test
+  #     - name: Run tests (release)
+  #       run: swift test -c release

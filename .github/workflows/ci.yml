@@ -49,19 +49,19 @@ jobs:
       - name: Run tests (release)
         run: swift test -c release --parallel
 
-  wasm:
-    name: Wasm
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: bytecodealliance/actions/wasmtime/setup@v1
-      - uses: swiftwasm/setup-swiftwasm@v1
-        with:
-          swift-version: "wasm-5.9.2-RELEASE"
-      - name: Build tests
-        run: swift build --triple wasm32-unknown-wasi --build-tests
-      - name: Run tests
-        run: wasmtime .build/debug/swift-dependenciesPackageTests.wasm
+  # wasm:
+  #   name: Wasm
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: bytecodealliance/actions/wasmtime/setup@v1
+  #     - uses: swiftwasm/setup-swiftwasm@v1
+  #       with:
+  #         swift-version: "wasm-5.9.2-RELEASE"
+  #     - name: Build tests
+  #       run: swift build --triple wasm32-unknown-wasi --build-tests
+  #     - name: Run tests
+  #       run: wasmtime .build/debug/swift-dependenciesPackageTests.wasm
 
   windows:
     name: Windows

@@ -230,9 +230,9 @@ extension MacroExpansionContext {
   }
 }
 
-extension Array where Element == String {
+extension Array<String> {
   func qualified(_ module: String) -> Self {
-    self.flatMap { [$0, "\(module).\($0)"] }
+    flatMap { [$0, "\(module).\($0)"] }
   }
 }
 

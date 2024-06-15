@@ -362,7 +362,7 @@ private final class CachedValues: @unchecked Sendable {
         let value: Key.Value?
         switch context {
         case .live:
-          value = _liveValue(key) as? Key.Value
+          value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
         case .preview:
           value = Key.previewValue
         case .test:

@@ -56,20 +56,21 @@ func runtimeWarn(
     //
     // Feedback filed: https://gist.github.com/stephencelis/a8d06383ed6ccde3e5ef5d1b3ad52bbc
     @usableFromInline
-    let dso = UncheckedSendable({
-      let count = _dyld_image_count()
-      for i in 0..<count {
-        if let name = _dyld_get_image_name(i) {
-          let swiftString = String(cString: name)
-          if swiftString.hasSuffix("/SwiftUI") {
-            if let header = _dyld_get_image_header(i) {
-              return UnsafeMutableRawPointer(mutating: UnsafeRawPointer(header))
+    let dso = UncheckedSendable(
+      {
+        let count = _dyld_image_count()
+        for i in 0..<count {
+          if let name = _dyld_get_image_name(i) {
+            let swiftString = String(cString: name)
+            if swiftString.hasSuffix("/SwiftUI") {
+              if let header = _dyld_get_image_header(i) {
+                return UnsafeMutableRawPointer(mutating: UnsafeRawPointer(header))
+              }
             }
           }
         }
-      }
-      return UnsafeMutableRawPointer(mutating: #dsohandle)
-    }())
+        return UnsafeMutableRawPointer(mutating: #dsohandle)
+      }())
   #elseif os(WASI)
     #if canImport(JavaScriptCore)
       import JavaScriptCore

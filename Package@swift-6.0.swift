@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 
 import CompilerPluginSupport
 import PackageDescription
@@ -23,7 +23,6 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-syntax", "509.0.0"..<"601.0.0"),
-    .package(url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
@@ -66,14 +65,8 @@ let package = Package(
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ]
     ),
-    .executableTarget(
-      name: "swift-dependencies-benchmark",
-      dependencies: [
-        "Dependencies",
-        .product(name: "Benchmark", package: "swift-benchmark"),
-      ]
-    ),
-  ]
+  ],
+  swiftLanguageVersions: [.v6]
 )
 
 #if !os(macOS) && !os(WASI)
@@ -108,15 +101,3 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
   )
 #endif
-
-for target in package.targets {
-  target.swiftSettings = target.swiftSettings ?? []
-  target.swiftSettings?.append(contentsOf: [
-    .enableExperimentalFeature("StrictConcurrency")
-  ])
-//  target.swiftSettings?.append(
-//    .unsafeFlags([
-//      "-enable-library-evolution",
-//    ])
-//  )
-}

@@ -120,7 +120,7 @@ public struct DependencyValues: Sendable {
   @TaskLocal static var currentDependency = CurrentDependency()
 
   fileprivate var cachedValues = CachedValues()
-  private var storage: [ObjectIdentifier: AnySendable] = [:]
+  private var storage: [ObjectIdentifier: any Sendable] = [:]
 
   /// Creates a dependency values instance.
   ///
@@ -214,13 +214,12 @@ public struct DependencyValues: Sendable {
     file file: StaticString = #file,
     function function: StaticString = #function,
     line line: UInt = #line
-  ) -> Key.Value where Key.Value: Sendable {
+  ) -> Key.Value {
     get {
-      guard let base = self.storage[ObjectIdentifier(key)]?.base,
-        let dependency = base as? Key.Value
+      guard let base = self.storage[ObjectIdentifier(key)], let dependency = base as? Key.Value
       else {
         let context =
-          self.storage[ObjectIdentifier(DependencyContextKey.self)]?.base as? DependencyContext
+          self.storage[ObjectIdentifier(DependencyContextKey.self)] as? DependencyContext
           ?? defaultContext
 
         switch context {
@@ -249,7 +248,7 @@ public struct DependencyValues: Sendable {
       return dependency
     }
     set {
-      self.storage[ObjectIdentifier(key)] = AnySendable(newValue)
+      self.storage[ObjectIdentifier(key)] = newValue
     }
   }
 
@@ -292,14 +291,6 @@ public struct DependencyValues: Sendable {
     var values = self
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })
     return values
-  }
-}
-
-private struct AnySendable: @unchecked Sendable {
-  let base: Any
-  @inlinable
-  init<Base: Sendable>(_ base: Base) {
-    self.base = base
   }
 }
 
@@ -352,7 +343,7 @@ private final class CachedValues: @unchecked Sendable {
   }
 
   private let lock = NSRecursiveLock()
-  fileprivate var cached = [CacheKey: AnySendable]()
+  fileprivate var cached = [CacheKey: any Sendable]()
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,
@@ -360,25 +351,25 @@ private final class CachedValues: @unchecked Sendable {
     file: StaticString = #file,
     function: StaticString = #function,
     line: UInt = #line
-  ) -> Key.Value where Key.Value: Sendable {
+  ) -> Key.Value {
     XCTFailContext.$current.withValue(XCTFailContext(file: file, line: line)) {
       self.lock.lock()
       defer { self.lock.unlock() }
 
       let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
-      guard let base = self.cached[cacheKey]?.base, let value = base as? Key.Value
+      guard let base = self.cached[cacheKey], let value = base as? Key.Value
       else {
         let value: Key.Value?
         switch context {
         case .live:
-          value = _liveValue(key) as? Key.Value
+          value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
         case .preview:
           value = Key.previewValue
         case .test:
           value = Key.testValue
         }
 
-        guard let value = value
+        guard let value
         else {
           #if DEBUG
             if !DependencyValues.isSetting {
@@ -436,12 +427,12 @@ private final class CachedValues: @unchecked Sendable {
           #endif
           let value = Key.testValue
           if !DependencyValues.isSetting {
-            self.cached[cacheKey] = AnySendable(value)
+            self.cached[cacheKey] = value
           }
           return value
         }
 
-        self.cached[cacheKey] = AnySendable(value)
+        self.cached[cacheKey] = value
         return value
       }
 

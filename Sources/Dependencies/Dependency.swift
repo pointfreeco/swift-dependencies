@@ -124,12 +124,12 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
   /// ```
   ///
   /// - Parameter key: A dependency key to a specific resulting value.
-  public init<Key: TestDependencyKey>(
+  public init<Key: TestDependencyKey<Value>>(
     _ key: Key.Type,
     file: StaticString = #file,
     fileID: StaticString = #fileID,
     line: UInt = #line
-  ) where Key.Value == Value {
+  ) {
     self.init(
       \DependencyValues.[HashableType<Key>(file: file, line: line)],
       file: file,

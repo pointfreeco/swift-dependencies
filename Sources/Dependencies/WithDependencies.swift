@@ -94,19 +94,23 @@ public func withDependencies<Model: AnyObject, R>(
   from model: Model,
   _ updateValuesForOperation: (inout DependencyValues) throws -> Void,
   operation: () throws -> R,
-  file: StaticString? = nil,
-  line: UInt? = nil
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  line: UInt = #line,
+  column: UInt = #column
 ) rethrows -> R {
   guard let values = dependencyObjects.values(from: model)
   else {
-    runtimeWarn(
+    reportIssue(
       """
       You are trying to propagate dependencies to a child model from a model with no dependencies. \
       To fix this, the given '\(Model.self)' must be returned from another 'withDependencies' \
       closure, or the class must hold at least one '@Dependency' property.
       """,
-      file: file,
-      line: line
+      fileID: fileID,
+      filePath: filePath,
+      line: line,
+      column: column
     )
     return try operation()
   }
@@ -134,15 +138,19 @@ public func withDependencies<Model: AnyObject, R>(
 public func withDependencies<Model: AnyObject, R>(
   from model: Model,
   operation: () throws -> R,
-  file: StaticString? = nil,
-  line: UInt? = nil
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  line: UInt = #line,
+  column: UInt = #column
 ) rethrows -> R {
   try withDependencies(
     from: model,
     { _ in },
     operation: operation,
-    file: file,
-    line: line
+    fileID: fileID,
+    filePath: filePath,
+    line: line,
+    column: column
   )
 }
 
@@ -163,19 +171,23 @@ public func withDependencies<Model: AnyObject, R>(
   from model: Model,
   _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
   operation: () async throws -> R,
-  file: StaticString? = nil,
-  line: UInt? = nil
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  line: UInt = #line,
+  column: UInt = #column
 ) async rethrows -> R {
   guard let values = dependencyObjects.values(from: model)
   else {
-    runtimeWarn(
+    reportIssue(
       """
       You are trying to propagate dependencies to a child model from a model with no \
       dependencies. To fix this, the given '\(Model.self)' must be returned from another \
       'withDependencies' closure, or the class must hold at least one '@Dependency' property.
       """,
-      file: file,
-      line: line
+      fileID: fileID,
+      filePath: filePath,
+      line: line,
+      column: column
     )
     return try await operation()
   }
@@ -205,15 +217,19 @@ public func withDependencies<Model: AnyObject, R>(
 public func withDependencies<Model: AnyObject, R>(
   from model: Model,
   operation: () async throws -> R,
-  file: StaticString? = nil,
-  line: UInt? = nil
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  line: UInt = #line,
+  column: UInt = #column
 ) async rethrows -> R {
   try await withDependencies(
     from: model,
     { _ in },
     operation: operation,
-    file: file,
-    line: line
+    fileID: fileID,
+    filePath: filePath,
+    line: line,
+    column: column
   )
 }
 

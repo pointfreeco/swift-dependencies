@@ -65,9 +65,10 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
   // NB: Key paths do not conform to sendable and are instead diagnosed at the time of forming the
   //     literal.
   private let keyPath: KeyPath<DependencyValues, Value>
-  private let file: StaticString
   private let fileID: StaticString
+  private let filePath: StaticString
   private let line: UInt
+  private let column: UInt
 
   /// Creates a dependency property to read the specified key path.
   ///
@@ -86,15 +87,17 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
   /// - Parameter keyPath: A key path to a specific resulting value.
   public init(
     _ keyPath: KeyPath<DependencyValues, Value>,
-    file: StaticString = #file,
     fileID: StaticString = #fileID,
-    line: UInt = #line
+    filePath: StaticString = #filePath,
+    line: UInt = #line,
+    column: UInt = #column
   ) {
     self.initialValues = DependencyValues._current
     self.keyPath = keyPath
-    self.file = file
     self.fileID = fileID
+    self.filePath = filePath
     self.line = line
+    self.column = column
   }
 
   /// Creates a dependency property to read a dependency object.
@@ -126,15 +129,22 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
   /// - Parameter key: A dependency key to a specific resulting value.
   public init<Key: TestDependencyKey<Value>>(
     _ key: Key.Type,
-    file: StaticString = #file,
     fileID: StaticString = #fileID,
-    line: UInt = #line
+    filePath: StaticString = #filePath,
+    line: UInt = #line,
+    column: UInt = #column
   ) {
     self.init(
-      \DependencyValues.[HashableType<Key>(file: file, line: line)],
-      file: file,
+      \DependencyValues.[HashableType<Key>(
+        fileID: fileID,
+        filePath: filePath,
+        line: line,
+        column: column
+      )],
       fileID: fileID,
-      line: line
+      filePath: filePath,
+      line: line,
+      column: column
     )
   }
 
@@ -142,9 +152,10 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
   public var wrappedValue: Value {
     #if DEBUG
       var currentDependency = DependencyValues.currentDependency
-      currentDependency.file = self.file
       currentDependency.fileID = self.fileID
+      currentDependency.filePath = self.filePath
       currentDependency.line = self.line
+      currentDependency.column = self.column
       return DependencyValues.$currentDependency.withValue(currentDependency) {
         let dependencies = self.initialValues.merging(DependencyValues._current)
         return DependencyValues.$_current.withValue(dependencies) {
@@ -161,8 +172,10 @@ public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
 }
 
 private struct HashableType<T>: Hashable {
-  let file: StaticString
+  let fileID: StaticString
+  let filePath: StaticString
   let line: UInt
+  let column: UInt
   static func == (lhs: Self, rhs: Self) -> Bool {
     true
   }
@@ -173,8 +186,24 @@ private struct HashableType<T>: Hashable {
 
 extension DependencyValues {
   fileprivate subscript<Key: TestDependencyKey>(key: HashableType<Key>) -> Key.Value {
-    get { self[Key.self, file: key.file, line: key.line] }
-    set { self[Key.self, file: key.file, line: key.line] = newValue }
+    get {
+      self[
+        Key.self,
+        key.fileID,
+        key.filePath,
+        key.line,
+        key.column
+      ]
+    }
+    set {
+      self[
+        Key.self,
+        key.fileID,
+        key.filePath,
+        key.line,
+        key.column
+      ] = newValue
+    }
   }
 }
 

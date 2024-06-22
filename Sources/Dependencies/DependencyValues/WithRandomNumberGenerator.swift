@@ -32,7 +32,7 @@ extension DependencyValues {
   ///
   /// By default, a `SystemRandomNumberGenerator` will be provided to the closure, with the
   /// exception of when run in tests, in which an unimplemented dependency will be provided that
-  /// calls `XCTFail`.
+  /// calls `reportIssue`.
   ///
   /// To test a feature that depends on randomness, you can override its random number generator.
   /// Inject a dependency by calling ``WithRandomNumberGenerator/init(_:)`` with a random number

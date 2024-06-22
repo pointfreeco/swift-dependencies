@@ -2,7 +2,7 @@ extension DependencyValues {
   /// A dependency for handling assertions.
   ///
   /// Useful as a controllable and testable substitute for Swift's `assert` function that calls
-  /// `XCTFail` in tests instead of terminating the executable.
+  /// `reportIssue` in tests instead of terminating the executable.
   ///
   /// ```swift
   /// func operate(_ n: Int) {
@@ -35,7 +35,7 @@ extension DependencyValues {
   /// A dependency for handling preconditions.
   ///
   /// Useful as a controllable and testable substitute for Swift's `precondition` function that
-  /// calls `XCTFail` in tests instead of terminating the executable.
+  /// calls `reportIssue` in tests instead of terminating the executable.
   ///
   /// ```swift
   /// func operate(_ n: Int) {
@@ -116,7 +116,10 @@ private struct TestAssertionEffect: AssertionEffect {
     file: StaticString,
     line: UInt
   ) {
-    guard condition() else { return XCTFail(message(), file: file, line: line) }
+    guard condition() else {
+      reportIssue(message(), fileID: file, filePath: file, line: line, column: 0)
+      return
+    }
   }
 }
 

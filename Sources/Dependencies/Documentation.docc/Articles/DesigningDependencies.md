@@ -34,7 +34,8 @@ protocol AudioPlayer {
 Then you are free to make as many conformances of this protocol as you want, such as a
 `LiveAudioPlayer` that actually interacts with AVFoundation, or a `MockAudioPlayer` that doesn't
 play any sounds, but does suspend in order to simulate that something is playing. You could even
-have an `UnimplementedAudioPlayer` conformance that invokes `XCTFail` when any method is invoked:
+have an `UnimplementedAudioPlayer` conformance that invokes `reportIssue` when any method is 
+invoked:
 
 ```swift
 struct LiveAudioPlayer: AudioPlayer {
@@ -46,7 +47,7 @@ struct MockAudioPlayer: AudioPlayer {
 }
 struct UnimplementedAudioPlayer: AudioPlayer {
   func loop(url: URL) async throws {
-    XCTFail("AudioPlayer.loop is unimplemented")
+    reportIssue("AudioPlayer.loop is unimplemented")
   }
   // ...
 }
@@ -96,7 +97,7 @@ extension AudioPlayerClient {
   static let mock = Self(/* ... */)
 
   static let unimplemented = Self(
-    loop: { _ in XCTFail("AudioPlayerClient.loop is unimplemented") },
+    loop: { _ in reportIssue("AudioPlayerClient.loop is unimplemented") },
     // ...
   )
 }
@@ -240,12 +241,12 @@ is no need to maintain that code as it is automatically provided for you by the 
 > }
 > ```
 >
-> The workaround is to invoke `XCTFail` directly in the closure:
+> The workaround is to invoke `reportIssue` directly in the closure:
 >
 > ```swift
 > @DependencyClient
 > struct NumberFetcher {
->   var get: () async -> Int = { XCTFail("\(Self.self).get"); return 42 }
+>   var get: () async -> Int = { reportIssue("\(Self.self).get"); return 42 }
 > }
 > ```
 

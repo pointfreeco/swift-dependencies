@@ -4,8 +4,8 @@ extension DependencyValues {
   /// The current calendar that features should use when handling dates.
   ///
   /// By default, the calendar returned from `Calendar.autoupdatingCurrent` is supplied. When used
-  /// in a testing context, access will call to `XCTFail` when invoked, unless explicitly overridden
-  /// using ``withDependencies(_:operation:)-4uz6m``:
+  /// in a testing context, access will call to `reportIssue` when invoked, unless explicitly
+  /// overridden using ``withDependencies(_:operation:)-4uz6m``:
   ///
   /// ```swift
   /// // Provision model with overridden dependencies

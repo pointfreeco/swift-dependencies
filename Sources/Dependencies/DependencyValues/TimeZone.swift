@@ -4,7 +4,7 @@ extension DependencyValues {
   /// The current time zone that features should use when handling dates.
   ///
   /// By default, the time zone returned from `TimeZone.autoupdatingCurrent` is supplied. When used
-  /// in tests, access will call to `XCTFail` when invoked, unless explicitly overridden:
+  /// in tests, access will call to `reportIssue` when invoked, unless explicitly overridden:
   ///
   /// ```swift
   /// // Provision model with overridden dependencies

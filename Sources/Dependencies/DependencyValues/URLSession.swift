@@ -9,7 +9,7 @@
     /// The URL session that features should use to make URL requests.
     ///
     /// By default, the session returned from `URLSession.shared` is supplied. When used in tests,
-    /// access will call to `XCTFail` when invoked, unless explicitly overridden:
+    /// access will call to `reportIssue` when invoked, unless explicitly overridden:
     ///
     /// ```swift
     /// // Provision model with overridden dependencies
@@ -86,7 +86,7 @@
       static var testValue: URLSession {
         #if DEBUG
           if !DependencyValues.isSetting {
-            XCTFail(#"Unimplemented: @Dependency(\.urlSession)"#)
+            reportIssue(#"Unimplemented: @Dependency(\.urlSession)"#)
           }
         #endif
         let configuration = URLSessionConfiguration.ephemeral

@@ -220,7 +220,7 @@ extension DependencyKey {
         }
         ?? ("A dependency", "the dependency")
 
-      XCTFail(
+      reportIssue(
         """
         \(argument) has no test implementation, but was accessed from a test context:
 

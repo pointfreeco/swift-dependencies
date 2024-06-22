@@ -211,9 +211,11 @@ public struct DependencyValues: Sendable {
   /// property wrapper.
   public subscript<Key: TestDependencyKey>(
     key: Key.Type,
-    file file: StaticString = #file,
-    function function: StaticString = #function,
-    line line: UInt = #line
+    fileID: StaticString = #fileID,
+    filePath: StaticString = #filePath,
+    line: UInt = #line,
+    column: UInt = #line,
+    function: StaticString = #function
   ) -> Key.Value {
     get {
       guard let base = self.storage[ObjectIdentifier(key)], let dependency = base as? Key.Value
@@ -227,9 +229,11 @@ public struct DependencyValues: Sendable {
           return self.cachedValues.value(
             for: Key.self,
             context: context,
-            file: file,
+            fileID: fileID,
+            filePath: filePath,
             function: function,
-            line: line
+            line: line,
+            column: column
           )
         case .test:
           var currentDependency = Self.currentDependency
@@ -238,9 +242,11 @@ public struct DependencyValues: Sendable {
             self.cachedValues.value(
               for: Key.self,
               context: context,
-              file: file,
+              fileID: fileID,
+              filePath: filePath,
               function: function,
-              line: line
+              line: line,
+              column: column
             )
           }
         }
@@ -296,9 +302,10 @@ public struct DependencyValues: Sendable {
 
 struct CurrentDependency {
   var name: StaticString?
-  var file: StaticString?
   var fileID: StaticString?
+  var filePath: StaticString?
   var line: UInt?
+  var column: UInt?
 }
 
 private let defaultContext: DependencyContext = {
@@ -324,7 +331,7 @@ private let defaultContext: DependencyContext = {
   case "test":
     return .test
   default:
-    runtimeWarn(
+    reportIssue(
       """
       An environment value for SWIFT_DEPENDENCIES_CONTEXT was provided but did not match "live",
       "preview", or "test".
@@ -350,11 +357,20 @@ package final class CachedValues: @unchecked Sendable {
   func value<Key: TestDependencyKey>(
     for key: Key.Type,
     context: DependencyContext,
-    file: StaticString = #file,
+    fileID: StaticString = #fileID,
+    filePath: StaticString = #filePath,
     function: StaticString = #function,
-    line: UInt = #line
+    line: UInt = #line,
+    column: UInt = #line
   ) -> Key.Value {
-    XCTFailContext.$current.withValue(XCTFailContext(file: file, line: line)) {
+    IssueContext.$current.withValue(
+      IssueContext(
+        fileID: fileID,
+        filePath: filePath,
+        line: line,
+        column: column
+      )
+    ) {
       self.lock.lock()
       defer { self.lock.unlock() }
 
@@ -405,7 +421,7 @@ package final class CachedValues: @unchecked Sendable {
                 "\(function)" == "subscript(_:)" ? "\(typeName(Key.self)).self" : "\\.\(function)"
               }
 
-              runtimeWarn(
+              reportIssue(
                 """
                 @Dependency(\(argument)) has no live implementation, but was accessed from a live \
                 context.
@@ -422,8 +438,10 @@ package final class CachedValues: @unchecked Sendable {
                 This is typically done at the entry point of your application, but can be done \
                 later too.
                 """,
-                file: DependencyValues.currentDependency.file ?? file,
-                line: DependencyValues.currentDependency.line ?? line
+                fileID: DependencyValues.currentDependency.fileID ?? fileID,
+                filePath: DependencyValues.currentDependency.filePath ?? filePath,
+                line: DependencyValues.currentDependency.line ?? line,
+                column: DependencyValues.currentDependency.column ?? column
               )
             }
           #endif

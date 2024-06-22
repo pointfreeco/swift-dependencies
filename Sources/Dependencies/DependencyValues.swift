@@ -119,7 +119,7 @@ public struct DependencyValues: Sendable {
   @TaskLocal static var isSetting = false
   @TaskLocal static var currentDependency = CurrentDependency()
 
-  fileprivate var cachedValues = CachedValues()
+  package var cachedValues = CachedValues()
   private var storage: [ObjectIdentifier: any Sendable] = [:]
 
   /// Creates a dependency values instance.
@@ -336,14 +336,16 @@ private let defaultContext: DependencyContext = {
   }
 }()
 
-private final class CachedValues: @unchecked Sendable {
-  struct CacheKey: Hashable, Sendable {
+package final class CachedValues: @unchecked Sendable {
+  package struct CacheKey: Hashable, Sendable {
     let id: ObjectIdentifier
     let context: DependencyContext
   }
 
+  package init() {}
+
   private let lock = NSRecursiveLock()
-  fileprivate var cached = [CacheKey: any Sendable]()
+  package var cached = [CacheKey: any Sendable]()
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,

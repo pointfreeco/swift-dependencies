@@ -154,7 +154,7 @@ public struct DependencyValues: Sendable {
       if _XCTIsTesting {
         XCTestObservationCenter.shared.addTestObserver(
           TestObserver({
-            DependencyValues._current.cachedValues.cached = [:]
+            DependencyValues._current.cachedValues.cached.withValue { $0 = [:] }
           }))
       }
     #else
@@ -177,7 +177,7 @@ public struct DependencyValues: Sendable {
         }
       #endif
       pRegisterTestObserver?({
-        DependencyValues._current.cachedValues.cached = [:]
+        DependencyValues._current.cachedValues.cached.withValue { $0 = [:] }
       })
     #endif
   }

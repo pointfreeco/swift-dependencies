@@ -36,7 +36,7 @@ let package = Package(
     .target(
       name: "DependenciesTestObserver",
       dependencies: [
-        .product(name: "TestingDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
@@ -46,7 +46,7 @@ let package = Package(
         .product(name: "Clocks", package: "swift-clocks"),
         .product(name: "CombineSchedulers", package: "combine-schedulers"),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
-        .product(name: "TestingDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
@@ -68,7 +68,7 @@ let package = Package(
       name: "DependenciesMacros",
       dependencies: [
         "DependenciesMacrosPlugin",
-        .product(name: "TestingDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),

@@ -32,7 +32,7 @@ let package = Package(
     .target(
       name: "DependenciesTestObserver",
       dependencies: [
-        .product(name: "TestingDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay")
       ]
     ),
@@ -42,7 +42,7 @@ let package = Package(
         .product(name: "Clocks", package: "swift-clocks"),
         .product(name: "CombineSchedulers", package: "combine-schedulers"),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
-        .product(name: "TestingDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
@@ -57,7 +57,7 @@ let package = Package(
       name: "DependenciesMacros",
       dependencies: [
         "DependenciesMacrosPlugin",
-        .product(name: "TestingDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
@@ -82,9 +82,9 @@ let package = Package(
 #endif
 
 #if !os(WASI)
-  package.dependencies.append(
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0")
-  )
+  package.dependencies.append(contentsOf: [
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0"),
+  ])
   package.targets.append(contentsOf: [
     .testTarget(
       name: "DependenciesMacrosPluginTests",

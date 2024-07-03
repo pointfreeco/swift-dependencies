@@ -71,7 +71,9 @@ public final class WithRandomNumberGenerator: @unchecked Sendable {
     self.generator = generator
   }
 
-  public func callAsFunction<R>(_ work: (inout any RandomNumberGenerator & Sendable) -> R) -> R {
-    return work(&self.generator)
+  public func callAsFunction<R>(_ work: (inout any RandomNumberGenerator & Sendable) throws -> R)
+    rethrows -> R
+  {
+    return try work(&self.generator)
   }
 }

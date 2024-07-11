@@ -363,14 +363,7 @@ package final class CachedValues: @unchecked Sendable {
     line: UInt = #line,
     column: UInt = #line
   ) -> Key.Value {
-    IssueContext.$current.withValue(
-      IssueContext(
-        fileID: fileID,
-        filePath: filePath,
-        line: line,
-        column: column
-      )
-    ) {
+    withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
       self.lock.lock()
       defer { self.lock.unlock() }
 

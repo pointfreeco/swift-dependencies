@@ -39,7 +39,7 @@ extension ActorIsolated {
   }
 }
 
-extension AsyncStream {
+extension AsyncStream where Element: Sendable {
   @available(
     *,
     deprecated,
@@ -68,7 +68,7 @@ extension AsyncStream {
   }
 }
 
-extension AsyncThrowingStream where Failure == Error {
+extension AsyncThrowingStream where Element: Sendable, Failure == Error {
   @available(
     *,
     deprecated,

@@ -27,8 +27,8 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-syntax", "509.0.0"..<"601.0.0-prerelease"),
-    .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.0"),
-    .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.0"),
+    .package(url: "https://github.com/pointfreeco/combine-schedulers", branch: "swift-testing"),
+    .package(url: "https://github.com/pointfreeco/swift-clocks", branch: "swift-testing"),
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", branch: "swift-testing"),
   ],
@@ -37,7 +37,6 @@ let package = Package(
       name: "DependenciesTestObserver",
       dependencies: [
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
     .target(

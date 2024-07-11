@@ -577,11 +577,11 @@ final class DependencyValuesTests: XCTestCase {
     let stream = withDependencies {
       $0.fullDependency.value = 42
     } operation: { () -> AsyncStream<Int> in
-      var isDone = false
+      let isDone = LockIsolated(false)
       return AsyncStream(unfolding: {
-        defer { isDone = true }
+        defer { isDone.setValue(true) }
         @Dependency(\.fullDependency.value) var value
-        return isDone ? nil : value
+        return isDone.value ? nil : value
       })
     }
 
@@ -593,13 +593,13 @@ final class DependencyValuesTests: XCTestCase {
     let stream = withDependencies {
       $0.fullDependency.value = 42
     } operation: { () -> AsyncStream<Int> in
-      var isDone = false
+      let isDone = LockIsolated(false)
       return withEscapedDependencies { continuation in
         AsyncStream(unfolding: {
           continuation.yield {
-            defer { isDone = true }
+            defer { isDone.setValue(true) }
             @Dependency(\.fullDependency.value) var value
-            return isDone ? nil : value
+            return isDone.value ? nil : value
           }
         })
       }

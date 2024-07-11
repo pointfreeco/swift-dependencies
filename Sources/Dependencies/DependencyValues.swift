@@ -423,11 +423,11 @@ package final class CachedValues: @unchecked Sendable {
 
                 To fix you can do one of two things:
 
-                * Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
+                • Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
                 a live implementation of your dependency, and make sure that the conformance is \
                 linked with this current application.
 
-                * Override the implementation of '\(typeName(Key.self))' using 'withDependencies'. \
+                • Override the implementation of '\(typeName(Key.self))' using 'withDependencies'. \
                 This is typically done at the entry point of your application, but can be done \
                 later too.
                 """,

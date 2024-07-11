@@ -26,7 +26,7 @@ final class DependencyKeyTests: XCTestCase {
         XCTAssertEqual(42, Dependency.testValue.value)
       } issueMatcher: { issue in
         issue.compactDescription == """
-          A dependency has no test implementation, but was accessed from a test context:
+          failed - A dependency has no test implementation, but was accessed from a test context:
 
             Dependency:
               DependencyKeyTests.Dependency
@@ -57,7 +57,7 @@ final class DependencyKeyTests: XCTestCase {
         XCTAssertEqual(42, Key.testValue)
       } issueMatcher: { issue in
         issue.compactDescription == """
-          A dependency has no test implementation, but was accessed from a test context:
+          failed - A dependency has no test implementation, but was accessed from a test context:
 
             Key:
               DependencyKeyTests.Key
@@ -91,7 +91,7 @@ final class DependencyKeyTests: XCTestCase {
         XCTAssertEqual(1729, Key.testValue)
       } issueMatcher: { issue in
         issue.compactDescription == """
-          A dependency has no test implementation, but was accessed from a test context:
+          failed - A dependency has no test implementation, but was accessed from a test context:
 
             Key:
               DependencyKeyTests.Key
@@ -131,8 +131,8 @@ final class DependencyKeyTests: XCTestCase {
           XCTAssertEqual(42, missingTestDependency)
         } issueMatcher: { issue in
           issue.compactDescription == """
-            @Dependency(\\.missingTestDependency) has no test implementation, but was accessed \
-            from a test context:
+            failed - @Dependency(\\.missingTestDependency) has no test implementation, but was \
+            accessed from a test context:
 
               Location:
                 DependenciesTests/DependencyKeyTests.swift:\(line)
@@ -166,8 +166,8 @@ final class DependencyKeyTests: XCTestCase {
           XCTAssertEqual(42, missingTestDependency)
         } issueMatcher: { issue in
           issue.compactDescription == """
-            @Dependency(LiveKey.self) has no test implementation, but was accessed from a test \
-            context:
+            failed - @Dependency(LiveKey.self) has no test implementation, but was accessed from a \
+            test context:
 
               Location:
                 DependenciesTests/DependencyKeyTests.swift:\(line)

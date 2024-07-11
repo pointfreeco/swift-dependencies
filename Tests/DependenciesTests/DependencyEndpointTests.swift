@@ -15,7 +15,7 @@
           client.endpoint()
         } issueMatcher: {
           $0.compactDescription == """
-            Unimplemented: 'Client.endpoint'
+            failed - Unimplemented: 'Client.endpoint'
             """
         }
       }

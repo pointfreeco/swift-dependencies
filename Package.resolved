@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/combine-schedulers",
       "state" : {
-        "revision" : "9dc9cbe4bc45c65164fa653a563d8d8db61b09bb",
-        "version" : "1.0.0"
+        "branch" : "swift-testing",
+        "revision" : "53fe9f37f7f6b0e2962c9779bb382ee1e03f8846"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-clocks",
       "state" : {
-        "revision" : "a8421d68068d8f45fbceb418fbf22c5dad4afd33",
-        "version" : "1.0.2"
+        "branch" : "swift-testing",
+        "revision" : "d232a15e0a96dfe4d0c93f85b5176afe1808e28d"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-macro-testing",
       "state" : {
-        "revision" : "4787b0b4d7b023b303d56eab0baee81d49e9f5c5",
-        "version" : "0.4.2"
+        "revision" : "c25f4f740ccab74665c4dc3f02e6e3adf5f38002",
+        "version" : "0.5.0"
       }
     },
     {
@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
       "state" : {
-        "revision" : "d2341adf332dc7341b4acad8761dff65e905d63c",
-        "version" : "1.16.2"
+        "revision" : "63d3b45dd249878a41c56274a748ca2c1c9c5230",
+        "version" : "1.17.1"
       }
     },
     {
@@ -78,7 +78,7 @@
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
         "branch" : "swift-testing",
-        "revision" : "4903760159c5a0e9fb82f1be10594d89e3cde485"
+        "revision" : "790cd0036de1946e97f66105c3e366ec06dd932a"
       }
     }
   ],

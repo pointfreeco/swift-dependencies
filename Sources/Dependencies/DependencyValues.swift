@@ -317,11 +317,6 @@ private let defaultContext: DependencyContext = {
     } else if isTesting {
       return .test
     } else {
-      print("---")
-      print("arguments", ProcessInfo.processInfo.arguments)
-      print("environment", environment)
-      print("---")
-
       return .live
     }
   }

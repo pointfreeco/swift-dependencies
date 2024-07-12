@@ -1,6 +1,5 @@
 import Dependencies
 import XCTest
-import XCTestDynamicOverlay
 
 final class WithRandomNumberGeneratorDependencyTests: XCTestCase {
   @Dependency(\.withRandomNumberGenerator) var withRandomNumberGenerator

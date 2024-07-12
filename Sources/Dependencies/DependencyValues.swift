@@ -1,5 +1,5 @@
 import Foundation
-import XCTestDynamicOverlay
+import IssueReporting
 
 #if os(Windows)
   import WinSDK
@@ -151,11 +151,12 @@ public struct DependencyValues: Sendable {
           .perform(Selector(("addTestObserver:")), with: TestObserver())
       }
     #elseif os(WASI)
-      if _XCTIsTesting {
+      if isTesting {
         XCTestObservationCenter.shared.addTestObserver(
-          TestObserver({
+          TestObserver {
             DependencyValues._current.cachedValues.cached = [:]
-          }))
+          }
+        )
       }
     #else
       typealias RegisterTestObserver = @convention(thin) (@convention(c) () -> Void) -> Void
@@ -313,7 +314,7 @@ private let defaultContext: DependencyContext = {
   var inferredContext: DependencyContext {
     if environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
       return .preview
-    } else if _XCTIsTesting {
+    } else if isTesting {
       return .test
     } else {
       return .live

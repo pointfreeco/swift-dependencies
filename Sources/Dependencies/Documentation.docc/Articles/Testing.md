@@ -128,7 +128,7 @@ running tests for frameworks or SwiftPM libraries, which is yet another good rea
 your code base.
 
 However, if you aren't in a position to modularize your code base right now, there is a quick
-fix. Our [XCTest Dynamic Overlay][xctest-dynamic-overlay-gh] library, which is transitively included
+fix. Our [Issue Reporting][issue-reporting-gh] library, which is transitively included
 with this library, comes with a property you can check to see if tests are currently running. If
 they are, you can omit the entire entry point of your application.
 
@@ -136,14 +136,14 @@ For example, for a pure SwiftUI entry point you can do the following to keep you
 running during tests:
 
 ```swift
+import IssueReporting
 import SwiftUI
-import XCTestDynamicOverlay
 
 @main
 struct MyApp: App {
   var body: some Scene {
     WindowGroup {
-      if !_XCTIsTesting {
+      if !isTesting {
         // Your real root view
       }
     }
@@ -158,7 +158,7 @@ func application(
 _ application: UIApplication,
 didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
 ) -> Bool {
-  guard !_XCTIsTesting else { return true }
+  guard !isTesting else { return true }
   // ...
 }
 ```
@@ -232,4 +232,4 @@ class Model {
 You will not be able to override this dependency in the normal fashion. In general there is no need
 to ever have a static dependency, and so you should avoid this pattern.
 
-[xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay
+[issue-reporting-gh]: http://github.com/pointfreeco/swift-issue-reporting

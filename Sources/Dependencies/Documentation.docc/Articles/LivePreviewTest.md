@@ -95,7 +95,7 @@ encourage users of our library to provide what is known as "unimplemented" versi
 dependencies for their ``TestDependencyKey/testValue``. These are implementations that cause a test
 failure if any of its endpoints are invoked.
 
-You can use our [XCTestDynamicOverlay][xctest-dynamic-overlay-gh] library to aid in this, which is
+You can use our [Issue Reporting][issue-reporting-gh] library to aid in this, which is
 immediately accessible as a transitive dependency. It comes with a function called
 [`unimplemented`][unimplemented-docs] that can return a function of nearly any signature with the
 property that if it is invoked it will cause a test failure. For example, the hypothetical analytics
@@ -301,5 +301,5 @@ func testFeature() {
 ```
 
 [unimplemented-docs]: https://pointfreeco.github.io/xctest-dynamic-overlay/main/documentation/xctestdynamicoverlay/unimplemented(_:fileid:line:)-5098a
-[xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay
+[issue-reporting-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay
 

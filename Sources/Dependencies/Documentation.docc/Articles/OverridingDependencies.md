@@ -164,4 +164,3 @@ class BaseTestCase: XCTestCase {
 
 [swift-identified-collections]: https://github.com/pointfreeco/swift-identified-collections
 [environment-values-docs]: https://developer.apple.com/documentation/swiftui/environmentvalues
-[xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay

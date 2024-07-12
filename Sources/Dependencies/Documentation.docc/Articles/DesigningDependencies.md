@@ -133,7 +133,7 @@ extension DependencyValues {
 ```
 
 > Tip: We are using the `unimplemented` method from our 
-> [XCTestDynamicOverlay][xctest-dynamic-overlay-gh] library to provide closures that cause an
+> [Issue Reporting][issue-reporting-gh] library to provide closures that cause an
 > XCTest failure if they are ever invoked. See <doc:LivePreviewTest> for more information on this
 > pattern.
 
@@ -251,4 +251,4 @@ is no need to maintain that code as it is automatically provided for you by the 
 > ```
 
 [designing-deps]: https://www.pointfree.co/collections/dependencies
-[xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay
+[issue-reporting-gh]: http://github.com/pointfreeco/swift-issue-reporting

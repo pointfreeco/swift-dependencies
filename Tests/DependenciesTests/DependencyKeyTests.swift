@@ -1,6 +1,5 @@
 import Dependencies
 import XCTest
-import XCTestDynamicOverlay
 
 final class DependencyKeyTests: XCTestCase {
   func testTestDependencyKey_ImplementOnlyTestValue() {

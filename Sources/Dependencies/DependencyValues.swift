@@ -313,13 +313,15 @@ private let defaultContext: DependencyContext = {
   let environment = ProcessInfo.processInfo.environment
   var inferredContext: DependencyContext {
     if environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-      print(#file, #line)
       return .preview
     } else if isTesting {
-      print(#file, #line)
       return .test
     } else {
-      print(#file, #line)
+      print("---")
+      print("arguments", ProcessInfo.processInfo.arguments)
+      print("environment", environment)
+      print("---")
+
       return .live
     }
   }
@@ -329,13 +331,10 @@ private let defaultContext: DependencyContext = {
 
   switch value {
   case "live":
-    print(#file, #line)
     return .live
   case "preview":
-    print(#file, #line)
     return .preview
   case "test":
-    print(#file, #line)
     return .test
   default:
     reportIssue(

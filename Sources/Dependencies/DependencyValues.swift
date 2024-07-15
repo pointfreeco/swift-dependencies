@@ -372,7 +372,7 @@ private final class CachedValues: Sendable {
               if !DependencyValues.isSetting {
                 var dependencyDescription = ""
                 if let fileID = DependencyValues.currentDependency.fileID,
-                   let line = DependencyValues.currentDependency.line
+                  let line = DependencyValues.currentDependency.line
                 {
                   dependencyDescription.append(
                     """
@@ -384,11 +384,11 @@ private final class CachedValues: Sendable {
                 }
                 dependencyDescription.append(
                   Key.self == Key.Value.self
-                  ? """
+                    ? """
                       Dependency:
                         \(typeName(Key.Value.self))
                     """
-                  : """
+                    : """
                       Key:
                         \(typeName(Key.self))
                       Value:

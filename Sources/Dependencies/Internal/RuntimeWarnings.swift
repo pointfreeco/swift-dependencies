@@ -26,16 +26,7 @@ func runtimeWarn(
           message
         )
       #elseif os(WASI)
-        #if canImport(JavaScriptCore)
-          let timestamp = JSContext()?.evaluateScript("new Date().toISOString()").toString()
-          print("\(timestamp.map { "\($0) " } ?? "")[\(category)] \(message)")
-        #elseif canImport(JavaScriptKit)
-          JSObjectRef.global.console.warn.callWithArguments([
-            "\(JSObjectRef.global.Date.new().toISOString()) [\(category)] \(message)"
-          ])
-        #else
-          print("[\(category)] \(message)")
-        #endif
+        print("[\(category)] \(message)")
       #else
         fputs("\(formatter.string(from: Date())) [\(category)] \(message)\n", stderr)
       #endif
@@ -71,12 +62,6 @@ func runtimeWarn(
         }
         return UnsafeMutableRawPointer(mutating: #dsohandle)
       }())
-  #elseif os(WASI)
-    #if canImport(JavaScriptCore)
-      import JavaScriptCore
-    #elseif canImport(JavaScriptKit)
-      import JavaScriptKit
-    #endif
   #else
     import Foundation
 

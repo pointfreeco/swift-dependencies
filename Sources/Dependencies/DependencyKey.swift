@@ -214,7 +214,7 @@ extension DependencyKey {
       let (argument, override) =
         DependencyValues.currentDependency.name
         .map {
-          "\($0)" == "subscript(_:)"
+          "\($0)" == "subscript(key:)"
             ? ("@Dependency(\(typeName(Self.self)).self)", "'\(typeName(Self.self)).self'")
             : ("@Dependency(\\.\($0))", "'\($0)'")
         }

@@ -407,7 +407,9 @@ package final class CachedValues: Sendable {
                 )
 
                 var argument: String {
-                  "\(function)" == "subscript(_:)" ? "\(typeName(Key.self)).self" : "\\.\(function)"
+                  "\(function)" == "subscript(key:)"
+                    ? "\(typeName(Key.self)).self"
+                    : "\\.\(function)"
                 }
 
                 reportIssue(
@@ -419,13 +421,13 @@ package final class CachedValues: Sendable {
 
                   To fix you can do one of two things:
 
-                  * Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
+                  • Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
                   a live implementation of your dependency, and make sure that the conformance is \
                   linked with this current application.
 
-                  * Override the implementation of '\(typeName(Key.self))' using 'withDependencies'. \
-                  This is typically done at the entry point of your application, but can be done \
-                  later too.
+                  • Override the implementation of '\(typeName(Key.self))' using \
+                  'withDependencies'. This is typically done at the entry point of your \
+                  application, but can be done later too.
                   """,
                   fileID: DependencyValues.currentDependency.fileID ?? fileID,
                   filePath: DependencyValues.currentDependency.filePath ?? filePath,

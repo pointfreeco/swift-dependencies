@@ -64,16 +64,18 @@ extension DependencyValues {
 /// A dependency that yields a random number generator to a closure.
 ///
 /// See ``DependencyValues/withRandomNumberGenerator`` for more information.
-public final class WithRandomNumberGenerator: @unchecked Sendable {
-  private var generator: any RandomNumberGenerator & Sendable
+public struct WithRandomNumberGenerator: Sendable {
+  private let generator: LockIsolated<any RandomNumberGenerator & Sendable>
 
   public init(_ generator: some RandomNumberGenerator & Sendable) {
-    self.generator = generator
+    self.generator = LockIsolated(generator)
   }
 
-  public func callAsFunction<R>(_ work: (inout any RandomNumberGenerator & Sendable) throws -> R)
-    rethrows -> R
-  {
-    return try work(&self.generator)
+  public func callAsFunction<R: Sendable>(
+    _ work: @Sendable (inout any RandomNumberGenerator & Sendable) throws -> R
+  ) rethrows -> R {
+    try generator.withValue {
+      try work(&$0)
+    }
   }
 }

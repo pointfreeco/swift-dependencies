@@ -48,7 +48,7 @@ extension AsyncStream where Element: Sendable {
   public init<S: AsyncSequence & Sendable>(
     _ sequence: S,
     bufferingPolicy limit: Continuation.BufferingPolicy
-  ) where S.Element == Element {
+  ) where S.Element == Element, S.Element: Sendable {
     self.init(bufferingPolicy: limit) { (continuation: Continuation) in
       let task = Task {
         do {
@@ -77,7 +77,7 @@ extension AsyncThrowingStream where Element: Sendable, Failure == Error {
   public init<S: AsyncSequence & Sendable>(
     _ sequence: S,
     bufferingPolicy limit: Continuation.BufferingPolicy
-  ) where S.Element == Element {
+  ) where S.Element == Element, S.Element: Sendable {
     self.init(bufferingPolicy: limit) { (continuation: Continuation) in
       let task = Task {
         do {

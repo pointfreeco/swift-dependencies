@@ -336,21 +336,21 @@ extension DependencyValues {
 
 private let dependencyObjects = DependencyObjects()
 
-private class DependencyObjects: @unchecked Sendable {
-  private var storage = LockIsolated<[ObjectIdentifier: DependencyObject]>([:])
+private final class DependencyObjects: Sendable {
+  private let storage = LockIsolated<[ObjectIdentifier: DependencyObject]>([:])
 
   internal init() {}
 
   func store(_ object: AnyObject) {
-    self.storage.withValue {
-      [id = ObjectIdentifier(object), object = UncheckedSendable(object)] storage in
-      storage[id] = DependencyObject(
-        object: object.wrappedValue,
-        dependencyValues: DependencyValues._current
-      )
+    let dependencyObject = DependencyObject(
+      object: object,
+      dependencyValues: DependencyValues._current
+    )
+    self.storage.withValue { [id = ObjectIdentifier(object)] storage in
+      storage[id] = dependencyObject
       Task {
         self.storage.withValue { storage in
-          for (id, box) in storage where box.object == nil {
+          for (id, object) in storage where object.isNil {
             storage.removeValue(forKey: id)
           }
         }
@@ -370,9 +370,16 @@ private class DependencyObjects: @unchecked Sendable {
   }
 }
 
-private struct DependencyObject {
-  weak var object: AnyObject?
+private struct DependencyObject: @unchecked Sendable {
+  private weak var object: AnyObject?
   let dependencyValues: DependencyValues
+  init(object: AnyObject, dependencyValues: DependencyValues) {
+    self.object = object
+    self.dependencyValues = dependencyValues
+  }
+  var isNil: Bool {
+    object == nil
+  }
 }
 
 @_transparent

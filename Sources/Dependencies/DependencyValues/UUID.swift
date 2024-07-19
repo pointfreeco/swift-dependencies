@@ -110,16 +110,13 @@ extension UUID {
   }
 }
 
-private final class IncrementingUUIDGenerator: @unchecked Sendable {
-  private let lock = NSLock()
-  private var sequence = 0
+private struct IncrementingUUIDGenerator: Sendable {
+  private let sequence = LockIsolated(0)
 
   func callAsFunction() -> UUID {
-    self.lock.lock()
-    defer {
-      self.sequence += 1
-      self.lock.unlock()
+    sequence.withValue { sequence in
+      defer { sequence += 1 }
+      return UUID(sequence)
     }
-    return UUID(self.sequence)
   }
 }

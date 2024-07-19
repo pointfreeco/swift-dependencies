@@ -6,7 +6,7 @@
       "location" : "https://github.com/pointfreeco/combine-schedulers",
       "state" : {
         "branch" : "swift-testing",
-        "revision" : "a64f9e085eb5ef3e32e18be86a35dc44f1c7b562"
+        "revision" : "233ad6eaffeb1d7979f100f1dffc1d397ff9acf6"
       }
     },
     {
@@ -15,7 +15,7 @@
       "location" : "https://github.com/pointfreeco/swift-clocks",
       "state" : {
         "branch" : "swift-testing",
-        "revision" : "74e4934df3d903a07f1fc4d80fb8459ba48e0b33"
+        "revision" : "2d16a24bb30b530eb5e86b519bd7afe25fb3034d"
       }
     },
     {
@@ -78,7 +78,7 @@
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
         "branch" : "swift-testing",
-        "revision" : "0bf5ef4746bb193865b946ced53b61aec223af42"
+        "revision" : "eb270c44fff42d8f0657749048e8519875ebdd6d"
       }
     }
   ],

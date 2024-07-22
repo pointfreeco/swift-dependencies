@@ -140,7 +140,7 @@ public struct DependencyValues: Sendable {
             .takeUnretainedValue()
         else { return }
         let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
-          DependencyValues._current.cachedValues.cached.withValue { $0 = [:] }
+          DependencyValues._current.cachedValues.cached = [:]
         }
         let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
         class_addMethod(
@@ -154,7 +154,7 @@ public struct DependencyValues: Sendable {
       if _XCTIsTesting {
         XCTestObservationCenter.shared.addTestObserver(
           TestObserver({
-            DependencyValues._current.cachedValues.cached.withValue { $0 = [:] }
+            DependencyValues._current.cachedValues.cached = [:]
           }))
       }
     #else
@@ -177,7 +177,7 @@ public struct DependencyValues: Sendable {
         }
       #endif
       pRegisterTestObserver?({
-        DependencyValues._current.cachedValues.cached.withValue { $0 = [:] }
+        DependencyValues._current.cachedValues.cached = [:]
       })
     #endif
   }
@@ -336,13 +336,14 @@ private let defaultContext: DependencyContext = {
   }
 }()
 
-private final class CachedValues: Sendable {
+private final class CachedValues: @unchecked Sendable {
   struct CacheKey: Hashable, Sendable {
     let id: ObjectIdentifier
     let context: DependencyContext
   }
 
-  fileprivate let cached = LockIsolated([CacheKey: any Sendable]())
+  private let lock = NSRecursiveLock()
+  fileprivate var cached = [CacheKey: any Sendable]()
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,
@@ -352,55 +353,54 @@ private final class CachedValues: Sendable {
     line: UInt = #line
   ) -> Key.Value {
     XCTFailContext.$current.withValue(XCTFailContext(file: file, line: line)) {
-      self.cached.withValue { cached in
-        let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
-        guard let base = cached[cacheKey], let value = base as? Key.Value
-        else {
-          let value: Key.Value?
-          switch context {
-          case .live:
-            value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
-          case .preview:
-            value = Key.previewValue
-          case .test:
-            value = Key.testValue
-          }
+      let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
+      guard let base = cached[cacheKey], let value = base as? Key.Value
+      else {
+        let value: Key.Value?
+        switch context {
+        case .live:
+          value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
+        case .preview:
+          value = Key.previewValue
+        case .test:
+          value = Key.testValue
+        }
 
-          guard let value
-          else {
-            #if DEBUG
-              if !DependencyValues.isSetting {
-                var dependencyDescription = ""
-                if let fileID = DependencyValues.currentDependency.fileID,
-                  let line = DependencyValues.currentDependency.line
-                {
-                  dependencyDescription.append(
+        guard let value
+        else {
+          #if DEBUG
+          if !DependencyValues.isSetting {
+            var dependencyDescription = ""
+            if let fileID = DependencyValues.currentDependency.fileID,
+               let line = DependencyValues.currentDependency.line
+            {
+              dependencyDescription.append(
                     """
                       Location:
                         \(fileID):\(line)
 
                     """
-                  )
-                }
-                dependencyDescription.append(
-                  Key.self == Key.Value.self
-                    ? """
+              )
+            }
+            dependencyDescription.append(
+              Key.self == Key.Value.self
+              ? """
                       Dependency:
                         \(typeName(Key.Value.self))
                     """
-                    : """
+              : """
                       Key:
                         \(typeName(Key.self))
                       Value:
                         \(typeName(Key.Value.self))
                     """
-                )
+            )
 
-                var argument: String {
-                  "\(function)" == "subscript(_:)" ? "\(typeName(Key.self)).self" : "\\.\(function)"
-                }
+            var argument: String {
+              "\(function)" == "subscript(_:)" ? "\(typeName(Key.self)).self" : "\\.\(function)"
+            }
 
-                runtimeWarn(
+            runtimeWarn(
                   """
                   @Dependency(\(argument)) has no live implementation, but was accessed from a live \
                   context.
@@ -419,22 +419,111 @@ private final class CachedValues: Sendable {
                   """,
                   file: DependencyValues.currentDependency.file ?? file,
                   line: DependencyValues.currentDependency.line ?? line
-                )
-              }
-            #endif
-            let value = Key.testValue
-            if !DependencyValues.isSetting {
-              cached[cacheKey] = value
-            }
-            return value
+            )
           }
-
-          cached[cacheKey] = value
+          #endif
+          let value = Key.testValue
+          if !DependencyValues.isSetting {
+            cached[cacheKey] = value
+          }
           return value
         }
 
+        cached[cacheKey] = value
         return value
       }
+
+      return value
+    }
+  }
+}
+
+
+
+
+
+import Foundation
+
+/// A generic wrapper for isolating a mutable value with a lock.
+///
+/// To asynchronously isolate a value on an actor, see ``ActorIsolated``. If you trust the
+/// sendability of the underlying value, consider using ``UncheckedSendable``, instead.
+@dynamicMemberLookup
+public final class LockIsolated_<Value>: @unchecked Sendable {
+  private var _value: Value
+  private let lock = NSLock()
+
+  /// Initializes lock-isolated state around a value.
+  ///
+  /// - Parameter value: A value to isolate with a lock.
+  public init(_ value: @autoclosure @Sendable () throws -> Value) rethrows {
+    self._value = try value()
+  }
+
+  public subscript<Subject: Sendable>(dynamicMember keyPath: KeyPath<Value, Subject>) -> Subject {
+    self.lock.withLock {
+      self._value[keyPath: keyPath]
+    }
+  }
+
+  /// Perform an operation with isolated access to the underlying value.
+  ///
+  /// Useful for modifying a value in a single transaction.
+  ///
+  /// ```swift
+  /// // Isolate an integer for concurrent read/write access:
+  /// var count = LockIsolated(0)
+  ///
+  /// func increment() {
+  ///   // Safely increment it:
+  ///   self.count.withValue { $0 += 1 }
+  /// }
+  /// ```
+  ///
+  /// - Parameter operation: An operation to be performed on the the underlying value with a lock.
+  /// - Returns: The result of the operation.
+  public func withValue<T: Sendable>(
+    _ operation: @Sendable (inout Value) throws -> T
+  ) rethrows -> T {
+    try self.lock.withLock {
+      var value = self._value
+      defer { self._value = value }
+      return try operation(&value)
+    }
+  }
+
+  /// Overwrite the isolated value with a new value.
+  ///
+  /// ```swift
+  /// // Isolate an integer for concurrent read/write access:
+  /// var count = LockIsolated(0)
+  ///
+  /// func reset() {
+  ///   // Reset it:
+  ///   self.count.setValue(0)
+  /// }
+  /// ```
+  ///
+  /// > Tip: Use ``withValue(_:)`` instead of ``setValue(_:)`` if the value being set is derived
+  /// > from the current value. That is, do this:
+  /// >
+  /// > ```swift
+  /// > self.count.withValue { $0 += 1 }
+  /// > ```
+  /// >
+  /// > ...and not this:
+  /// >
+  /// > ```swift
+  /// > self.count.setValue(self.count + 1)
+  /// > ```
+  /// >
+  /// > ``withValue(_:)`` isolates the entire transaction and avoids data races between reading and
+  /// > writing the value.
+  ///
+  /// - Parameter newValue: The value to replace the current isolated value with.
+  public func setValue(_ newValue: @autoclosure @Sendable () throws -> Value) rethrows {
+    try self.lock.withLock {
+      self._value = try newValue()
     }
   }
 }

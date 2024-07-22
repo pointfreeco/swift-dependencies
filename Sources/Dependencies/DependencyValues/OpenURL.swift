@@ -33,7 +33,7 @@
       return await stream.first(where: { _ in true }) ?? false
     }
     static let testValue = OpenURLEffect { _ in
-      XCTFail(#"Unimplemented: @Dependency(\.openURL)"#)
+      reportIssue(#"Unimplemented: @Dependency(\.openURL)"#)
       return false
     }
   }

@@ -8,7 +8,7 @@ final class DependencyClientTests: BaseTestCase {
 
     XCTExpectFailure {
       $0.compactDescription == """
-        Unimplemented: 'Client.fetch'
+        failed - Unimplemented: 'Client.fetch'
         """
     }
 
@@ -30,9 +30,9 @@ final class DependencyClientTests: BaseTestCase {
       XCTAssertEqual(client.fetchWithUnimplemented(), 42)
     } issueMatcher: {
       $0.compactDescription == """
-        Unimplemented …
+        failed - Unimplemented …
 
-          Defined at:
+          Defined in 'ClientWithNonThrowingEndpoint' at:
             DependenciesMacrosPluginTests/DependencyClientTests.swift:\(ClientWithNonThrowingEndpoint.line + 1)
         """
     }

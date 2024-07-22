@@ -4,7 +4,7 @@
 
 ### Using a dependency
 
-- ``init(_:file:fileID:line:)``
+- ``init(_:fileID:filePath:line:column:)``
 
 ### Getting the value
 

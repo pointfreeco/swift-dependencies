@@ -22,17 +22,17 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.0"),
-    .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.0"),
+    .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.1"),
+    .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.3"),
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
-    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.1.0"),
+    .package(url: "https://github.com/pointfreeco/swift-issue-reporting", from: "1.2.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"601.0.0-prerelease"),
   ],
   targets: [
     .target(
       name: "DependenciesTestObserver",
       dependencies: [
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay")
+        .product(name: "IssueReporting", package: "swift-issue-reporting"),
       ]
     ),
     .target(
@@ -41,7 +41,8 @@ let package = Package(
         .product(name: "Clocks", package: "swift-clocks"),
         .product(name: "CombineSchedulers", package: "combine-schedulers"),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "swift-issue-reporting"),
+        .product(name: "XCTestDynamicOverlay", package: "swift-issue-reporting"),
       ]
     ),
     .testTarget(
@@ -49,13 +50,14 @@ let package = Package(
       dependencies: [
         "Dependencies",
         "DependenciesMacros",
+        .product(name: "IssueReportingTestSupport", package: "swift-issue-reporting"),
       ]
     ),
     .target(
       name: "DependenciesMacros",
       dependencies: [
         "DependenciesMacrosPlugin",
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "swift-issue-reporting"),
       ]
     ),
     .macro(
@@ -79,9 +81,9 @@ let package = Package(
 #endif
 
 #if !os(WASI)
-  package.dependencies.append(
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0")
-  )
+  package.dependencies.append(contentsOf: [
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0"),
+  ])
   package.targets.append(contentsOf: [
     .testTarget(
       name: "DependenciesMacrosPluginTests",

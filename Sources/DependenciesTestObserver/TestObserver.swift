@@ -1,5 +1,5 @@
+import IssueReporting
 import XCTest
-import XCTestDynamicOverlay
 
 #if !_runtime(_ObjC)
   final class TestObserver: NSObject, XCTestObservation {
@@ -14,7 +14,7 @@ import XCTestDynamicOverlay
 #endif
 
 public func registerTestObserver(_ resetCache: @convention(c) () -> Void) {
-  guard _XCTIsTesting else { return }
+  guard isTesting else { return }
   #if !_runtime(_ObjC)
     XCTestObservationCenter.shared.addTestObserver(TestObserver(resetCache))
   #endif

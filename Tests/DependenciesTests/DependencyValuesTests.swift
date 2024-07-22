@@ -27,8 +27,8 @@ final class DependencyValuesTests: XCTestCase {
         }
       } issueMatcher: {
         $0.compactDescription == """
-          @Dependency(\\.missingLiveDependency) has no live implementation, but was accessed \
-          from a live context.
+          failed - @Dependency(\\.missingLiveDependency) has no live implementation, but was \
+          accessed from a live context.
 
             Location:
               DependenciesTests/DependencyValuesTests.swift:\(line)
@@ -39,11 +39,11 @@ final class DependencyValuesTests: XCTestCase {
 
           To fix you can do one of two things:
 
-          * Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
+          • Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
           of your dependency, and make sure that the conformance is linked with this current \
           application.
 
-          * Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
+          • Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
           done at the entry point of your application, but can be done later too.
           """
       }
@@ -63,8 +63,8 @@ final class DependencyValuesTests: XCTestCase {
         }
       } issueMatcher: {
         $0.compactDescription == """
-          @Dependency(TestKey.self) has no live implementation, but was accessed from a live \
-          context.
+          failed - @Dependency(TestKey.self) has no live implementation, but was accessed from a \
+          live context.
 
             Location:
               DependenciesTests/DependencyValuesTests.swift:\(line)
@@ -75,11 +75,11 @@ final class DependencyValuesTests: XCTestCase {
 
           To fix you can do one of two things:
 
-          * Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
+          • Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
           of your dependency, and make sure that the conformance is linked with this current \
           application.
 
-          * Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
+          • Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
           done at the entry point of your application, but can be done later too.
           """
       }
@@ -577,11 +577,11 @@ final class DependencyValuesTests: XCTestCase {
     let stream = withDependencies {
       $0.fullDependency.value = 42
     } operation: { () -> AsyncStream<Int> in
-      var isDone = false
+      let isDone = LockIsolated(false)
       return AsyncStream(unfolding: {
-        defer { isDone = true }
+        defer { isDone.setValue(true) }
         @Dependency(\.fullDependency.value) var value
-        return isDone ? nil : value
+        return isDone.value ? nil : value
       })
     }
 
@@ -593,13 +593,13 @@ final class DependencyValuesTests: XCTestCase {
     let stream = withDependencies {
       $0.fullDependency.value = 42
     } operation: { () -> AsyncStream<Int> in
-      var isDone = false
+      let isDone = LockIsolated(false)
       return withEscapedDependencies { continuation in
         AsyncStream(unfolding: {
           continuation.yield {
-            defer { isDone = true }
+            defer { isDone.setValue(true) }
             @Dependency(\.fullDependency.value) var value
-            return isDone ? nil : value
+            return isDone.value ? nil : value
           }
         })
       }

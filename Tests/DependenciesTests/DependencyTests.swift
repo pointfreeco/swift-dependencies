@@ -92,7 +92,7 @@ final class DependencyTests: XCTestCase {
         withDependencies(from: self) {}
       } issueMatcher: {
         $0.compactDescription == """
-          You are trying to propagate dependencies to a child model from a model with no \
+          failed - You are trying to propagate dependencies to a child model from a model with no \
           dependencies. To fix this, the given 'DependencyTests' must be returned from another \
           'withDependencies' closure, or the class must hold at least one '@Dependency' property.
           """

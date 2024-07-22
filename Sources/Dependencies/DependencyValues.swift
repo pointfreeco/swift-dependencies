@@ -1,5 +1,5 @@
 import Foundation
-import XCTestDynamicOverlay
+import IssueReporting
 
 #if os(Windows)
   import WinSDK
@@ -152,11 +152,12 @@ public struct DependencyValues: Sendable {
           .perform(Selector(("addTestObserver:")), with: TestObserver())
       }
     #elseif os(WASI)
-      if _XCTIsTesting {
+      if isTesting {
         XCTestObservationCenter.shared.addTestObserver(
-          TestObserver({
+          TestObserver {
             DependencyValues._current.cachedValues.cached = [:]
-          }))
+          }
+        )
       }
     #else
       typealias RegisterTestObserver = @convention(thin) (@convention(c) () -> Void) -> Void
@@ -212,9 +213,11 @@ public struct DependencyValues: Sendable {
   /// property wrapper.
   public subscript<Key: TestDependencyKey>(
     key: Key.Type,
-    file file: StaticString = #file,
-    function function: StaticString = #function,
-    line line: UInt = #line
+    fileID: StaticString = #fileID,
+    filePath: StaticString = #filePath,
+    line: UInt = #line,
+    column: UInt = #line,
+    function: StaticString = #function
   ) -> Key.Value {
     get {
       guard let base = self.storage[ObjectIdentifier(key)], let dependency = base as? Key.Value
@@ -228,9 +231,11 @@ public struct DependencyValues: Sendable {
           return self.cachedValues.value(
             for: Key.self,
             context: context,
-            file: file,
+            fileID: fileID,
+            filePath: filePath,
             function: function,
-            line: line
+            line: line,
+            column: column
           )
         case .test:
           var currentDependency = Self.currentDependency
@@ -239,9 +244,11 @@ public struct DependencyValues: Sendable {
             self.cachedValues.value(
               for: Key.self,
               context: context,
-              file: file,
+              fileID: fileID,
+              filePath: filePath,
               function: function,
-              line: line
+              line: line,
+              column: column
             )
           }
         }
@@ -293,13 +300,19 @@ public struct DependencyValues: Sendable {
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })
     return values
   }
+
+  @_spi(Beta)
+  public func resetCache() {
+    cachedValues.cached = [:]
+  }
 }
 
 struct CurrentDependency {
   var name: StaticString?
-  var file: StaticString?
   var fileID: StaticString?
+  var filePath: StaticString?
   var line: UInt?
+  var column: UInt?
 }
 
 private let defaultContext: DependencyContext = {
@@ -307,7 +320,7 @@ private let defaultContext: DependencyContext = {
   var inferredContext: DependencyContext {
     if environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
       return .preview
-    } else if _XCTIsTesting {
+    } else if isTesting {
       return .test
     } else {
       return .live
@@ -325,7 +338,7 @@ private let defaultContext: DependencyContext = {
   case "test":
     return .test
   default:
-    runtimeWarn(
+    reportIssue(
       """
       An environment value for SWIFT_DEPENDENCIES_CONTEXT was provided but did not match "live",
       "preview", or "test".
@@ -350,14 +363,16 @@ public final class CachedValues: @unchecked Sendable {
   func value<Key: TestDependencyKey>(
     for key: Key.Type,
     context: DependencyContext,
-    file: StaticString = #file,
+    fileID: StaticString = #fileID,
+    filePath: StaticString = #filePath,
     function: StaticString = #function,
-    line: UInt = #line
+    line: UInt = #line,
+    column: UInt = #line
   ) -> Key.Value {
     lock.lock()
     defer { lock.unlock() }
 
-    return XCTFailContext.$current.withValue(XCTFailContext(file: file, line: line)) {
+    return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
       let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
       guard let base = cached[cacheKey], let value = base as? Key.Value
       else {
@@ -402,10 +417,12 @@ public final class CachedValues: @unchecked Sendable {
               )
 
               var argument: String {
-                "\(function)" == "subscript(_:)" ? "\(typeName(Key.self)).self" : "\\.\(function)"
+                 "\(function)" == "subscript(key:)"
+                    ? "\(typeName(Key.self)).self"
+                    : "\\.\(function)"
               }
 
-              runtimeWarn(
+              reportIssue(
                 """
                 @Dependency(\(argument)) has no live implementation, but was accessed from a live \
                 context.
@@ -414,16 +431,18 @@ public final class CachedValues: @unchecked Sendable {
 
                 To fix you can do one of two things:
 
-                * Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
+                • Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
                 a live implementation of your dependency, and make sure that the conformance is \
                 linked with this current application.
 
-                * Override the implementation of '\(typeName(Key.self))' using 'withDependencies'. \
-                This is typically done at the entry point of your application, but can be done \
-                later too.
+                • Override the implementation of '\(typeName(Key.self))' using \
+                'withDependencies'. This is typically done at the entry point of your \
+                application, but can be done later too.
                 """,
-                file: DependencyValues.currentDependency.file ?? file,
-                line: DependencyValues.currentDependency.line ?? line
+                fileID: DependencyValues.currentDependency.fileID ?? fileID,
+                filePath: DependencyValues.currentDependency.filePath ?? filePath,
+                line: DependencyValues.currentDependency.line ?? line,
+                column: DependencyValues.currentDependency.column ?? column
               )
             }
           #endif

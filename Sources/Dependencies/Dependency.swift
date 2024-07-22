@@ -66,21 +66,24 @@
     // NB: Key paths do not conform to sendable and are instead diagnosed at the time of forming the
     //     literal.
     private let keyPath: KeyPath<DependencyValues, Value>
-    private let file: StaticString
+    private let filePath: StaticString
     private let fileID: StaticString
     private let line: UInt
+    private let column: UInt
 
     public init(
       _ keyPath: KeyPath<DependencyValues, Value>,
-      file: StaticString = #file,
       fileID: StaticString = #fileID,
-      line: UInt = #line
+      filePath: StaticString = #filePath,
+      line: UInt = #line,
+      column: UInt = #column
     ) {
       self.initialValues = DependencyValues._current
       self.keyPath = keyPath
-      self.file = file
+      self.filePath = filePath
       self.fileID = fileID
       self.line = line
+      self.column = column
     }
 
     /// The current value of the dependency property.
@@ -93,9 +96,10 @@
   public struct Dependency<Value>: Sendable, _HasInitialValues {
     let initialValues: DependencyValues
     private let keyPath: KeyPath<DependencyValues, Value> & Sendable
-    private let file: StaticString
+    private let filePath: StaticString
     private let fileID: StaticString
     private let line: UInt
+    private let column: UInt
 
     /// Creates a dependency property to read the specified key path.
     ///
@@ -114,15 +118,17 @@
     /// - Parameter keyPath: A key path to a specific resulting value.
     public init(
       _ keyPath: KeyPath<DependencyValues, Value> & Sendable,
-      file: StaticString = #file,
       fileID: StaticString = #fileID,
-      line: UInt = #line
+      filePath: StaticString = #filePath,
+      line: UInt = #line,
+      column: UInt = #column
     ) {
       self.initialValues = DependencyValues._current
       self.keyPath = keyPath
-      self.file = file
+      self.filePath = filePath
       self.fileID = fileID
       self.line = line
+      self.column = column
     }
 
     /// The current value of the dependency property.
@@ -160,26 +166,31 @@ extension Dependency {
   /// ```
   ///
   /// - Parameter key: A dependency key to a specific resulting value.
-  public init<Key: TestDependencyKey<Value>>(
+  public init<Key: TestDependencyKey>(
     _ key: Key.Type,
-    file: StaticString = #file,
     fileID: StaticString = #fileID,
-    line: UInt = #line
-  ) {
+    filePath: StaticString = #filePath,
+    line: UInt = #line,
+    column: UInt = #column
+  ) where Key.Value == Value {
     self.init(
-      \DependencyValues.[HashableType<Key>(file: file, line: line)],
-      file: file,
+      \DependencyValues.[
+        key: HashableType<Key>(fileID: fileID, filePath: filePath, line: line, column: column)
+      ],
       fileID: fileID,
-      line: line
+      filePath: filePath,
+      line: line,
+      column: column
     )
   }
 
   fileprivate var _wrappedValue: Value {
     #if DEBUG
       var currentDependency = DependencyValues.currentDependency
-      currentDependency.file = self.file
       currentDependency.fileID = self.fileID
+      currentDependency.filePath = self.filePath
       currentDependency.line = self.line
+      currentDependency.column = self.column
       return DependencyValues.$currentDependency.withValue(currentDependency) {
         let dependencies = self.initialValues.merging(DependencyValues._current)
         return DependencyValues.$_current.withValue(dependencies) {
@@ -195,9 +206,11 @@ extension Dependency {
   }
 }
 
-private struct HashableType<T>: Hashable {
-  let file: StaticString
+private struct HashableType<T>: Hashable, Sendable {
+  let fileID: StaticString
+  let filePath: StaticString
   let line: UInt
+  let column: UInt
   static func == (lhs: Self, rhs: Self) -> Bool {
     true
   }
@@ -207,9 +220,25 @@ private struct HashableType<T>: Hashable {
 }
 
 extension DependencyValues {
-  fileprivate subscript<Key: TestDependencyKey>(key: HashableType<Key>) -> Key.Value {
-    get { self[Key.self, file: key.file, line: key.line] }
-    set { self[Key.self, file: key.file, line: key.line] = newValue }
+  fileprivate subscript<Key: TestDependencyKey>(key key: HashableType<Key>) -> Key.Value {
+    get {
+      self[
+        Key.self,
+        key.fileID,
+        key.filePath,
+        key.line,
+        key.column
+      ]
+    }
+    set {
+      self[
+        Key.self,
+        key.fileID,
+        key.filePath,
+        key.line,
+        key.column
+      ] = newValue
+    }
   }
 }
 

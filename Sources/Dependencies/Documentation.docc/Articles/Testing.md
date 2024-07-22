@@ -13,6 +13,7 @@ as well as some tips and gotchas to keep in mind.
 * [Altered execution contexts](#Altered-execution-contexts)
 * [Changing dependencies during tests](#Changing-dependencies-during-tests)
 * [Testing gotchas](#Testing-gotchas)
+* [Swift's native Testing framework](#Swifts-native-Testing-framework)
 
 ## Altered execution contexts
 
@@ -233,3 +234,50 @@ You will not be able to override this dependency in the normal fashion. In gener
 to ever have a static dependency, and so you should avoid this pattern.
 
 [issue-reporting-gh]: http://github.com/pointfreeco/swift-issue-reporting
+
+## Swift's native Testing framework
+
+The library comes with beta support for Swift's new native Testing framework. However, as there
+are still features missing from the Testing framework that XCTest has, there are some additional
+steps you must take.
+
+> Warning: Currently our support of the Swift Testing framework is considered "beta" because Swift's
+> own testing framework has not even officially been released yet. Once it is officially released,
+> probably sometime in September, we will have an official release of our libraries with support.
+
+If you are are writing a test using the `@Test` macro, you will need to surround the entire body
+of your test in [`withDependencies`](<doc:withDependencies(_:operation:)-3vrqy>) that resets
+the entire set of values:
+
+```swift
+@Test 
+func feature() {
+  withDependencies {
+    $0 = DependencyValues()
+  } operation: {
+    // All test code in here…
+  }
+}
+```
+
+This will guarantee that tests do not bleed over to other tests when run in parallel.
+
+Alternatively, you can create a class-based `@Suite` that runs in serial _and_ resets the
+dependency case after each test is run. To do so you will need to `@_spi` import the 
+Dependencies library to get access to a `resetCache` method:
+
+```swift
+@_spi(Beta) import Dependencies
+
+@Suite(.serialized)
+class FeatureTests {
+  deinit {
+    DependencyValues._current.resetCache()
+  }
+
+  @Test
+  func feature() {
+    // All test code in here…
+  }
+}
+```

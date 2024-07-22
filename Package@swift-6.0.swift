@@ -17,10 +17,6 @@ let package = Package(
       targets: ["Dependencies"]
     ),
     .library(
-      name: "DependenciesTestSupport",
-      targets: ["DependenciesTestSupport"]
-    ),
-    .library(
       name: "DependenciesMacros",
       targets: ["DependenciesMacros"]
     ),
@@ -49,18 +45,11 @@ let package = Package(
         .product(name: "XCTestDynamicOverlay", package: "swift-issue-reporting"),
       ]
     ),
-    .target(
-      name: "DependenciesTestSupport",
-      dependencies: [
-        "Dependencies",
-      ]
-    ),
     .testTarget(
       name: "DependenciesTests",
       dependencies: [
         "Dependencies",
         "DependenciesMacros",
-        "DependenciesTestSupport",
       ]
     ),
     .target(

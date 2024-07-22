@@ -119,7 +119,8 @@ public struct DependencyValues: Sendable {
   @TaskLocal static var isSetting = false
   @TaskLocal static var currentDependency = CurrentDependency()
 
-  package var cachedValues = CachedValues()
+  @_spi(Internals)
+  public var cachedValues = CachedValues()
   private var storage: [ObjectIdentifier: any Sendable] = [:]
 
   /// Creates a dependency values instance.
@@ -140,7 +141,7 @@ public struct DependencyValues: Sendable {
             .takeUnretainedValue()
         else { return }
         let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
-          DependencyValues._current.cachedValues.cached.withValue { $0 = [:] }
+          DependencyValues._current.cachedValues.cached = [:]
         }
         let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
         class_addMethod(
@@ -154,7 +155,7 @@ public struct DependencyValues: Sendable {
       if isTesting {
         XCTestObservationCenter.shared.addTestObserver(
           TestObserver {
-            DependencyValues._current.cachedValues.cached.withValue { $0 = [:] }
+            DependencyValues._current.cachedValues.cached = [:]
           }
         )
       }
@@ -178,7 +179,7 @@ public struct DependencyValues: Sendable {
         }
       #endif
       pRegisterTestObserver?({
-        DependencyValues._current.cachedValues.cached.withValue { $0 = [:] }
+        DependencyValues._current.cachedValues.cached = [:]
       })
     #endif
   }
@@ -302,7 +303,7 @@ public struct DependencyValues: Sendable {
 
   @_spi(Beta)
   public func resetCache() {
-    cachedValues.cached.withValue { $0 = [:] }
+    cachedValues.cached = [:]
   }
 }
 
@@ -349,13 +350,15 @@ private let defaultContext: DependencyContext = {
   }
 }()
 
-package final class CachedValues: Sendable {
-  struct CacheKey: Hashable, Sendable {
+@_spi(Internals)
+public final class CachedValues: @unchecked Sendable {
+  public struct CacheKey: Hashable, Sendable {
     let id: ObjectIdentifier
     let context: DependencyContext
   }
 
-  fileprivate let cached = LockIsolated([CacheKey: any Sendable]())
+  private let lock = NSRecursiveLock()
+  public var cached = [CacheKey: any Sendable]()
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,
@@ -366,94 +369,95 @@ package final class CachedValues: Sendable {
     line: UInt = #line,
     column: UInt = #line
   ) -> Key.Value {
-    withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
-      self.cached.withValue { cached in
-        let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
-        guard let base = cached[cacheKey], let value = base as? Key.Value
+    lock.lock()
+    defer { lock.unlock() }
+
+    return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
+      let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
+      guard let base = cached[cacheKey], let value = base as? Key.Value
+      else {
+        let value: Key.Value?
+        switch context {
+        case .live:
+          value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
+        case .preview:
+          value = Key.previewValue
+        case .test:
+          value = Key.testValue
+        }
+
+        guard let value
         else {
-          let value: Key.Value?
-          switch context {
-          case .live:
-            value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
-          case .preview:
-            value = Key.previewValue
-          case .test:
-            value = Key.testValue
-          }
-
-          guard let value
-          else {
-            #if DEBUG
-              if !DependencyValues.isSetting {
-                var dependencyDescription = ""
-                if let fileID = DependencyValues.currentDependency.fileID,
-                  let line = DependencyValues.currentDependency.line
-                {
-                  dependencyDescription.append(
-                    """
-                      Location:
-                        \(fileID):\(line)
-
-                    """
-                  )
-                }
+          #if DEBUG
+            if !DependencyValues.isSetting {
+              var dependencyDescription = ""
+              if let fileID = DependencyValues.currentDependency.fileID,
+                let line = DependencyValues.currentDependency.line
+              {
                 dependencyDescription.append(
-                  Key.self == Key.Value.self
-                    ? """
-                      Dependency:
-                        \(typeName(Key.Value.self))
-                    """
-                    : """
-                      Key:
-                        \(typeName(Key.self))
-                      Value:
-                        \(typeName(Key.Value.self))
-                    """
-                )
-
-                var argument: String {
-                  "\(function)" == "subscript(key:)"
-                    ? "\(typeName(Key.self)).self"
-                    : "\\.\(function)"
-                }
-
-                reportIssue(
                   """
-                  @Dependency(\(argument)) has no live implementation, but was accessed from a live \
-                  context.
+                    Location:
+                      \(fileID):\(line)
 
-                  \(dependencyDescription)
-
-                  To fix you can do one of two things:
-
-                  • Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
-                  a live implementation of your dependency, and make sure that the conformance is \
-                  linked with this current application.
-
-                  • Override the implementation of '\(typeName(Key.self))' using \
-                  'withDependencies'. This is typically done at the entry point of your \
-                  application, but can be done later too.
-                  """,
-                  fileID: DependencyValues.currentDependency.fileID ?? fileID,
-                  filePath: DependencyValues.currentDependency.filePath ?? filePath,
-                  line: DependencyValues.currentDependency.line ?? line,
-                  column: DependencyValues.currentDependency.column ?? column
+                  """
                 )
               }
-            #endif
-            let value = Key.testValue
-            if !DependencyValues.isSetting {
-              cached[cacheKey] = value
-            }
-            return value
-          }
+              dependencyDescription.append(
+                Key.self == Key.Value.self
+                  ? """
+                    Dependency:
+                      \(typeName(Key.Value.self))
+                  """
+                  : """
+                    Key:
+                      \(typeName(Key.self))
+                    Value:
+                      \(typeName(Key.Value.self))
+                  """
+              )
 
-          cached[cacheKey] = value
+              var argument: String {
+                 "\(function)" == "subscript(key:)"
+                    ? "\(typeName(Key.self)).self"
+                    : "\\.\(function)"
+              }
+
+              reportIssue(
+                """
+                @Dependency(\(argument)) has no live implementation, but was accessed from a live \
+                context.
+
+                \(dependencyDescription)
+
+                To fix you can do one of two things:
+
+                • Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
+                a live implementation of your dependency, and make sure that the conformance is \
+                linked with this current application.
+
+                • Override the implementation of '\(typeName(Key.self))' using \
+                'withDependencies'. This is typically done at the entry point of your \
+                application, but can be done later too.
+                """,
+                fileID: DependencyValues.currentDependency.fileID ?? fileID,
+                filePath: DependencyValues.currentDependency.filePath ?? filePath,
+                line: DependencyValues.currentDependency.line ?? line,
+                column: DependencyValues.currentDependency.column ?? column
+              )
+            }
+          #endif
+          let value = Key.testValue
+          if !DependencyValues.isSetting {
+            cached[cacheKey] = value
+          }
           return value
         }
 
+        cached[cacheKey] = value
         return value
       }
+
+      return value
     }
   }
 }

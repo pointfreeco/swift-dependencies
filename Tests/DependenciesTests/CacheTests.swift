@@ -11,7 +11,7 @@ final class CachedValueTests: XCTestCase {
 struct OuterDependencyTests: TestDependencyKey {
   static var testValue: OuterDependencyTests {
     @Dependency(InnerDependency.self) var innerDependency
-    innerDependency.perform()
+    _ = innerDependency
     return Self()
   }
 }

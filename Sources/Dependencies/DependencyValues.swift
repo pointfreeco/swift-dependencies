@@ -352,6 +352,9 @@ private final class CachedValues: @unchecked Sendable {
     function: StaticString = #function,
     line: UInt = #line
   ) -> Key.Value {
+    lock.lock()
+    defer { lock.unlock() }
+    
     XCTFailContext.$current.withValue(XCTFailContext(file: file, line: line)) {
       let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
       guard let base = cached[cacheKey], let value = base as? Key.Value

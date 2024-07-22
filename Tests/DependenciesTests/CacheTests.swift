@@ -2,9 +2,11 @@
 import XCTest
 
 final class CachedValueTests: XCTestCase {
-  override class func tearDown() {
+  override func tearDown() {
     super.tearDown()
-    DependencyValues._current.cachedValues.cached = [:]
+    CacheLocals.$skipFailure.withValue(true) {
+      DependencyValues._current.cachedValues.cached = [:]
+    }
   }
 
   func testCacheWithReEntrantAccess() {
@@ -25,6 +27,8 @@ private struct InnerDependency: TestDependencyKey {
   static var testValue: InnerDependency {
     final class Ref: Sendable {
       deinit {
+        guard !CacheLocals.skipFailure
+        else { return }
         XCTFail("This should not deinit")
       }
     }
@@ -33,4 +37,8 @@ private struct InnerDependency: TestDependencyKey {
       _ = ref
     }
   }
+}
+
+private enum CacheLocals {
+  @TaskLocal static var skipFailure = false
 }

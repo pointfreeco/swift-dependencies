@@ -9,13 +9,10 @@ final class CachedValueTests: XCTestCase {
 }
 
 struct OuterDependencyTests: TestDependencyKey {
-  let perform: @Sendable () -> Void
   static var testValue: OuterDependencyTests {
     @Dependency(InnerDependency.self) var innerDependency
     innerDependency.perform()
-    return Self {
-      innerDependency.perform()
-    }
+    return Self()
   }
 }
 struct InnerDependency: TestDependencyKey {

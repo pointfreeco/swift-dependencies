@@ -374,58 +374,58 @@ public final class CachedValues: @unchecked Sendable {
         guard let value
         else {
           #if DEBUG
-          if !DependencyValues.isSetting {
-            var dependencyDescription = ""
-            if let fileID = DependencyValues.currentDependency.fileID,
-               let line = DependencyValues.currentDependency.line
-            {
-              dependencyDescription.append(
-                    """
-                      Location:
-                        \(fileID):\(line)
+            if !DependencyValues.isSetting {
+              var dependencyDescription = ""
+              if let fileID = DependencyValues.currentDependency.fileID,
+                let line = DependencyValues.currentDependency.line
+              {
+                dependencyDescription.append(
+                  """
+                    Location:
+                      \(fileID):\(line)
 
-                    """
+                  """
+                )
+              }
+              dependencyDescription.append(
+                Key.self == Key.Value.self
+                  ? """
+                    Dependency:
+                      \(typeName(Key.Value.self))
+                  """
+                  : """
+                    Key:
+                      \(typeName(Key.self))
+                    Value:
+                      \(typeName(Key.Value.self))
+                  """
+              )
+
+              var argument: String {
+                "\(function)" == "subscript(_:)" ? "\(typeName(Key.self)).self" : "\\.\(function)"
+              }
+
+              runtimeWarn(
+                """
+                @Dependency(\(argument)) has no live implementation, but was accessed from a live \
+                context.
+
+                \(dependencyDescription)
+
+                To fix you can do one of two things:
+
+                * Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
+                a live implementation of your dependency, and make sure that the conformance is \
+                linked with this current application.
+
+                * Override the implementation of '\(typeName(Key.self))' using 'withDependencies'. \
+                This is typically done at the entry point of your application, but can be done \
+                later too.
+                """,
+                file: DependencyValues.currentDependency.file ?? file,
+                line: DependencyValues.currentDependency.line ?? line
               )
             }
-            dependencyDescription.append(
-              Key.self == Key.Value.self
-              ? """
-                      Dependency:
-                        \(typeName(Key.Value.self))
-                    """
-              : """
-                      Key:
-                        \(typeName(Key.self))
-                      Value:
-                        \(typeName(Key.Value.self))
-                    """
-            )
-
-            var argument: String {
-              "\(function)" == "subscript(_:)" ? "\(typeName(Key.self)).self" : "\\.\(function)"
-            }
-
-            runtimeWarn(
-              """
-              @Dependency(\(argument)) has no live implementation, but was accessed from a live \
-              context.
-
-              \(dependencyDescription)
-
-              To fix you can do one of two things:
-
-              * Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
-              a live implementation of your dependency, and make sure that the conformance is \
-              linked with this current application.
-
-              * Override the implementation of '\(typeName(Key.self))' using 'withDependencies'. \
-              This is typically done at the entry point of your application, but can be done \
-              later too.
-              """,
-              file: DependencyValues.currentDependency.file ?? file,
-              line: DependencyValues.currentDependency.line ?? line
-            )
-          }
           #endif
           let value = Key.testValue
           if !DependencyValues.isSetting {

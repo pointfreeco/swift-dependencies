@@ -119,7 +119,7 @@ public struct DependencyValues: Sendable {
   @TaskLocal static var isSetting = false
   @TaskLocal static var currentDependency = CurrentDependency()
 
-  package var cachedValues = CachedValues()
+  private var cachedValues = CachedValues()
   private var storage: [ObjectIdentifier: any Sendable] = [:]
 
   /// Creates a dependency values instance.
@@ -344,7 +344,7 @@ private let defaultContext: DependencyContext = {
   }
 }()
 
-package final class CachedValues: Sendable {
+private final class CachedValues: Sendable {
   struct CacheKey: Hashable, Sendable {
     let id: ObjectIdentifier
     let context: DependencyContext

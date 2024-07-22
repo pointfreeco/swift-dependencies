@@ -417,9 +417,9 @@ public final class CachedValues: @unchecked Sendable {
               )
 
               var argument: String {
-                 "\(function)" == "subscript(key:)"
-                    ? "\(typeName(Key.self)).self"
-                    : "\\.\(function)"
+                "\(function)" == "subscript(key:)"
+                  ? "\(typeName(Key.self)).self"
+                  : "\\.\(function)"
               }
 
               reportIssue(

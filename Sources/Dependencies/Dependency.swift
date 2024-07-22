@@ -175,7 +175,7 @@ extension Dependency {
   ) where Key.Value == Value {
     self.init(
       \DependencyValues.[
-        key: HashableType<Key>(fileID: fileID, filePath: filePath, line: line, column: column)
+        key:HashableType<Key>(fileID: fileID, filePath: filePath, line: line, column: column)
       ],
       fileID: fileID,
       filePath: filePath,

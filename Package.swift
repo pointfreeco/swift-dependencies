@@ -32,7 +32,7 @@ let package = Package(
     .target(
       name: "DependenciesTestObserver",
       dependencies: [
-        .product(name: "IssueReporting", package: "swift-issue-reporting"),
+        .product(name: "IssueReporting", package: "swift-issue-reporting")
       ]
     ),
     .target(
@@ -82,7 +82,7 @@ let package = Package(
 
 #if !os(WASI)
   package.dependencies.append(contentsOf: [
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0"),
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0")
   ])
   package.targets.append(contentsOf: [
     .testTarget(

@@ -577,11 +577,11 @@ final class DependencyValuesTests: XCTestCase {
     let stream = withDependencies {
       $0.fullDependency.value = 42
     } operation: { () -> AsyncStream<Int> in
-      let isDone = LockIsolated(false)
+      var isDone = false
       return AsyncStream(unfolding: {
-        defer { isDone.setValue(true) }
+        defer { isDone = true }
         @Dependency(\.fullDependency.value) var value
-        return isDone.withValue { $0 ? nil : value }
+        return isDone ? nil : value
       })
     }
 

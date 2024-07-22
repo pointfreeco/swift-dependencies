@@ -119,7 +119,8 @@ public struct DependencyValues: Sendable {
   @TaskLocal static var isSetting = false
   @TaskLocal static var currentDependency = CurrentDependency()
 
-  fileprivate var cachedValues = CachedValues()
+  @_spi(Internals)
+  public var cachedValues = CachedValues()
   private var storage: [ObjectIdentifier: any Sendable] = [:]
 
   /// Creates a dependency values instance.
@@ -336,14 +337,15 @@ private let defaultContext: DependencyContext = {
   }
 }()
 
-private final class CachedValues: @unchecked Sendable {
-  struct CacheKey: Hashable, Sendable {
+@_spi(Internals)
+public final class CachedValues: @unchecked Sendable {
+  public struct CacheKey: Hashable, Sendable {
     let id: ObjectIdentifier
     let context: DependencyContext
   }
 
   private let lock = NSRecursiveLock()
-  fileprivate var cached = [CacheKey: any Sendable]()
+  public var cached = [CacheKey: any Sendable]()
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,
@@ -404,24 +406,24 @@ private final class CachedValues: @unchecked Sendable {
             }
 
             runtimeWarn(
-                  """
-                  @Dependency(\(argument)) has no live implementation, but was accessed from a live \
-                  context.
+              """
+              @Dependency(\(argument)) has no live implementation, but was accessed from a live \
+              context.
 
-                  \(dependencyDescription)
+              \(dependencyDescription)
 
-                  To fix you can do one of two things:
+              To fix you can do one of two things:
 
-                  * Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
-                  a live implementation of your dependency, and make sure that the conformance is \
-                  linked with this current application.
+              * Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
+              a live implementation of your dependency, and make sure that the conformance is \
+              linked with this current application.
 
-                  * Override the implementation of '\(typeName(Key.self))' using 'withDependencies'. \
-                  This is typically done at the entry point of your application, but can be done \
-                  later too.
-                  """,
-                  file: DependencyValues.currentDependency.file ?? file,
-                  line: DependencyValues.currentDependency.line ?? line
+              * Override the implementation of '\(typeName(Key.self))' using 'withDependencies'. \
+              This is typically done at the entry point of your application, but can be done \
+              later too.
+              """,
+              file: DependencyValues.currentDependency.file ?? file,
+              line: DependencyValues.currentDependency.line ?? line
             )
           }
           #endif

@@ -29,14 +29,14 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/combine-schedulers", branch: "swift-testing"),
     .package(url: "https://github.com/pointfreeco/swift-clocks", branch: "swift-testing"),
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
-    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", branch: "swift-testing"),
+    .package(url: "https://github.com/pointfreeco/swift-issue-reporting", from: "1.2.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"601.0.0-prerelease"),
   ],
   targets: [
     .target(
       name: "DependenciesTestObserver",
       dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "swift-issue-reporting"),
       ]
     ),
     .target(
@@ -45,8 +45,8 @@ let package = Package(
         .product(name: "Clocks", package: "swift-clocks"),
         .product(name: "CombineSchedulers", package: "combine-schedulers"),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "swift-issue-reporting"),
+        .product(name: "XCTestDynamicOverlay", package: "swift-issue-reporting"),
       ]
     ),
     .target(
@@ -67,8 +67,8 @@ let package = Package(
       name: "DependenciesMacros",
       dependencies: [
         "DependenciesMacrosPlugin",
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "swift-issue-reporting"),
+        .product(name: "XCTestDynamicOverlay", package: "swift-issue-reporting"),
       ]
     ),
     .macro(

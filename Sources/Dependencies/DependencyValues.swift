@@ -299,6 +299,11 @@ public struct DependencyValues: Sendable {
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })
     return values
   }
+
+  @_spi(Beta)
+  public func resetCache() {
+    cachedValues.cached.withValue { $0 = [:] }
+  }
 }
 
 struct CurrentDependency {
@@ -345,12 +350,12 @@ private let defaultContext: DependencyContext = {
 }()
 
 package final class CachedValues: Sendable {
-  struct CacheKey: Hashable, Sendable {
+  package struct CacheKey: Hashable, Sendable {
     let id: ObjectIdentifier
     let context: DependencyContext
   }
 
-  fileprivate let cached = LockIsolated([CacheKey: any Sendable]())
+  package let cached = LockIsolated([CacheKey: any Sendable]())
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,

@@ -299,6 +299,11 @@ public struct DependencyValues: Sendable {
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })
     return values
   }
+
+  @_spi(Beta)
+  public func resetCache() {
+    cachedValues.cached.withValue { $0 = [:] }
+  }
 }
 
 struct CurrentDependency {

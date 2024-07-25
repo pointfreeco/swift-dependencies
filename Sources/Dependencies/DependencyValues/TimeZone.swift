@@ -28,7 +28,7 @@ extension DependencyValues {
       #if canImport(Darwin)
         self[TimeZoneKey.self] = newValue
       #else
-        self[TimeZoneKey.self].newValue
+        self[TimeZoneKey.self].wrappedValue = newValue
       #endif
     }
   }

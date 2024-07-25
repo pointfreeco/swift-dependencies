@@ -29,7 +29,7 @@ extension DependencyValues {
       #if canImport(Darwin)
         self[CalendarKey.self] = newValue
       #else
-        self[CalendarKey.self].newValue
+        self[CalendarKey.self].wrappedValue = newValue
       #endif
     }
   }

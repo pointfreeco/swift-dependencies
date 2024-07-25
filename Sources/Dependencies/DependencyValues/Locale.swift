@@ -40,7 +40,7 @@ extension DependencyValues {
       #if canImport(Darwin)
         self[LocaleKey.self] = newValue
       #else
-        self[LocaleKey.self].newValue
+        self[LocaleKey.self].wrappedValue = newValue
       #endif
     }
   }

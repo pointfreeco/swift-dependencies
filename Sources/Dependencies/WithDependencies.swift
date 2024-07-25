@@ -478,15 +478,29 @@ private func isSetting<R>(
   #endif
 }
 
-@_transparent
-private func isSetting<R>(
-  _ value: Bool,
-  isolation: isolated (any Actor)? = #isolation,
-  operation: () async throws -> R
-) async rethrows -> R {
-  #if DEBUG
-    try await DependencyValues.$isSetting.withValue(value, operation: operation)
-  #else
-    try await operation()
-  #endif
-}
+#if swift(>=6)
+  @_transparent
+  private func isSetting<R>(
+    _ value: Bool,
+    isolation: isolated (any Actor)? = #isolation,
+    operation: () async throws -> R
+  ) async rethrows -> R {
+    #if DEBUG
+      try await DependencyValues.$isSetting.withValue(value, operation: operation)
+    #else
+      try await operation()
+    #endif
+  }
+#else
+  @_transparent
+  private func isSetting<R>(
+    _ value: Bool,
+    operation: () async throws -> R
+  ) async rethrows -> R {
+    #if DEBUG
+      try await DependencyValues.$isSetting.withValue(value, operation: operation)
+    #else
+      try await operation()
+    #endif
+  }
+#endif

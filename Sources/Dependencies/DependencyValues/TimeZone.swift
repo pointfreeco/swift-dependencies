@@ -17,11 +17,28 @@ extension DependencyValues {
   /// // Make assertions with model...
   /// ```
   public var timeZone: TimeZone {
-    get { self[TimeZoneKey.self] }
-    set { self[TimeZoneKey.self] = newValue }
+    get {
+      #if canImport(Darwin)
+        self[TimeZoneKey.self]
+      #else
+        self[TimeZoneKey.self].wrappedValue
+      #endif
+    }
+    set {
+      #if canImport(Darwin)
+        self[TimeZoneKey.self] = newValue
+      #else
+        self[TimeZoneKey.self].wrappedValue = newValue
+      #endif
+    }
   }
 
   private enum TimeZoneKey: DependencyKey {
-    static let liveValue = TimeZone.autoupdatingCurrent
+    #if canImport(Darwin)
+      static let liveValue = TimeZone.autoupdatingCurrent
+    #else
+      // NB: 'TimeZone' sendability is not yet available in a 'swift-corelibs-foundation' release
+      static let liveValue = UncheckedSendable(TimeZone.autoupdatingCurrent)
+    #endif
   }
 }

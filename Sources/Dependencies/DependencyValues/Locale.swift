@@ -49,7 +49,7 @@ extension DependencyValues {
     #if canImport(Darwin)
       static let liveValue = Locale.autoupdatingCurrent
     #else
-    // NB: 'Locale' sendability is not yet available in a 'swift-corelibs-foundation' release
+      // NB: 'Locale' sendability is not yet available in a 'swift-corelibs-foundation' release
       static let liveValue = UncheckedSendable(Locale.autoupdatingCurrent)
     #endif
   }

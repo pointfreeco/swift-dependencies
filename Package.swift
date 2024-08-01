@@ -58,6 +58,7 @@ let package = Package(
       dependencies: [
         "DependenciesMacrosPlugin",
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
+        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
     .macro(

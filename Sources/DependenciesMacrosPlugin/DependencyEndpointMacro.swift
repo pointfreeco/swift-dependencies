@@ -131,14 +131,14 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       )
     }
 
-    guard let unimplementedDefault = unimplementedDefault(
-      binding: binding,
-      functionType: functionType,
-      unescapedIdentifier: unescapedIdentifier,
-      identifier: identifier,
-      context: context
-    )
-    else { return [] }
+//    guard let unimplementedDefault = unimplementedDefault(
+//      binding: binding,
+//      functionType: functionType,
+//      unescapedIdentifier: unescapedIdentifier,
+//      identifier: identifier,
+//      context: context
+//    )
+//    else { return [] }
 
     //let privateProperty = property.privatePrefixed("_", unimplementedDefault: unimplementedDefault)
 

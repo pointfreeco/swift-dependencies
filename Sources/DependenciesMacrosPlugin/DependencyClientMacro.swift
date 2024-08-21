@@ -106,7 +106,8 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       let propertyAccess = Access(modifiers: property.modifiers)
       guard
         var binding = property.bindings.first,
-        let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
+        let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
+        let functionType = property.asClosureType?.trimmed
       else { return [] }
 
       if property.bindingSpecifier.tokenKind == .keyword(.let), binding.initializer != nil {
@@ -210,20 +211,33 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         )
       }
       property.bindings[property.bindings.startIndex] = binding
+
+      guard let unimplementedDefaultClosure = unimplementedDefault(
+        binding: binding,
+        functionType: functionType,
+        unescapedIdentifier: identifier.trimmedDescription.trimmedBackticks,
+        identifier: identifier,
+        context: context
+      )
+      else { return [] }
+
       properties.append(
-        Property(declaration: property, identifier: identifier, isEndpoint: isEndpoint)
+        Property(
+          declaration: property,
+          defaultClosure: unimplementedDefaultClosure,
+          identifier: identifier.text,
+          isEndpoint: isEndpoint
+        )
       )
       hasEndpoints = hasEndpoints || isEndpoint
     }
     guard hasEndpoints else { return [] }
     let access = accesses.min().flatMap { $0.token?.with(\.trailingTrivia, .space) }
     // TODO: Don't define initializers if any single endpoint is invalid
-    return [properties, properties.filter { !$0.isEndpoint }].map {
-      $0.isEmpty
-        ? "\(access)init() {}"
-        : """
+    return [properties/*, properties.filter { !$0.isEndpoint }*/].map {
+        """
         \(access)init(
-        \(raw: $0.map { $0.declaration.bindings.trimmedDescription }.joined(separator: ",\n"))
+        \(raw: $0.map { $0.declaration.bindings.trimmedDescription + " = " + $0.defaultClosure.description }.joined(separator: ",\n"))
         ) {
         \(raw: $0.map { "self.\($0.identifier) = \($0.identifier)" }.joined(separator: "\n"))
         }
@@ -276,6 +290,7 @@ private enum Access: Comparable {
 
 private struct Property {
   var declaration: VariableDeclSyntax
+  var defaultClosure: ClosureExprSyntax
   var identifier: String
   var isEndpoint: Bool
 }

@@ -6,6 +6,7 @@
   final class DependencyEndpointTests: XCTestCase {
     #if DEBUG && (os(iOS) || os(macOS) || os(tvOS) || os(watchOS))
       func testUnimplemented() {
+        @DependencyClient
         struct Client {
           @DependencyEndpoint
           var endpoint: () -> Void

@@ -75,67 +75,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     }
 
     let unescapedIdentifier = identifier.trimmedDescription.trimmedBackticks
-    var unimplementedDefault: ClosureExprSyntax
-    if let initializer = binding.initializer {
-      guard var closure = initializer.value.as(ClosureExprSyntax.self)
-      else {
-        return []
-      }
-      if closure.statements.count == 1,
-        var statement = closure.statements.first,
-        let expression = statement.item.as(ExprSyntax.self),
-        !functionType.isVoid
-          || expression.as(FunctionCallExprSyntax.self)?.calledExpression.is(ClosureExprSyntax.self)
-            == true
-      {
-        if !statement.item.description.hasPrefix("fatalError(") {
-          statement.item = CodeBlockItemSyntax.Item(
-            ReturnStmtSyntax(
-              returnKeyword: .keyword(.return, trailingTrivia: .space),
-              expression: expression.trimmed
-            )
-          )
-        }
-        closure.statements = closure.statements.with(\.[closure.statements.startIndex], statement)
-      }
-      unimplementedDefault = closure
-    } else {
-      unimplementedDefault = functionType.unimplementedDefault
-      if functionType.effectSpecifiers?.hasThrowsClause == true {
-        unimplementedDefault.statements.append(
-          """
-          throw DependenciesMacros.Unimplemented("\(raw: unescapedIdentifier)")
-          """
-        )
-      } else if functionType.isVoid {
-        // Do nothing...
-      } else if functionType.isOptional {
-        unimplementedDefault.statements.append(
-          """
-          return nil
-          """
-        )
-      } else {
-        unimplementedDefault.append(placeholder: functionType.returnClause.type.trimmed.description)
-        context.diagnose(
-          node: binding,
-          identifier: identifier,
-          unimplementedDefault: unimplementedDefault
-        )
-        return []
-      }
-    }
-    unimplementedDefault.statements.insert(
-      #"""
-      IssueReporting.reportIssue("Unimplemented: '\(Self.self).\#(raw: unescapedIdentifier)'")
-      """#,
-      at: unimplementedDefault.statements.startIndex
-    )
-    for index in unimplementedDefault.statements.indices {
-      unimplementedDefault.statements[index] = unimplementedDefault.statements[index]
-        .trimmed
-        .with(\.leadingTrivia, .newline)
-    }
+
     var effectSpecifiers = ""
     if functionType.effectSpecifiers?.hasThrowsClause == true {
       effectSpecifiers.append("try ")
@@ -191,10 +131,90 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       )
     }
 
+    guard let unimplementedDefault = unimplementedDefault(
+      binding: binding,
+      functionType: functionType,
+      unescapedIdentifier: unescapedIdentifier,
+      identifier: identifier,
+      context: context
+    )
+    else { return [] }
+
     let privateProperty = property.privatePrefixed("_", unimplementedDefault: unimplementedDefault)
 
     return decls + [DeclSyntax(privateProperty)]
   }
+}
+
+func unimplementedDefault<C: MacroExpansionContext>(
+  binding: PatternBindingListSyntax.Element,
+  functionType: FunctionTypeSyntax,
+  unescapedIdentifier: String,
+  identifier: TokenSyntax,
+  context: C
+) -> ClosureExprSyntax? {
+  var unimplementedDefault: ClosureExprSyntax
+  if let initializer = binding.initializer {
+    guard var closure = initializer.value.as(ClosureExprSyntax.self)
+    else {
+      return nil
+    }
+    if closure.statements.count == 1,
+       var statement = closure.statements.first,
+       let expression = statement.item.as(ExprSyntax.self),
+       !functionType.isVoid
+        || expression.as(FunctionCallExprSyntax.self)?.calledExpression.is(ClosureExprSyntax.self)
+        == true
+    {
+      if !statement.item.description.hasPrefix("fatalError(") {
+        statement.item = CodeBlockItemSyntax.Item(
+          ReturnStmtSyntax(
+            returnKeyword: .keyword(.return, trailingTrivia: .space),
+            expression: expression.trimmed
+          )
+        )
+      }
+      closure.statements = closure.statements.with(\.[closure.statements.startIndex], statement)
+    }
+    unimplementedDefault = closure
+  } else {
+    unimplementedDefault = functionType.unimplementedDefault
+    if functionType.effectSpecifiers?.hasThrowsClause == true {
+      unimplementedDefault.statements.append(
+          """
+          throw DependenciesMacros.Unimplemented("\(raw: unescapedIdentifier)")
+          """
+      )
+    } else if functionType.isVoid {
+      // Do nothing...
+    } else if functionType.isOptional {
+      unimplementedDefault.statements.append(
+          """
+          return nil
+          """
+      )
+    } else {
+      unimplementedDefault.append(placeholder: functionType.returnClause.type.trimmed.description)
+      context.diagnose(
+        node: binding,
+        identifier: identifier,
+        unimplementedDefault: unimplementedDefault
+      )
+      return nil
+    }
+  }
+  unimplementedDefault.statements.insert(
+      #"""
+      IssueReporting.reportIssue("Unimplemented: '\(Self.self).\#(raw: unescapedIdentifier)'")
+      """#,
+      at: unimplementedDefault.statements.startIndex
+  )
+  for index in unimplementedDefault.statements.indices {
+    unimplementedDefault.statements[index] = unimplementedDefault.statements[index]
+      .trimmed
+      .with(\.leadingTrivia, .newline)
+  }
+  return unimplementedDefault
 }
 
 extension TokenSyntax {
@@ -212,7 +232,8 @@ extension TokenSyntax {
 
 extension PatternBindingListSyntax {
   func privatePrefixed(
-    _ prefix: String, unimplementedDefault: ClosureExprSyntax
+    _ prefix: String,
+    unimplementedDefault: ClosureExprSyntax
   ) -> PatternBindingListSyntax {
     var bindings = self.map { $0 }
     for index in 0..<bindings.count {
@@ -226,7 +247,7 @@ extension PatternBindingListSyntax {
             trailingTrivia: identifier.trailingTrivia
           ),
           typeAnnotation: binding.typeAnnotation,
-          initializer: InitializerClauseSyntax(value: unimplementedDefault),
+          //initializer: InitializerClauseSyntax(value: unimplementedDefault),
           accessorBlock: binding.accessorBlock,
           trailingComma: binding.trailingComma,
           trailingTrivia: binding.trailingTrivia

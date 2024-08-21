@@ -581,6 +581,23 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         var endpoint: (_ id: Int) -> Void
       }
       """
+    } expansion: {
+      """
+      struct Client {
+        var endpoint: (_ id: Int) -> Void {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
+      }
+      """
     }
   }
 
@@ -637,6 +654,23 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         var endpoint: (_ id: Int) -> Void
       }
       """#
+    } expansion: {
+      """
+      struct Client {
+        var endpoint: (_ id: Int) -> Void {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
+      }
+      """
     }
   }
 

@@ -483,7 +483,7 @@ private func isSetting<R>(
   private func isSetting<R>(
     _ value: Bool,
     isolation: isolated (any Actor)? = #isolation,
-    operation: () async throws -> sending R
+    operation: () async throws -> R
   ) async rethrows -> R {
     #if DEBUG
       try await DependencyValues.$isSetting.withValue(value, operation: operation)

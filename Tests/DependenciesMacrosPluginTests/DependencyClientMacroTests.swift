@@ -13,7 +13,7 @@ final class DependencyClientMacroTests: BaseTestCase {
   }
 
   func testBasics() {
-    
+
     assertMacro {
       """
       @DependencyClient
@@ -622,7 +622,7 @@ final class DependencyClientMacroTests: BaseTestCase {
       """
       @DependencyClient
       struct Client: Sendable {
-      
+
         let id = UUID()
         var endpoint: @Sendable () -> Void
 
@@ -778,7 +778,7 @@ final class DependencyClientMacroTests: BaseTestCase {
                ✏️ Insert '= { <#Int#> }'
       }
       """
-    }fixes: {
+    } fixes: {
       """
       @DependencyClient
       struct Client: Sendable {
@@ -801,6 +801,38 @@ final class DependencyClientMacroTests: BaseTestCase {
         }
       }
       """
+    }
+  }
+
+  func testDefault() {
+    assertMacro(
+      [
+        DependencyClientMacro.self,
+        DependencyEndpointMacro.self,
+      ]
+      , record: .all
+    ) {
+      """
+      @DependencyClient
+      struct Client {
+        var fetch: () -> Int = { 42 }
+      }
+      """
+    } expansion: {
+      #"""
+      struct Client {
+        var fetch: () -> Int = { 42 }
+
+        init(
+          fetch: @escaping () -> Int = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).fetch'")
+            return 42
+          }
+        ) {
+          self.fetch = fetch
+        }
+      }
+      """#
     }
   }
 

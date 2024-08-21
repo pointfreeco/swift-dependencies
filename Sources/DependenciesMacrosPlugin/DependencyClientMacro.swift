@@ -50,7 +50,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     var attributes: [AttributeSyntax] =
       property.hasDependencyEndpointMacroAttached
       ? []
-      : ["@DependencyEndpoint"]
+      : [] //["@\(raw: VariableDeclSyntax.dependencyEndpointName)"]
     if try functionType.parameters.contains(where: { $0.secondName != nil })
       || node.methodArgument != nil
     {
@@ -200,6 +200,18 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
           type: type.with(\.trailingTrivia, .space)
         )
       }
+
+      guard let unimplementedDefaultClosure = unimplementedDefault(
+        binding: binding,
+        functionType: functionType,
+        unescapedIdentifier: identifier.trimmedDescription.trimmedBackticks,
+        identifier: identifier,
+        context: nil as C?
+      )
+      else {
+        return []
+      }
+
       if isEndpoint {
         binding.accessorBlock = nil
         binding.initializer = nil
@@ -211,15 +223,6 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         )
       }
       property.bindings[property.bindings.startIndex] = binding
-
-      guard let unimplementedDefaultClosure = unimplementedDefault(
-        binding: binding,
-        functionType: functionType,
-        unescapedIdentifier: identifier.trimmedDescription.trimmedBackticks,
-        identifier: identifier,
-        context: context
-      )
-      else { return [] }
 
       properties.append(
         Property(

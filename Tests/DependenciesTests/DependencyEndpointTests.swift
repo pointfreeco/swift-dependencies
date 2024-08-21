@@ -8,7 +8,6 @@
       func testUnimplemented() {
         @DependencyClient
         struct Client {
-          @DependencyEndpoint
           var endpoint: () -> Void
         }
         let client = Client()
@@ -22,15 +21,19 @@
       }
 
       func testUnimplementedWithDefault() {
+        @DependencyClient
         struct Client {
-          @DependencyEndpoint
           var endpoint: () -> Int = { 42 }
         }
         let client = Client()
-        // NB: This invocation of 'endpoint' *should* fail, but it does not due to a bug in the
-        //     Swift compiler: https://github.com/apple/swift/issues/71070
-        let output = client.endpoint()
-        XCTAssert(output == 42)
+        XCTExpectFailure {
+          let output = client.endpoint()
+          XCTAssert(output == 42)
+        } issueMatcher: {
+          $0.compactDescription == """
+            failed - Unimplemented: 'Client.endpoint'
+            """
+        }
       }
     #endif
   }

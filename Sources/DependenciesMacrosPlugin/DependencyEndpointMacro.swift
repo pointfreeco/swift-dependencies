@@ -31,22 +31,22 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     }
 
     return [
-      """
-      @storageRestrictions(initializes: _\(raw: identifier))
-      init(initialValue) {
-      _\(raw: identifier) = initialValue
-      }
-      """,
-      """
-      get {
-      _\(raw: identifier)
-      }
-      """,
-      """
-      set {
-      _\(raw: identifier) = newValue
-      }
-      """,
+//      """
+//      @storageRestrictions(initializes: _\(raw: identifier))
+//      init(initialValue) {
+//      _\(raw: identifier) = initialValue
+//      }
+//      """,
+//      """
+//      get {
+//      _\(raw: identifier)
+//      }
+//      """,
+//      """
+//      set {
+//      _\(raw: identifier) = newValue
+//      }
+//      """,
     ]
   }
 
@@ -140,9 +140,9 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     )
     else { return [] }
 
-    let privateProperty = property.privatePrefixed("_", unimplementedDefault: unimplementedDefault)
+    //let privateProperty = property.privatePrefixed("_", unimplementedDefault: unimplementedDefault)
 
-    return decls + [DeclSyntax(privateProperty)]
+    return decls //+ [DeclSyntax(privateProperty)]
   }
 }
 
@@ -151,7 +151,7 @@ func unimplementedDefault<C: MacroExpansionContext>(
   functionType: FunctionTypeSyntax,
   unescapedIdentifier: String,
   identifier: TokenSyntax,
-  context: C
+  context: C?
 ) -> ClosureExprSyntax? {
   var unimplementedDefault: ClosureExprSyntax
   if let initializer = binding.initializer {
@@ -195,7 +195,7 @@ func unimplementedDefault<C: MacroExpansionContext>(
       )
     } else {
       unimplementedDefault.append(placeholder: functionType.returnClause.type.trimmed.description)
-      context.diagnose(
+      context?.diagnose(
         node: binding,
         identifier: identifier,
         unimplementedDefault: unimplementedDefault

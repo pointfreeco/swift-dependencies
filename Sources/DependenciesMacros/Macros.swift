@@ -202,7 +202,7 @@ public macro DependencyClient() =
 /// let user1 = try await client.fetchUser(id: 42)
 /// let user2 = try await client.fetchUser(subscriptionID: "sub_deadbeef")
 /// ```
-@attached(accessor, names: named(init), named(get), named(set))
+//@attached(accessor, names: named(init), named(get), named(set))
 @attached(peer, names: arbitrary)
 public macro DependencyEndpoint(method: String = "") =
   #externalMacro(

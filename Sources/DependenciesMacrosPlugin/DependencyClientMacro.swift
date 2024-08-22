@@ -50,7 +50,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     var attributes: [AttributeSyntax] =
       property.hasDependencyEndpointMacroAttached
       ? []
-      : [] //["@\(raw: VariableDeclSyntax.dependencyEndpointName)"]
+      : ["@\(raw: VariableDeclSyntax.dependencyEndpointName)"]
     if try functionType.parameters.contains(where: { $0.secondName != nil })
       || node.methodArgument != nil
     {

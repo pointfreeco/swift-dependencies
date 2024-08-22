@@ -9,46 +9,46 @@ import SwiftSyntaxMacros
   import SwiftSyntaxMacroExpansion
 #endif
 
-public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
-  public static func expansion<D: DeclSyntaxProtocol, C: MacroExpansionContext>(
-    of node: AttributeSyntax,
-    providingAccessorsOf declaration: D,
-    in context: C
-  ) throws -> [AccessorDeclSyntax] {
-    guard
-      let property = declaration.as(VariableDeclSyntax.self),
-      let binding = property.bindings.first,
-      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier
-        .trimmedDescription.trimmedBackticks,
-      property.isClosure
-    else {
-      return []
-    }
-    if let initializer = binding.initializer,
-      try initializer.diagnose(node, context: context).earlyOut
-    {
-      return []
-    }
-
-    return [
-//      """
-//      @storageRestrictions(initializes: _\(raw: identifier))
-//      init(initialValue) {
-//      _\(raw: identifier) = initialValue
-//      }
-//      """,
-//      """
-//      get {
-//      _\(raw: identifier)
-//      }
-//      """,
-//      """
-//      set {
-//      _\(raw: identifier) = newValue
-//      }
-//      """,
-    ]
-  }
+public enum DependencyEndpointMacro: /*AccessorMacro,*/ PeerMacro {
+//  public static func expansion<D: DeclSyntaxProtocol, C: MacroExpansionContext>(
+//    of node: AttributeSyntax,
+//    providingAccessorsOf declaration: D,
+//    in context: C
+//  ) throws -> [AccessorDeclSyntax] {
+//    guard
+//      let property = declaration.as(VariableDeclSyntax.self),
+//      let binding = property.bindings.first,
+//      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier
+//        .trimmedDescription.trimmedBackticks,
+//      property.isClosure
+//    else {
+//      return []
+//    }
+//    if let initializer = binding.initializer,
+//      try initializer.diagnose(node, context: context).earlyOut
+//    {
+//      return []
+//    }
+//
+//    return [
+////      """
+////      @storageRestrictions(initializes: _\(raw: identifier))
+////      init(initialValue) {
+////      _\(raw: identifier) = initialValue
+////      }
+////      """,
+////      """
+////      get {
+////      _\(raw: identifier)
+////      }
+////      """,
+////      """
+////      set {
+////      _\(raw: identifier) = newValue
+////      }
+////      """,
+//    ]
+//  }
 
   public static func expansion<D: DeclSyntaxProtocol, C: MacroExpansionContext>(
     of node: AttributeSyntax,

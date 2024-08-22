@@ -485,13 +485,11 @@ private func isSetting<R>(
     isolation: isolated (any Actor)? = #isolation,
     operation: () async throws -> R
   ) async rethrows -> R {
-    // NB: Due to a Swift 6 (Xcode 16.0 beta 6) bug we cannot omit 'isSetting' in the RELEASE
-    //     branch of this code.
-    // #if DEBUG
+    #if DEBUG
       try await DependencyValues.$isSetting.withValue(value, operation: operation)
-    // #else
-    //   try await operation()
-    // #endif
+    #else
+      try await operation()
+    #endif
   }
 #else
   @_transparent

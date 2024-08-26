@@ -66,29 +66,29 @@ public func withDependencies<R>(
     operation: () async throws -> R
   ) async rethrows -> R {
     #if DEBUG
-    try await DependencyValues.$isSetting.withValue(true) {
+      try await DependencyValues.$isSetting.withValue(true) {
+        var dependencies = DependencyValues._current
+        try await updateValuesForOperation(&dependencies)
+        return try await DependencyValues.$_current.withValue(dependencies) {
+          try await DependencyValues.$isSetting.withValue(false) {
+            let result = try await operation()
+            if R.self is AnyClass {
+              dependencyObjects.store(result as AnyObject)
+            }
+            return result
+          }
+        }
+      }
+    #else
       var dependencies = DependencyValues._current
       try await updateValuesForOperation(&dependencies)
       return try await DependencyValues.$_current.withValue(dependencies) {
-        try await DependencyValues.$isSetting.withValue(false) {
-          let result = try await operation()
-          if R.self is AnyClass {
-            dependencyObjects.store(result as AnyObject)
-          }
-          return result
+        let result = try await operation()
+        if R.self is AnyClass {
+          dependencyObjects.store(result as AnyObject)
         }
+        return result
       }
-    }
-    #else
-    var dependencies = DependencyValues._current
-    try await updateValuesForOperation(&dependencies)
-    return try await DependencyValues.$_current.withValue(dependencies) {
-      let result = try await operation()
-      if R.self is AnyClass {
-        dependencyObjects.store(result as AnyObject)
-      }
-      return result
-    }
     #endif
   }
 #else
@@ -483,11 +483,11 @@ private func isSetting<R>(
   _ value: Bool,
   operation: () throws -> R
 ) rethrows -> R {
-#if DEBUG
-  try DependencyValues.$isSetting.withValue(value, operation: operation)
-#else
-  try operation()
-#endif
+  #if DEBUG
+    try DependencyValues.$isSetting.withValue(value, operation: operation)
+  #else
+    try operation()
+  #endif
 }
 
 #if swift(<6)

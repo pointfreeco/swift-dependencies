@@ -259,19 +259,17 @@ feature behaves in very specific states. For example, if you wanted to see how y
 when the `fetchUser` endpoint throws an error, you can update the preview like so:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.apiClient.fetchUser = { _ in
-          struct SomeError: Error {}
-          throw SomeError()
-        }
-      } operation: {
-        FeatureModel()
+#Preview {
+  FeatureView(
+    model: withDependencies {
+      $0.apiClient.fetchUser = { _ in
+        struct SomeError: Error {}
+        throw SomeError()
       }
-    )
-  }
+    } operation: {
+      FeatureModel()
+    }
+  )
 }
 ```
 

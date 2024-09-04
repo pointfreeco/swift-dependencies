@@ -97,16 +97,14 @@ For previews, you can use ``withDependencies(_:operation:)-4uz6m`` to override t
 does not actually sleep for any amount of time:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.continuousClock = ImmediateClock()
-      } operation: {
-        FeatureModel()
-      }
-    )
-  }
+#Preview {
+  FeatureView(
+    model: withDependencies {
+      $0.continuousClock = ImmediateClock()
+    } operation: {
+      FeatureModel()
+    }
+  )
 }
 ```
 

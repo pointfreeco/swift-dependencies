@@ -161,16 +161,14 @@ how the view changes, you can override the clock dependency to be an "immediate"
 [`withDependencies`][withdependencies-docs] helper:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.clock = ImmediateClock()
-      } operation: {
-        FeatureModel()
-      }
-    )
-  }
+#Preview {
+  FeatureView(
+    model: withDependencies {
+      $0.clock = ImmediateClock()
+    } operation: {
+      FeatureModel()
+    }
+  )
 }
 ```
 

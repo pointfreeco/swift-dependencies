@@ -1,8 +1,7 @@
 /// A key for accessing dependencies.
 ///
-/// Types conform to this protocol to extend ``DependencyValues`` with custom dependencies. It is
-/// similar to SwiftUI's `EnvironmentKey` protocol, which is used to add values to
-/// `EnvironmentValues`.
+/// Types conform to this protocol to register a live dependency with the library. It is
+/// similar to SwiftUI's `EnvironmentKey` protocol.
 ///
 /// `DependencyKey` has one main requirement, ``liveValue``, which must return a default value for
 /// your dependency that is used when the application is run in a simulator or device. If the
@@ -17,6 +16,7 @@
 ///   var fetchUser: (User.ID) async throws -> User
 ///   var saveUser: (User) async throws -> Void
 /// }
+///
 /// // Conform to DependencyKey to provide a live implementation of
 /// // the interface.
 /// extension UserClient: DependencyKey {
@@ -25,13 +25,9 @@
 ///     saveUser: { /* Make request to save user */ }
 ///   )
 /// }
-/// // Register the dependency within DependencyValues.
-/// extension DependencyValues {
-///   var userClient: UserClient {
-///     get { self[UserClient.self] }
-///     set { self[UserClient.self] = newValue }
-///   }
-/// }
+///
+/// // Resolve the dependency to get access to the client.
+/// @Dependency(UserClient.self) var userClient
 /// ```
 ///
 /// When a dependency is first accessed its value is cached so that it will not be requested again.

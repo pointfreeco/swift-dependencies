@@ -29,5 +29,19 @@
         #endif
       }
     }
+    
+    @Test
+    func cachePollution1_NoWithDependencies() async {
+      @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+      let value = await cachedDependency.increment()
+      #expect(value == 1)
+    }
+
+    @Test
+    func cachePollution2_NoWithDependencies() async {
+      @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+      let value = await cachedDependency.increment()
+      #expect(value == 1)
+    }
   }
 #endif

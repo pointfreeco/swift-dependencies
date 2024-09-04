@@ -1,13 +1,26 @@
+let previewDependencies = LockIsolated(DependencyValues())
+import SwiftUI
+@available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
+extension PreviewTrait where T == Preview.ViewTraits {
+  public static func dependencies(_ operation: @Sendable (inout DependencyValues) -> Void) -> PreviewTrait {
+    previewDependencies.withValue {
+      operation(&$0)
+    }
+    return PreviewTrait()
+  }
+}
+
 #if swift(<6)
   /// A property wrapper for accessing dependencies.
   ///
   /// All dependencies are stored in ``DependencyValues`` and one uses this property wrapper to gain
-  /// access to a particular dependency. Typically it used to provide dependencies to features such as
-  /// an observable object:
+  /// access to a particular dependency. Typically it used to provide dependencies to features such
+  /// as an observable object:
   ///
   /// ```swift
-  /// final class FeatureModel: ObservableObject {
-  ///   @Dependency(\.apiClient) var apiClient
+  /// @Observable
+  /// final class FeatureModel {
+  ///   @Dependency(APIClient.self) var apiClient
   ///   @Dependency(\.continuousClock) var clock
   ///   @Dependency(\.uuid) var uuid
   ///
@@ -19,7 +32,7 @@
   ///
   /// ```swift
   /// struct Feature: ReducerProtocol {
-  ///   @Dependency(\.apiClient) var apiClient
+  ///   @Dependency(APIClient.self) var apiClient
   ///   @Dependency(\.continuousClock) var clock
   ///   @Dependency(\.uuid) var uuid
   ///
@@ -31,7 +44,7 @@
   ///
   /// ```swift
   /// func sharedEffect() async throws -> Action {
-  ///   @Dependency(\.apiClient) var apiClient
+  ///   @Dependency(APIClient.self) var apiClient
   ///   @Dependency(\.continuousClock) var clock
   ///
   ///   // ...

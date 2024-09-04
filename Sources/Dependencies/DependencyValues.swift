@@ -84,36 +84,8 @@ import IssueReporting
 /// >
 /// > Read the article <doc:Lifetimes> for more information.
 ///
-/// To register a dependency inside ``DependencyValues``, you first create a type to conform to the
-/// ``DependencyKey`` protocol in order to specify the ``DependencyKey/liveValue`` to use for the
-/// dependency when run in simulators and on devices. It can even be private:
-///
-/// ```swift
-/// private enum MyValueKey: DependencyKey {
-///   static let liveValue = 42
-/// }
-/// ```
-///
-/// And then extend ``DependencyValues`` with a computed property that uses the key to read and
-/// write to ``DependencyValues``:
-///
-/// ```swift
-/// extension DependencyValues {
-///   var myValue: Int {
-///     get { self[MyValueKey.self] }
-///     set { self[MyValueKey.self] = newValue }
-///   }
-/// }
-/// ```
-///
-/// With those steps done you can access the dependency using the ``Dependency`` property wrapper:
-///
-/// ```swift
-/// @Dependency(\.myValue) var myValue
-/// myValue  // 42
-/// ```
-///
-/// Read the article <doc:RegisteringDependencies> for more information.
+/// Read the article <doc:RegisteringDependencies> for information on registering your dependencies
+/// with the library.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
   @TaskLocal static var isSetting = false
@@ -220,7 +192,9 @@ public struct DependencyValues: Sendable {
     function: StaticString = #function
   ) -> Key.Value {
     get {
-      guard let base = self.storage[ObjectIdentifier(key)], let dependency = base as? Key.Value
+      guard
+        let base = self.storage[ObjectIdentifier(key)],
+        let dependency = base as? Key.Value
       else {
         let context =
           self.storage[ObjectIdentifier(DependencyContextKey.self)] as? DependencyContext
@@ -350,11 +324,18 @@ private let defaultContext: DependencyContext = {
   }
 }()
 
+private enum _DependencyValuesLocals {
+  @TaskLocal static var isReEnteringCache = false
+}
+
+import Testing
+
 @_spi(Internals)
 public final class CachedValues: @unchecked Sendable {
   public struct CacheKey: Hashable, Sendable {
     let id: ObjectIdentifier
     let context: DependencyContext
+    let currentTest = Test.current
   }
 
   private let lock = NSRecursiveLock()
@@ -376,6 +357,13 @@ public final class CachedValues: @unchecked Sendable {
       let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
       guard let base = cached[cacheKey], let value = base as? Key.Value
       else {
+        let isInPreviews = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+        if isInPreviews, !_DependencyValuesLocals.isReEnteringCache {
+          return _DependencyValuesLocals.$isReEnteringCache.withValue(true) {
+            previewDependencies.value[key]
+          }
+        }
+
         let value: Key.Value?
         switch context {
         case .live:

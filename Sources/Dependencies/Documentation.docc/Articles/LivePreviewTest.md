@@ -177,35 +177,31 @@ configuration of data. For example, if you want to test the empty state of your 
 API client returns an empty array, you can do so like this:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.apiClient.fetchUsers = { _ in [] }
-      } operation: {
-        FeatureModel()
-      }
-    )
-  }
+#Preview {
+  FeatureView(
+    model: withDependencies {
+      $0.apiClient.fetchUsers = { _ in [] }
+    } operation: {
+      FeatureModel()
+    }
+  )
 }
 ```
 
 Or if you want to preview how your feature deals with errors returned from the API:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.apiClient.fetchUser = { _ in
-          struct SomeError: Error {}
-          throw SomeError()
-        }
-      } operation: {
-        FeatureModel()
+#Preview {
+  FeatureView(
+    model: withDependencies {
+      $0.apiClient.fetchUser = { _ in
+        struct SomeError: Error {}
+        throw SomeError()
       }
-    )
-  }
+    } operation: {
+      FeatureModel()
+    }
+  )
 }
 ```
 

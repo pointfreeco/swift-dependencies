@@ -355,6 +355,18 @@ public final class CachedValues: @unchecked Sendable {
   public struct CacheKey: Hashable, Sendable {
     let id: ObjectIdentifier
     let context: DependencyContext
+    let testIdentifier: TestContext.Testing.Test.ID?
+
+    init(id: ObjectIdentifier, context: DependencyContext) {
+      self.id = id
+      self.context = context
+      switch TestContext.current {
+      case let .swiftTesting(testing):
+        self.testIdentifier = testing.test.id
+      default:
+        self.testIdentifier = nil
+      }
+    }
   }
 
   private let lock = NSRecursiveLock()

@@ -302,6 +302,10 @@ public struct DependencyValues: Sendable {
   }
 
   @_spi(Beta)
+  @available(
+    *, deprecated,
+    message: "'resetCache' is no longer necessary for most (unparameterized) '@Test' cases"
+  )
   public func resetCache() {
     cachedValues.cached = [:]
   }

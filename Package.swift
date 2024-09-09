@@ -27,7 +27,7 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
     .package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay",
-      branch: "testing-test-context"
+      branch: "test-case-parameterization"
     ),
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"601.0.0-prerelease"),
   ],

@@ -47,13 +47,16 @@
     }
   }
 
-private struct Client: TestDependencyKey {
-  var increment: @Sendable () -> Int
-  static var testValue: Client {
-    let count = LockIsolated(0)
-    return Self {
-      count.withValue { $0 += 1; return $0 }
+  private struct Client: TestDependencyKey {
+    var increment: @Sendable () -> Int
+    static var testValue: Client {
+      let count = LockIsolated(0)
+      return Self {
+        count.withValue {
+          $0 += 1
+          return $0
+        }
+      }
     }
   }
-}
 #endif

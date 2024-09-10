@@ -357,17 +357,13 @@ private let defaultContext: DependencyContext = {
 @_spi(Internals)
 public final class CachedValues: @unchecked Sendable {
   public struct CacheKey: Hashable, Sendable {
-    let id: ObjectIdentifier
+    let id: TypeIdentifier
     let context: DependencyContext
-#if DEBUG
-    let key: String
-#endif
     let testIdentifier: TestContext.Testing.Test.ID?
 
-    init<Key>(key: Key.Type, context: DependencyContext) {
-      self.id = ObjectIdentifier(key)
+    init(id: TypeIdentifier, context: DependencyContext) {
+      self.id = id
       self.context = context
-      self.key = typeName(key)
       switch TestContext.current {
       case let .swiftTesting(testing):
         self.testIdentifier = testing.test.id
@@ -393,7 +389,7 @@ public final class CachedValues: @unchecked Sendable {
     defer { lock.unlock() }
 
     return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
-      let cacheKey = CacheKey(key: key, context: context)
+      let cacheKey = CacheKey(id: TypeIdentifier(key), context: context)
       guard let base = cached[cacheKey], let value = base as? Key.Value
       else {
         let value: Key.Value?
@@ -479,5 +475,27 @@ public final class CachedValues: @unchecked Sendable {
 
       return value
     }
+  }
+}
+
+struct TypeIdentifier: Hashable {
+  let id: ObjectIdentifier
+  #if DEBUG
+  let typeName: String
+  #endif
+
+  init<T>(_ type: T.Type) {
+    self.id = ObjectIdentifier(type)
+    #if DEBUG
+    self.typeName = Dependencies.typeName(type)
+#endif
+  }
+
+  static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.id == rhs.id
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(id)
   }
 }

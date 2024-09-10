@@ -68,8 +68,8 @@ let package = Package(
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ]
     ),
-  ]
-  //, swiftLanguageMode: [.v6]
+  ],
+  swiftLanguageVersions: [.v6]
 )
 
 #if !os(macOS) && !os(WASI)

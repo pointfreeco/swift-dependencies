@@ -3,11 +3,26 @@
   import Testing
 
   struct SwiftTestingTests {
-    @Test(arguments: 1...5)
-    func parameterizedCachePollution(_: Int) {
+    @Test(.serialized, arguments: 1...5)
+    func parameterizedCachePollution(_ argument: Int) {
       @Dependency(Client.self) var client
       let value = client.increment()
-      withKnownIssue(isIntermittent: true) {
+      if argument == 1 {
+        #expect(value == 1)
+      } else {
+        withKnownIssue {
+          #expect(value == 1)
+        }
+      }
+    }
+
+    @Test(arguments: 1...5)
+    func parameterizedCachePollution_ResetDependencies(_ argument: Int) {
+      withDependencies {
+        $0 = DependencyValues()
+      } operation: {
+        @Dependency(Client.self) var client
+        let value = client.increment()
         #expect(value == 1)
       }
     }

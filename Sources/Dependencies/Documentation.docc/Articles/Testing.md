@@ -23,7 +23,7 @@ how your feature deals with data returned from an API, and your feature doesn't 
 with the file system just to test how data gets loaded or persisted.
 
 The tool for doing this is ``withDependencies(_:operation:)-3vrqy``, which allows you to specify
-which dependencies should be overriden for the test, and then construct your feature's model
+which dependencies should be overridden for the test, and then construct your feature's model
 in that context:
 
 ```swift
@@ -237,47 +237,23 @@ to ever have a static dependency, and so you should avoid this pattern.
 
 ## Swift's native Testing framework
 
-The library comes with beta support for Swift's new native Testing framework. However, as there
-are still features missing from the Testing framework that XCTest has, there are some additional
+The library comes with support for Swift's new native Testing framework. However, as there are still
+still features missing from the Testing framework that XCTest has, there may be some additional
 steps you must take.
 
-> Warning: Currently our support of the Swift Testing framework is considered "beta" because Swift's
-> own testing framework has not even officially been released yet. Once it is officially released,
-> probably sometime in September, we will have an official release of our libraries with support.
-
-If you are are writing a test using the `@Test` macro, you will need to surround the entire body
-of your test in [`withDependencies`](<doc:withDependencies(_:operation:)-3vrqy>) that resets
-the entire set of values:
+If you are are writing a _parameterized_ test using the `@Test` macro, you will need to surround the
+entire body of your test in [`withDependencies`](<doc:withDependencies(_:operation:)-3vrqy>) that
+resets the entire set of values to guarantee that a fresh set of dependencies is used per parameter:
 
 ```swift
-@Test 
-func feature() {
+@Test(arguments: [1, 2, 3])
+func feature(_ number: Int) {
   withDependencies {
     $0 = DependencyValues()
   } operation: {
-    // All test code in here…
+    // All test code in here...
   }
 }
 ```
 
-This will guarantee that tests do not bleed over to other tests when run in parallel.
-
-Alternatively, you can create a class-based `@Suite` that runs in serial _and_ resets the
-dependency case after each test is run. To do so you will need to `@_spi` import the 
-Dependencies library to get access to a `resetCache` method:
-
-```swift
-@_spi(Beta) import Dependencies
-
-@Suite(.serialized)
-class FeatureTests {
-  deinit {
-    DependencyValues._current.resetCache()
-  }
-
-  @Test
-  func feature() {
-    // All test code in here…
-  }
-}
-```
+This will guarantee that dependency state does not bleed over to each parameter of the test.

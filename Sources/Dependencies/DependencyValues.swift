@@ -359,11 +359,15 @@ public final class CachedValues: @unchecked Sendable {
   public struct CacheKey: Hashable, Sendable {
     let id: ObjectIdentifier
     let context: DependencyContext
+#if DEBUG
+    let key: String
+#endif
     let testIdentifier: TestContext.Testing.Test.ID?
 
-    init(id: ObjectIdentifier, context: DependencyContext) {
-      self.id = id
+    init<Key>(key: Key.Type, context: DependencyContext) {
+      self.id = ObjectIdentifier(key)
       self.context = context
+      self.key = typeName(key)
       switch TestContext.current {
       case let .swiftTesting(testing):
         self.testIdentifier = testing.test.id
@@ -389,7 +393,7 @@ public final class CachedValues: @unchecked Sendable {
     defer { lock.unlock() }
 
     return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
-      let cacheKey = CacheKey(id: ObjectIdentifier(key), context: context)
+      let cacheKey = CacheKey(key: key, context: context)
       guard let base = cached[cacheKey], let value = base as? Key.Value
       else {
         let value: Key.Value?

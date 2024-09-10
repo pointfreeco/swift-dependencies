@@ -481,14 +481,14 @@ public final class CachedValues: @unchecked Sendable {
 struct TypeIdentifier: Hashable {
   let id: ObjectIdentifier
   #if DEBUG
-  let typeName: String
+    let base: Any.Type
   #endif
 
   init<T>(_ type: T.Type) {
     self.id = ObjectIdentifier(type)
     #if DEBUG
-    self.typeName = Dependencies.typeName(type)
-#endif
+      self.base = type
+    #endif
   }
 
   static func == (lhs: Self, rhs: Self) -> Bool {

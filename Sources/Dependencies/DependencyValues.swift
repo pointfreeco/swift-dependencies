@@ -365,7 +365,7 @@ public final class CachedValues: @unchecked Sendable {
       self.id = id
       self.context = context
       switch TestContext.current {
-      case let .swiftTesting(testing):
+      case let .swiftTesting(.some(testing)):
         self.testIdentifier = testing.test.id
       default:
         self.testIdentifier = nil

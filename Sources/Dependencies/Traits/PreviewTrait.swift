@@ -19,6 +19,6 @@
       return PreviewTrait()
     }
   }
-
-  let previewValues = LockIsolated(DependencyValues())
 #endif
+
+let previewValues = LockIsolated(DependencyValues())

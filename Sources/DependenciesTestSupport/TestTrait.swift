@@ -3,6 +3,41 @@
   import Testing
 
   extension Trait where Self == _DependenciesTrait {
+    /// A trait that overrides a test's or suite's dependency.
+    ///
+    /// Useful for overriding a dependency in a test without incurring the nesting and
+    /// indentation of ``withDependencies(_:operation:)-4uz6m``.
+    ///
+    /// ```swift
+    /// @Test(
+    ///   .dependency(\.continuousClock, .immediate)
+    /// )
+    /// func feature() {
+    ///   // ...
+    /// }
+    /// ```
+    ///
+    /// > Important: Due to [a Swift bug](https://github.com/swiftlang/swift/issues/76409), it is
+    /// > not possible to specify a closure directly inside a `@Suite` or `@Test` macro:
+    /// >
+    /// > ```swift
+    /// > @Suite(
+    /// >   .dependency(\.apiClient.fetchUser, { _ in .mock })  // 🛑
+    /// > )
+    /// > struct FeatureTests { /* ... */ }
+    /// > ```
+    /// >
+    /// > To work around: extract the closure so that it is created outside the macro:
+    /// >
+    /// > private let fetchUser: @Sendable (Int) async throws -> User = { _ in .mock }
+    /// > @Suite(
+    /// >   .dependency(\.apiClient.fetchUser, fetchUser)
+    /// > )
+    /// > struct FeatureTests { /* ... */ }
+    ///
+    /// - Parameters:
+    ///   - keyPath: A key path to a dependency value.
+    ///   - value: A dependency value to override for the test.
     public static func dependency<Value: Sendable>(
       _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
       _ value: Value
@@ -10,10 +45,11 @@
       Self { $0[keyPath: keyPath] = value }
     }
 
+    /// A trait that overrides a test's or suite's dependencies.
     public static func dependencies(
-      _ operation: @escaping @Sendable (inout DependencyValues) -> Void
+      _ updateValues: @escaping @Sendable (inout DependencyValues) -> Void
     ) -> Self {
-      Self(operation)
+      Self(updateValues)
     }
   }
 
@@ -21,7 +57,9 @@
     public var isRecursive: Bool { true }
 
     public func prepare(for test: Test) async throws {
-      Self.all.withValue { self.operation(&$0[test.id, default: DependencyValues(context: .test)]) }
+      Self.all.withValue {
+        self.updateValues(&$0[test.id, default: DependencyValues(context: .test)])
+      }
     }
   }
 #endif

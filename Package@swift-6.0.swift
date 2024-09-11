@@ -20,12 +20,10 @@ let package = Package(
       name: "DependenciesMacros",
       targets: ["DependenciesMacros"]
     ),
-    // NB: A Swift bug prevents the test trait from being useful at the moment.
-    //     https://github.com/swiftlang/swift/issues/76409
-    // .library(
-    //   name: "DependenciesTestSupport",
-    //   targets: ["DependenciesTestSupport"]
-    // ),
+    .library(
+      name: "DependenciesTestSupport",
+      targets: ["DependenciesTestSupport"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.2"),

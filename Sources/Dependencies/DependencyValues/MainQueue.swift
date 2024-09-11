@@ -12,7 +12,7 @@
     /// For example, you could introduce controllable timing to an observable object model that
     /// counts the number of seconds it's onscreen:
     ///
-    /// ```
+    /// ```swift
     /// @Observable
     /// final class TimerModel {
     ///   var elapsed = 0
@@ -31,7 +31,7 @@
     ///
     /// And you could test this model by overriding its main queue with a test scheduler:
     ///
-    /// ```
+    /// ```swift
     /// @Test
     /// func feature() {
     ///   let mainQueue = DispatchQueue.test

@@ -184,7 +184,7 @@ public struct DependencyValues: Sendable {
     #endif
   }
 
-  init(context: DependencyContext) {
+  package init(context: DependencyContext) {
     self.init()
     self.context = context
   }

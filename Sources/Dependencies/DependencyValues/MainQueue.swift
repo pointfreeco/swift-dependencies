@@ -13,15 +13,17 @@
     /// counts the number of seconds it's onscreen:
     ///
     /// ```
-    /// final class TimerModel: ObservableObject {
-    ///   @Published var elapsed = 0
+    /// @Observable
+    /// final class TimerModel {
+    ///   var elapsed = 0
     ///
+    ///   @ObservationIgnored
     ///   @Dependency(\.mainQueue) var mainQueue
     ///
     ///   @MainActor
     ///   func onAppear() async {
-    ///     for await _ in self.mainQueue.timer(interval: .seconds(1)) {
-    ///       self.elapsed += 1
+    ///     for await _ in mainQueue.timer(interval: .seconds(1)) {
+    ///       elapsed += 1
     ///     }
     ///   }
     /// }
@@ -30,13 +32,14 @@
     /// And you could test this model by overriding its main queue with a test scheduler:
     ///
     /// ```
-    /// let mainQueue = DispatchQueue.test
-    ///
-    /// @Test(
-    ///   .dependency(\.mainQueue, mainQueue.eraseToAnyScheduler())
-    /// )
+    /// @Test
     /// func feature() {
-    ///   let model = TimerModel()
+    ///   let mainQueue = DispatchQueue.test
+    ///   let model = withDependencies {
+    ///     $0.mainQueue = mainQueue.eraseToAnyScheduler()
+    ///   } operation: {
+    ///     TimerModel()
+    ///   }
     ///
     ///   Task { await model.onAppear() }
     ///

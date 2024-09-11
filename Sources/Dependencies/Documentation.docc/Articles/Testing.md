@@ -22,53 +22,38 @@ great for tests. It means your feature doesn't need to actually make network req
 how your feature deals with data returned from an API, and your feature doesn't need to interact
 with the file system just to test how data gets loaded or persisted.
 
-The tool for doing this is using `.dependency` test trait when using Swift's Testing framework, 
-or ``withDependencies(_:operation:)-3vrqy`` when using XCTest, both of which allow you to specify
-which dependencies should be overridden for the test:
+The tool for doing this is ``withDependencies(_:operation:)-3vrqy``, which allows you to specify
+which dependencies should be overridden for the test, and then construct your feature's model in
+that context:
 
-@Row {
-  @Column {
-    ###### Testing
-    ```swift
-    @Test(
-      .dependency(\.continuousClock, .immediate),
-      .dependency(\.date.now, Date(timeIntervalSince1970: 1234567890))
-    )
-    func feature() async {
-      let model = FeatureModel()
-      // Call methods on `model` and make assertions
-    }
-    ```
+```swift
+@Test
+func feature() async {
+  let model = withDependencies { 
+    $0.continuousClock = .immediate
+    $0.date.now = Date(timeIntervalSince1970: 1234567890)
+  } operation: {
+    FeatureModel()
   }
-  @Column {
-    ###### XCTest
-    ```swift
-    func testFeature() async {
-      let model = withDependencies { 
-        $0.continuousClock = .immediate
-        $0.date.now = Date(timeIntervalSince1970: 1234567890)
-      } operation: {
-        FeatureModel()
-        // Call methods on `model` and make assertions
-      }
-    }
-    ```
-  }
+
+  // Call methods on `model` and make assertions
 }
+```
 
 As long as all of your dependencies are declared with `@Dependency` as instance properties on 
 `FeatureModel`, its entire execution will happen in a context in which any reference to 
 `continuousClock` is an `ImmediateClock` and any reference to `date.now` will always report that
 the date is "Feb 13, 2009 at 3:31 PM".
 
-> Note: If you are using XCTest it is important to note that if `FeatureModel` creates _other_ 
-models inside its methods, then it has to be careful about how it does so. In order for
-`FeatureModel`'s dependencies to propagate to the new child model, it must construct the child 
-model in an altered execution context that passes along the dependencies. The tool for this is
-``withDependencies(from:operation:file:line:)-2qx0c`` and can be used simply like this:
+> Note: If you are using XCTest it is important to note that if `FeatureModel` creates _other_
+> models inside its methods, then it has to be careful about how it does so. In order for
+> `FeatureModel`'s dependencies to propagate to the new child model, it must construct the child 
+> model in an altered execution context that passes along the dependencies. The tool for this is
+> ``withDependencies(from:operation:file:line:)-2qx0c`` and can be used simply like this:
 > 
 >  ```swift
->  class FeatureModel: ObservableObject {
+>  @Observable
+>  class FeatureModel {
 >    // ...
 >
 >    func buttonTapped() {
@@ -96,11 +81,16 @@ login fails, and then later change the dependency so that it succeeds using
 ``withDependencies(_:operation:)-3vrqy``:
 
 ```swift
-@Test(
-  .dependency(\.apiClient.login, { _, _ in  throw LoginFailure() })
-)
+@Test
 func retryFlow() async {
-  let model = LoginModel()
+  let model = withDependencies { 
+    $0.apiClient.login = { email, password in 
+      struct LoginFailure: Error {}
+      throw LoginFailure()
+    }
+  } operation: {
+    LoginModel()
+  }
   
   await model.loginButtonTapped()
   #expect(model.errorMessage == "We could not log you in. Please try again")

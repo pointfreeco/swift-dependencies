@@ -35,10 +35,17 @@ is a good chance you can immediately make use of one. If you are using `Date()`,
 this library.
 
 ```swift
-final class FeatureModel: ObservableObject {
+@Observable
+final class FeatureModel {
+  var items: [Item] = []
+
+  @ObservationIgnored
   @Dependency(\.continuousClock) var clock  // Controllable way to sleep a task
+  @ObservationIgnored
   @Dependency(\.date.now) var now           // Controllable way to ask for current date
+  @ObservationIgnored
   @Dependency(\.mainQueue) var mainQueue    // Controllable scheduling on main queue
+  @ObservationIgnored
   @Dependency(\.uuid) var uuid              // Controllable UUID creation
 
   // ...
@@ -49,16 +56,17 @@ Once your dependencies are declared, rather than reaching out to the `Date()`, `
 directly, you can use the dependency that is defined on your feature's model:
 
 ```swift
-final class FeatureModel: ObservableObject {
+@Observable
+final class FeatureModel {
   // ...
 
   func addButtonTapped() async throws {
-    try await self.clock.sleep(for: .seconds(1))  // 👈 Don't use 'Task.sleep'
-    self.items.append(
+    try await clock.sleep(for: .seconds(1))  // 👈 Don't use 'Task.sleep'
+    items.append(
       Item(
-        id: self.uuid(),  // 👈 Don't use 'UUID()'
+        id: uuid(),  // 👈 Don't use 'UUID()'
         name: "",
-        createdAt: self.now  // 👈 Don't use 'Date()'
+        createdAt: now  // 👈 Don't use 'Date()'
       )
     )
   }
@@ -73,15 +81,17 @@ inside the `addButtonTapped` method, you can use the ``withDependencies(_:operat
 function to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
 
 ```swift
-@Test(
-    // 1️⃣ Override any dependencies that your feature uses.
-  .dependency(\.clock, .immediate),
-  .dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 1234567890)),
-  .dependency(\.uuid, .incrementing)
-)
+@Test
 func add() async throws {
-  // 2️⃣ Construct the feature's model
-  let model = FeatureModel()
+  let model = withDependencies {
+    // 1️⃣ Override any dependencies that your feature uses.
+    $0.clock = .immediate
+    $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
+    $0.uuid = .incrementing)
+  } operation: {
+    // 2️⃣ Construct the feature's model
+    FeatureModel()
+  }
 
   // 3️⃣ The model now executes in a controlled environment of dependencies,
   //    and so we can make assertions against its behavior.

@@ -60,9 +60,9 @@ up a response to send back to the client. This again describes just a single poi
 be executed for a particular request.
 
 So, there are a lot of examples of "single entry point" systems out there, but it's also not the
-majority. There are plenty of examples that do not fall into this paradigm, such as
-`ObservableObject` conformances, all of UIKit and more. If you _are_ dealing with a single entry
-point system, then there are some really great superpowers that can be unlocked...
+majority. There are plenty of examples that do not fall into this paradigm, such as observable
+objects, all of UIKit and more. If you _are_ dealing with a single entry point system, then there
+are some really great superpowers that can be unlocked...
 
 ## Altered execution environments
 
@@ -159,12 +159,15 @@ with other kinds of systems. You just have to be a little more careful. In parti
 careful where you add dependencies to your features and how you construct features that use
 dependencies.
 
-When adding a dependency to a feature's `ObservableObject` conformance, you should make use of
+When adding a dependency to a feature modeled in an observable object, you should make use of
 `@Dependency` only for the object's instance properties:
 
 ```swift
-final class FeatureModel: ObservableObject {
+@Observable
+final class FeatureModel {
+  @ObservationIgnored
   @Dependency(\.apiClient) var apiClient
+  @ObservationIgnored
   @Dependency(\.date) var date
   // ...
 }
@@ -191,14 +194,17 @@ hydrating that state you will want to wrap it in
 ``withDependencies(from:operation:file:line:)-8e74m``:
 
 ```swift
-final class FeatureModel: ObservableObject {
-  @Published var editModel: EditModel?
+@Observable
+final class FeatureModel {
+  var editModel: EditModel?
 
+  @ObservationIgnored
   @Dependency(\.apiClient) var apiClient
+  @ObservationIgnored
   @Dependency(\.date) var date
 
   func editButtonTapped() {
-    self.editModel = withDependencies(from: self) {
+    editModel = withDependencies(from: self) {
       EditModel()
     }
   }
@@ -221,7 +227,7 @@ final class FeatureViewController: UIViewController {
     let controller = withDependencies(from: self) {
       EditViewController()
     }
-    self.present(controller, animated: true, completion: nil)
+    present(controller, animated: true, completion: nil)
   }
 }
 ```

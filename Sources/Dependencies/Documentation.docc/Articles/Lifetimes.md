@@ -139,12 +139,16 @@ with a few tools to prolong the change in a well-defined manner.
 For example, suppose you have a feature that needs access to an API client for fetching a user:
 
 ```swift
-class FeatureModel: ObservableObject {
+@Observable
+class FeatureModel {
+  var user: User?
+
+  @ObservationIgnored
   @Dependency(\.apiClient) var apiClient
 
   func onAppear() async {
     do {
-      self.user = try await self.apiClient.fetchUser()
+      user = try await apiClient.fetchUser()
     } catch {}
   }
 }
@@ -200,7 +204,7 @@ This makes `FeatureModel`'s dependencies inherit from the parent feature, and yo
 override any additional dependencies you want.
 
 In general, if you want dependencies to be properly inherited through every layer of feature in your
-application, you should make sure to create any `ObservableObject` models inside a
+application, you should make sure to create any observable models inside a
 ``withDependencies(from:operation:file:line:)-8e74m`` scope.
 
 If you do this, it also allows you to run previews in a very specific environment. Dependencies

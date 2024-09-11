@@ -13,12 +13,15 @@ extension DependencyValues {
   /// that creates to-dos with unique identifiers:
   ///
   /// ```swift
-  /// final class TodosModel: ObservableObject {
-  ///   @Published var todos: [Todo] = []
+  /// @Observable
+  /// final class TodosModel {
+  ///   var todos: [Todo] = []
+  ///
+  ///   @ObservationIgnored
   ///   @Dependency(\.uuid) var uuid
   ///
   ///   func addButtonTapped() {
-  ///     self.todos.append(Todo(id: self.uuid()))
+  ///     todos.append(Todo(id: uuid()))
   ///   }
   /// }
   /// ```
@@ -39,11 +42,13 @@ extension DependencyValues {
   /// ``UUIDGenerator/incrementing`` generator as a dependency:
   ///
   /// ```swift
-  /// @Test(
-  ///   .dependency(\.uuid, .incrementing)
-  /// )
+  /// @Test
   /// func feature() {
-  ///   let model = TodosModel()
+  ///   let model = withDependencies {
+  ///     $0.uuid = .incrementing
+  ///   } operation: {
+  ///     TodosModel()
+  ///   }
   ///
   ///   model.addButtonTapped()
   ///   #expect(

@@ -6,7 +6,7 @@ Learn how to use the dependencies that are registered with the library.
 
 Once a dependency is registered with the library (see <doc:RegisteringDependencies> for more info),
 one can access the dependency with the ``Dependency`` property wrapper. This is most commonly done
-by adding `@Dependency` properties to your feature's model, such as an `ObservableObject`, or
+by adding `@Dependency` properties to your feature's model, such as an observable object, or
 controller, such as `UIViewController` subclass. It can be used in other scopes too, such as
 functions, methods and computed properties, but there are caveats to consider, and so doing that
 is not recommended until you are very comfortable with the library.
@@ -19,10 +19,11 @@ clock for time-based asynchrony, and a UUID initializer. All 3 dependencies can 
 feature's model:
 
 ```swift
-final class TodosModel: ObservableObject {
-  @Dependency(\.continuousClock) var clock
-  @Dependency(\.date) var date
-  @Dependency(\.uuid) var uuid
+@Observable
+final class TodosModel {
+  @ObservationIgnored @Dependency(\.continuousClock) var clock
+  @ObservationIgnored @Dependency(\.date) var date
+  @ObservationIgnored @Dependency(\.uuid) var uuid
 
   // ...
 }
@@ -33,13 +34,15 @@ feature:
 
 ```swift
 @MainActor
-@Test(
-  .dependency(\.continuousClock, .immediate),
-  .dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 1234567890),
-  .dependency(\.uuid, .incrementing)
-)
+@Test
 func todos() async {
-  let model = TodosModel()
+  let model = withDependencies {
+    $0.continuousClock = .immediate
+    $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890
+    $0.uuid = .incrementing
+  } operation: {
+    TodosModel()
+  }
 
   // Invoke methods on `model` and make assertions...
 }

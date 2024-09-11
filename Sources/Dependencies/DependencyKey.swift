@@ -169,11 +169,13 @@ extension DependencyKey {
   /// accessed:
   ///
   /// ```swift
-  /// @Test(
-  ///   .dependency(\.myDependency, .mock)  // Override dependency
-  /// )
+  /// @Test
   /// func featureThatUsesMyDependency() {
-  ///   // Test feature with dependency overridden
+  ///   withDependencies {
+  ///     $0.myDependency = .mock  // Override dependency
+  ///   } operation: {
+  ///     // Test feature with dependency overridden
+  ///   }
   /// }
   /// ```
   ///

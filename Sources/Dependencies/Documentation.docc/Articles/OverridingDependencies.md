@@ -23,11 +23,12 @@ method, which allows you to inherit the dependencies from an existing object _an
 override some of those dependencies:
 
 ```swift
-final class AppModel: ObservableObject {
-  @Published var onboardingTodos: TodosModel?
+@Observable
+final class AppModel {
+  var onboardingTodos: TodosModel?
 
   func tutorialButtonTapped() {
-    self.onboardingTodos = withDependencies(from: self) {
+    onboardingTodos = withDependencies(from: self) {
       $0.apiClient = .mock
       $0.fileManager = .mock
       $0.userDefaults = .mock
@@ -67,16 +68,20 @@ edit screen for a particular todo. You could model that with an `EditTodoModel` 
 optional state that when hydrated causes the drill down:
 
 ```swift
-final class TodosModel: ObservableObject {
-  @Published var todos: [Todo] = []
-  @Published var editTodo: EditTodoModel?
+@Observable
+final class TodosModel {
+  var todos: [Todo] = []
+  var editTodo: EditTodoModel?
 
+  @ObservationIgnored
   @Dependency(\.apiClient) var apiClient
+  @ObservationIgnored
   @Dependency(\.fileManager) var fileManager
+  @ObservationIgnored
   @Dependency(\.userDefaults) var userDefaults
 
   func tappedTodo(_ todo: Todo) {
-    self.editTodo = EditTodoModel(todo: todo)
+    editTodo = EditTodoModel(todo: todo)
   }
 
   // ...
@@ -93,7 +98,7 @@ must wrap the creation of the child model in
 
 ```swift
 func tappedTodo(_ todo: Todo) {
-  self.editTodo = withDependencies(from: self) {
+  editTodo = withDependencies(from: self) {
     EditTodoModel(todo: todo)
   }
 }
@@ -111,11 +116,13 @@ a user when the view appears, a test for this functionality could be written by 
 `apiClient` to return some mock data:
 
 ```swift
-@Test(
-  .dependency(\.apiClient.fetchUser, { _ in User(id: 42, name: "Blob") })
-)
+@Test
 func onAppear() async {
-  let model = FeatureModel()
+  let model = withDependencies {
+    $0.apiClient.fetchUser = { _ in User(id: 42, name: "Blob") }
+  } operation: {
+    FeatureModel()
+  }
 
   #expect(model.user == nil)
   await model.onAppear()

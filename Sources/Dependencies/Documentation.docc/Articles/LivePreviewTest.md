@@ -37,8 +37,6 @@ be written to disk, which will bleed into other tests, and more.
 Using live dependencies in tests are so problematic that the library will cause a test failure
 if you ever interact with a live dependency while tests are running:
 
-<!-- TODO: @Test -->
-
 ```swift
 @Test
 func feature() async throws {
@@ -56,17 +54,18 @@ func feature() async throws {
 }
 ```
 
-If you truly want to use
-live dependencies in tests you have to make it explicit by overriding the dependency the
-`.dependency` testing trait and setting the live value:
+If you truly want to use live dependencies in tests you have to make it explicit by overriding the
+dependency and setting the live value:
 
 ```swift
-@Test(
-  // ⚠️ Explicitly say you want to use a live dependency.
-  .dependency(\.apiClient, .liveValue)
-)
+@Test
 func feature() async throws {
-  let model = FeatureModel()
+  let model = withDependencies {
+    // ⚠️ Explicitly say you want to use a live dependency.
+    $0.apiClient = .liveValue
+  } operation: {
+    FeatureModel()
+  }
 
   // ...
 }
@@ -268,12 +267,14 @@ understand the risks of using a live dependency in tests. To confirm that you tr
 live dependency you can override the dependency with `.liveValue`:
 
 ```swift
-@Test(
-  // ⚠️ Explicitly say you want to use a live dependency.
-  .dependency(\.apiClient, .liveValue)
-)
+@Test
 func feature() async throws {
-  let model = FeatureModel()
+  let model = withDependencies {
+    // ⚠️ Explicitly say you want to use a live dependency.
+    $0.apiClient = .liveValue
+  } operation: {
+    FeatureModel()
+  }
 
   // ...
 }

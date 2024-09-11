@@ -10,7 +10,9 @@ extension DependencyValues {
   /// wrapper to the property:
   ///
   /// ```swift
-  /// final class FeatureModel: ObservableObject {
+  /// @Observable
+  /// final class FeatureModel {
+  ///   @ObservationIgnored
   ///   @Dependency(\.locale) var locale
   ///   // ...
   /// }

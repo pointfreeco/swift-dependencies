@@ -1,5 +1,6 @@
 #if canImport(Testing)
   import Dependencies
+  import DependenciesTestSupport
   import Foundation
   import Testing
 

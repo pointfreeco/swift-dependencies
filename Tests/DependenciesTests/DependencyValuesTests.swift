@@ -698,8 +698,8 @@ final class DependencyValuesTests: XCTestCase {
     
     DispatchQueue.global(qos: .default).async {
       @Dependency(\.dependencyWithSyncDependency) var dependency
-      expectation.fulfill()
       XCTAssertGreaterThanOrEqual(dependency.count, 0)
+      expectation.fulfill()
     }
     
     wait(for: [expectation], timeout: 5)
@@ -710,14 +710,18 @@ final class DependencyValuesTests: XCTestCase {
 
 struct DependencyWithSyncDependency: TestDependencyKey {
   let count: Int
+  
   init() {
-    print(Thread.current)
+    // This is a very contrived example. Initializing this dependency
+    // depends on an `@Dependency()` call that happens in another thread. Because
+    // this initializer does not complete until it gets the value from the other
+    // thread, it holds the `CachedValues.lock` and prevents the other `@Dependency`
+    // call from ever returning.
     let group = DispatchGroup()
+    group.enter()
     var count = -1
     
-    group.enter()
     DispatchQueue.global(qos: .userInitiated).async {
-      print(Thread.current)
       @Dependency(\.countInitDependency) var countInitDependency
       count = countInitDependency.fetch()
       group.leave()

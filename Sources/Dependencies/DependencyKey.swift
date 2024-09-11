@@ -162,19 +162,18 @@ extension DependencyKey {
   /// ``TestDependencyKey``.
   public static var previewValue: Value { Self.liveValue }
 
-  /// A default implementation that provides the ``previewValue`` to XCTest runs (or ``liveValue``,
+  /// A default implementation that provides the ``previewValue`` to test runs (or ``liveValue``,
   /// if no preview value is implemented), but will trigger a test failure when accessed.
   ///
   /// To prevent test failures, explicitly override the dependency in any tests in which it is
   /// accessed:
   ///
   /// ```swift
-  /// func testFeatureThatUsesMyDependency() {
-  ///   withDependencies {
-  ///     $0.myDependency = .mock  // Override dependency
-  ///   } operation: {
-  ///     // Test feature with dependency overridden
-  ///   }
+  /// @Test(
+  ///   .dependency(\.myDependency, .mock)  // Override dependency
+  /// )
+  /// func featureThatUsesMyDependency() {
+  ///   // Test feature with dependency overridden
   /// }
   /// ```
   ///

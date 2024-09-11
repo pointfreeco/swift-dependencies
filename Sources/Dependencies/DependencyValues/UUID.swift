@@ -39,20 +39,23 @@ extension DependencyValues {
   /// ``UUIDGenerator/incrementing`` generator as a dependency:
   ///
   /// ```swift
-  /// func testFeature() {
-  ///   let model = withDependencies {
-  ///     $0.uuid = .incrementing
-  ///   } operation: {
-  ///     TodosModel()
-  ///   }
+  /// @Test(
+  ///   .dependency(\.uuid, .incrementing)
+  /// )
+  /// func feature() {
+  ///   let model = TodosModel()
   ///
   ///   model.addButtonTapped()
-  ///   XCTAssertEqual(
-  ///     model.todos,
-  ///     [Todo(id: UUID(uuidString: "00000000-0000-0000-0000-000000000000")!)]
+  ///   #expect(
+  ///     model.todos == [
+  ///       Todo(id: UUID(0))
+  ///     ]
   ///   )
   /// }
   /// ```
+  ///
+  /// > Note: This test uses the special ``Foundation/UUID/init(_:)`` UUID initializer that comes
+  /// with this library.
   public var uuid: UUIDGenerator {
     get { self[UUIDGeneratorKey.self] }
     set { self[UUIDGeneratorKey.self] = newValue }

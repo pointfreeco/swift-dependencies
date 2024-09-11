@@ -1,5 +1,5 @@
 {
-  "originHash" : "583c00d70f39319a7eca67f614e30ccaab233ad9a104a40007e982cf4584d4d6",
+  "originHash" : "394d112861864bba0ea98864997e8099aeb9a5cc4c184329ffc078cf5fe4f1c0",
   "pins" : [
     {
       "identity" : "combine-schedulers",
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
-        "branch" : "test-case-parameterization",
-        "revision" : "be48dda989581f65f82e09041b11e12da837c49d"
+        "revision" : "3fcc3f21695ad5bb889a024b1b046d61bebb1ef3",
+        "version" : "1.3.0"
       }
     }
   ],

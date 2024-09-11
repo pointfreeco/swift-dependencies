@@ -30,20 +30,20 @@
     /// And you could test this model by overriding its main queue with a test scheduler:
     ///
     /// ```
-    /// func testFeature() {
-    ///   let mainQueue = DispatchQueue.test
-    ///   let model = withDependencies {
-    ///     $0.mainQueue = mainQueue.eraseToAnyScheduler()
-    ///   } operation: {
-    ///     TimerModel()
-    ///   }
+    /// let mainQueue = DispatchQueue.test
+    ///
+    /// @Test(
+    ///   .dependency(\.mainQueue, mainQueue.eraseToAnyScheduler())
+    /// )
+    /// func feature() {
+    ///   let model = TimerModel()
     ///
     ///   Task { await model.onAppear() }
     ///
-    ///   mainQueue.advance(by: .seconds(1))
+    ///   await mainQueue.advance(by: .seconds(1))
     ///   XCTAssertEqual(model.elapsed, 1)
     ///
-    ///   mainQueue.advance(by: .seconds(4))
+    ///   await mainQueue.advance(by: .seconds(4))
     ///   XCTAssertEqual(model.elapsed, 5)
     /// }
     /// ```

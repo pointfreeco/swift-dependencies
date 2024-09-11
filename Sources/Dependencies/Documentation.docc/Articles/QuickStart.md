@@ -73,23 +73,21 @@ inside the `addButtonTapped` method, you can use the ``withDependencies(_:operat
 function to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
 
 ```swift
-func testAdd() async throws {
-  let model = withDependencies {
+@Test(
     // 1️⃣ Override any dependencies that your feature uses.
-    $0.clock = ImmediateClock()
-    $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
-    $0.uuid = .incrementing
-  } operation: {
-    // 2️⃣ Construct the feature's model
-    FeatureModel()
-  }
+  .dependency(\.clock, .immediate),
+  .dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 1234567890)),
+  .dependency(\.uuid, .incrementing)
+)
+func add() async throws {
+  // 2️⃣ Construct the feature's model
+  let model = FeatureModel()
 
   // 3️⃣ The model now executes in a controlled environment of dependencies,
   //    and so we can make assertions against its behavior.
   try await model.addButtonTapped()
-  XCTAssertEqual(
-    model.items,
-    [
+  #expect(
+    model.items == [
       Item(
         id: UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
         name: "",

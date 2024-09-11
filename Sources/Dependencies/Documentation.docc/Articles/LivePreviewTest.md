@@ -40,7 +40,8 @@ if you ever interact with a live dependency while tests are running:
 <!-- TODO: @Test -->
 
 ```swift
-func testFeature() async throws {
+@Test
+func feature() async throws {
   let model = FeatureModel()
 
   model.addButtonTapped()
@@ -55,19 +56,17 @@ func testFeature() async throws {
 }
 ```
 
-
 If you truly want to use
-live dependencies in tests you have to make it explicit by overriding the dependency using 
-``withDependencies(_:operation:)-3vrqy`` and setting the live value:
+live dependencies in tests you have to make it explicit by overriding the dependency the
+`.dependency` testing trait and setting the live value:
 
 ```swift
-func testFeature() async throws {
-  let model = withDependencies {
-    // ⚠️ Explicitly say you want to use a live dependency.
-    $0.apiClient = .liveValue
-  } operation: {
-    FeatureModel()
-  }
+@Test(
+  // ⚠️ Explicitly say you want to use a live dependency.
+  .dependency(\.apiClient, .liveValue)
+)
+func feature() async throws {
+  let model = FeatureModel()
 
   // ...
 }
@@ -269,12 +268,13 @@ understand the risks of using a live dependency in tests. To confirm that you tr
 live dependency you can override the dependency with `.liveValue`:
 
 ```swift
-func testFeature() {
-  let model = withDependencies {
-    $0.apiClient = .liveValue  // ⬅️
-  } operation: {
-    FeatureModel()
-  }
+@Test(
+  // ⚠️ Explicitly say you want to use a live dependency.
+  .dependency(\.apiClient, .liveValue)
+)
+func feature() async throws {
+  let model = FeatureModel()
+
   // ...
 }
 ```

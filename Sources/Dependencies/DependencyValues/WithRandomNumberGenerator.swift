@@ -40,12 +40,11 @@ extension DependencyValues {
   /// a game's model by supplying a seeded random number generator as a dependency:
   ///
   /// ```swift
-  /// func testRoll() {
-  ///   let model = withDependencies {
-  ///     $0.withRandomNumberGenerator = WithRandomNumberGenerator(LCRNG(seed: 0))
-  ///   } operation: {
-  ///     GameModel()
-  ///   }
+  /// @Test(
+  ///   .dependency(\.withRandomNumberGenerator, WithRandomNumberGenerator(LCRNG(seed: 0)))
+  /// )
+  /// func roll() {
+  ///   let model = GameModel()
   ///
   ///   model.rollDice()
   ///   XCTAssert(model.dice == (1, 3))

@@ -151,55 +151,10 @@ class FeatureModel: ObservableObject {
 ```
 
 Sometimes we may want to construct this model in a "controlled" environment, where we use a
-different implementation of `apiClient`. Tests are probably the most prototypical example of this.
-In tests we do not want to make a live network request since that opens up to the vagaries of the
-outside world, and instead we want to provide an implementation of the `apiClient` that
-synchronously and immediately return some data so that you can test how that data flows through your
-features logic.
+different implementation of `apiClient`. 
 
-The library comes with a helper in order to do this and it's called
-``withDependencies(_:operation:)-4uz6m``. It takes two closures: the first allows you
-to override any dependencies you want, and the second allows you to execute your feature's logic in
-a scope where those dependency mutations are applied:
-
-```swift
-func testOnAppear() async {
-  await withDependencies {
-    $0.apiClient.fetchUser = { _ in User(id: 42, name: "Blob") }
-  } operation: {
-    let model = FeatureModel()
-    XCTAssertEqual(model.user, nil)
-    await model.onAppear()
-    XCTAssertEqual(model.user, User(id: 42, name: "Blob"))
-  }
-}
-```
-
-All code executed in the `operation` trailing closure of
-``withDependencies(_:operation:)-4uz6m`` will use the overridden `fetchUser`
-endpoint, which makes it possible to exercise the feature's code without making a real network
-request.
-
-But, we can take this one step further. We don't need to execute the entire test in the scope of the
-trailing `operation` closure. We only need to construct the model in that scope, and then as long as
-all dependencies are declared in `FeatureModel` as instance variables, all interactions with the 
-model will use the controlled dependencies, even outside the `operation` closure:
-
-```swift
-func testOnAppear() async {
-  let model = withDependencies {
-    $0.apiClient.fetchUser = { _ in User(id: 42, name: "Blob") }
-  } operation: {
-    FeatureModel()
-  }
-
-  XCTAssertEqual(model.user, nil)
-  await model.onAppear()
-  XCTAssertEqual(model.user, User(id: 42, name: "Blob"))
-}
-```
-
-This is one way in which `@Dependency` can propagate changes outside of its standard scope.
+> Note: Tests are probably the most prototypical example of overriding dependencies to control them.
+Be sure to read the dedicated article <doc:Testing> for more information on that topic.
 
 Controlling dependencies isn't only useful in tests. It can also be used directly in your feature's
 logic in order to run some child feature in a controlled environment, and can even be used in Xcode
@@ -259,19 +214,12 @@ feature behaves in very specific states. For example, if you wanted to see how y
 when the `fetchUser` endpoint throws an error, you can update the preview like so:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.apiClient.fetchUser = { _ in
-          struct SomeError: Error {}
-          throw SomeError()
-        }
-      } operation: {
-        FeatureModel()
-      }
-    )
+#Preview( 
+  traits: .dependencies {
+    $0.apiClient.fetchUser = { _ in throw SomeError() }
   }
+) {
+  FeatureView(model: FeatureModel())
 }
 ```
 

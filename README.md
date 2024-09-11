@@ -116,27 +116,25 @@ That is all it takes to start using controllable dependencies in your features. 
 bit of upfront work done you can start to take advantage of the library's powers.
 
 For example, you can easily control these dependencies in tests. If you want to test the logic
-inside the `addButtonTapped` method, you can use the [`withDependencies`][withdependencies-docs]
-function to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
+inside the `addButtonTapped` method, you can use the `.dependency` test trait
+to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
 
 ```swift
-func testAdd() async throws {
-  let model = withDependencies {
+@Test(
     // 1️⃣ Override any dependencies that your feature uses.
-    $0.clock = ImmediateClock()
-    $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
-    $0.uuid = .incrementing
-  } operation: {
-    // 2️⃣ Construct the feature's model
-    FeatureModel()
-  }
+  .dependency(\.clock, .immediate),
+  .dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 1234567890)),
+  .dependency(\.uuid, .incrementing)
+)
+func add() async throws {
+  // 2️⃣ Construct the feature's model
+  let model = FeatureModel()
 
   // 3️⃣ The model now executes in a controlled environment of dependencies,
   //    and so we can make assertions against its behavior.
   try await model.addButtonTapped()
-  XCTAssertEqual(
-    model.items,
-    [
+  #expect(
+    model.items == [
       Item(
         id: UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
         name: "",
@@ -158,19 +156,17 @@ But, controllable dependencies aren't only useful for tests. They can also be us
 previews. Suppose the feature above makes use of a clock to sleep for an amount of time before
 something happens in the view. If you don't want to literally wait for time to pass in order to see
 how the view changes, you can override the clock dependency to be an "immediate" clock using the
-[`withDependencies`][withdependencies-docs] helper:
+`.dependencies` preview trait:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.clock = ImmediateClock()
-      } operation: {
-        FeatureModel()
-      }
-    )
+#Preview( 
+  traits: .dependencies {
+    $0.continuousClock = .immediate
   }
+) {
+  // All access of '@Dependency(\.continuousClock)' in this preview will 
+  // use an immediate clock.
+  FeatureView(model: FeatureModel())
 }
 ```
 

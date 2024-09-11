@@ -33,14 +33,13 @@ feature:
 
 ```swift
 @MainActor
-func testTodos() async {
-  let model = withDependencies {
-    $0.continuousClock = ImmediateClock()
-    $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
-    $0.uuid = .incrementing
-  } operation: {
-    TodosModel()
-  }
+@Test(
+  .dependency(\.continuousClock, .immediate),
+  .dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 1234567890),
+  .dependency(\.uuid, .incrementing)
+)
+func todos() async {
+  let model = TodosModel()
 
   // Invoke methods on `model` and make assertions...
 }

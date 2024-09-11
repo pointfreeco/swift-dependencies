@@ -30,20 +30,20 @@
     /// And you could test this model by overriding its main run loop with a test scheduler:
     ///
     /// ```
-    /// func testFeature() {
-    ///   let mainRunLoop = RunLoop.test
-    ///   let model = withDependencies {
-    ///     $0.mainRunLoop = mainRunLoop
-    ///   } operation: {
-    ///     TimerModel()
-    ///   }
+    /// let mainRunLoop = RunLoop.test
+    ///
+    /// @Test(
+    ///   .dependency(\.mainRunLoop, mainRunLoop.eraseToAnyScheduler())
+    /// )
+    /// func feature() {
+    ///   let model = TimerModel()
     ///
     ///   Task { await model.onAppear() }
     ///
-    ///   mainRunLoop.advance(by: .seconds(1))
+    ///   await mainRunLoop.advance(by: .seconds(1))
     ///   XCTAssertEqual(model.elapsed, 1)
     ///
-    ///   mainRunLoop.advance(by: .seconds(4))
+    ///   await mainRunLoop.advance(by: .seconds(4))
     ///   XCTAssertEqual(model.elapsed, 5)
     /// }
     /// ```

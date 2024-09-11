@@ -45,17 +45,15 @@ you can override the dependency to return mock data:
 
 ```swift
 @MainActor
-func testFetchUser() async {
-  let model = withDependencies {
-    $0[APIClient.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
-  } operation: {
-    TodosModel()
-  }
+@Test(
+  .dependency(\.[APIClient.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") })
+)
+func fetchUser() async {
+  let model = TodosModel()
 
   await store.loadButtonTapped()
-  XCTAssertEqual(
-    model.todos,
-    [Todo(id: 1, title: "Get milk")]
+  #expect(
+    model.todos == [Todo(id: 1, title: "Get milk")]
   )
 }
 ```

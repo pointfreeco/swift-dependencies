@@ -119,16 +119,15 @@ Further, in tests you can also override the clock dependency to use an immediate
 the ``withDependencies(_:operation:)-4uz6m`` helper:
 
 ```swift
-func testMessage() async {
-  let model = withDependencies {
-    $0.continuousClock = ImmediateClock()
-  } operation: {
-    FeatureModel()
-  }
+@Test(
+  .dependency(\.continuousClock, .immediate)
+)
+func message() async {
+  let model = FeatureModel()
 
-  XCTAssertEqual(model.message, nil)
+  #expect(model.message == nil)
   await model.onAppear()
-  XCTAssertEqual(model.message, "Welcome!")
+  #expect(model.message == "Welcome!")
 }
 ```
 

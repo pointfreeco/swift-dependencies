@@ -111,16 +111,15 @@ a user when the view appears, a test for this functionality could be written by 
 `apiClient` to return some mock data:
 
 ```swift
-func testOnAppear() async {
-  let model = withDependencies {
-    $0.apiClient.fetchUser = { _ in User(id: 42, name: "Blob") }
-  } operation: {
-    FeatureModel()
-  }
+@Test(
+  .dependency(\.apiClient.fetchUser, { _ in User(id: 42, name: "Blob") })
+)
+func onAppear() async {
+  let model = FeatureModel()
 
-  XCTAssertEqual(model.user, nil)
+  #expect(model.user == nil)
   await model.onAppear()
-  XCTAssertEqual(model.user, User(id: 42, name: "Blob"))
+  #expect(model.user == User(id: 42, name: "Blob"))
 }
 ```
 

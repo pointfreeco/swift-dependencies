@@ -21,7 +21,7 @@
     public var isRecursive: Bool { true }
 
     public func prepare(for test: Test) async throws {
-      Self.all.withValue { self.operation(&$0[test.id, default: DependencyValues()]) }
+      Self.all.withValue { self.operation(&$0[test.id, default: DependencyValues(context: .test)]) }
     }
   }
 #endif

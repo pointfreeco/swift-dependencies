@@ -21,4 +21,4 @@
   }
 #endif
 
-let previewValues = LockIsolated(DependencyValues())
+let previewValues = LockIsolated(DependencyValues(context: .preview))

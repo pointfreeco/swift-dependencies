@@ -184,6 +184,11 @@ public struct DependencyValues: Sendable {
     #endif
   }
 
+  init(context: DependencyContext) {
+    self.init()
+    self.context = context
+  }
+
   @_disfavoredOverload
   public subscript<Key: TestDependencyKey>(type: Key.Type) -> Key.Value {
     get { self[type] }

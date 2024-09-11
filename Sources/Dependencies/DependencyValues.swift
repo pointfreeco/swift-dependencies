@@ -385,12 +385,14 @@ public final class CachedValues: @unchecked Sendable {
     line: UInt = #line,
     column: UInt = #line
   ) -> Key.Value {
-    lock.lock()
-    defer { lock.unlock() }
-
     return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
       let cacheKey = CacheKey(id: TypeIdentifier(key), context: context)
-      guard let base = cached[cacheKey], let value = base as? Key.Value
+      
+      lock.lock()
+      let base = cached[cacheKey]
+      lock.unlock()
+      
+      guard let base, let value = base as? Key.Value
       else {
         let value: Key.Value?
         switch context {
@@ -464,12 +466,16 @@ public final class CachedValues: @unchecked Sendable {
           #endif
           let value = Key.testValue
           if !DependencyValues.isSetting {
+            lock.lock()
             cached[cacheKey] = value
+            lock.unlock()
           }
           return value
         }
 
+        lock.lock()
         cached[cacheKey] = value
+        lock.unlock()
         return value
       }
 

@@ -692,7 +692,53 @@ final class DependencyValuesTests: XCTestCase {
     @Dependency(\.date) var date
     _ = date
   }
+  
+  func testNoDeadlock() {
+    let expectation = XCTestExpectation(description: "Should be fulfilled on init")
+    
+    DispatchQueue.global(qos: .default).async {
+      @Dependency(\.dependencyWithSyncDependency) var dependency
+      expectation.fulfill()
+      XCTAssertGreaterThanOrEqual(dependency.count, 0)
+    }
+    
+    wait(for: [expectation], timeout: 5)
+  }
 }
+
+// MARK: Deadlock Example
+
+struct DependencyWithSyncDependency: TestDependencyKey {
+  let count: Int
+  init() {
+    print(Thread.current)
+    let group = DispatchGroup()
+    var count = -1
+    
+    group.enter()
+    DispatchQueue.global(qos: .userInitiated).async {
+      print(Thread.current)
+      @Dependency(\.countInitDependency) var countInitDependency
+      count = countInitDependency.fetch()
+      group.leave()
+    }
+    
+    group.wait()
+    self.count = count
+  }
+  
+  static var testValue: Self {
+    return Self()
+  }
+}
+
+extension DependencyValues {
+  var dependencyWithSyncDependency: DependencyWithSyncDependency {
+    self[DependencyWithSyncDependency.self]
+  }
+}
+
+// MARK: End Deadlock Example
 
 struct CountInitDependency: TestDependencyKey {
   static let initCount = LockIsolated(0)

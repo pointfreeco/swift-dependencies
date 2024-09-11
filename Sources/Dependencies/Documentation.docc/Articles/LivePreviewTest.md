@@ -37,6 +37,8 @@ be written to disk, which will bleed into other tests, and more.
 Using live dependencies in tests are so problematic that the library will cause a test failure
 if you ever interact with a live dependency while tests are running:
 
+<!-- TODO: @Test -->
+
 ```swift
 func testFeature() async throws {
   let model = FeatureModel()

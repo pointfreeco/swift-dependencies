@@ -29,11 +29,13 @@
     /// >
     /// > To work around: extract the closure so that it is created outside the macro:
     /// >
+    /// ```swift
     /// > private let fetchUser: @Sendable (Int) async throws -> User = { _ in .mock }
     /// > @Suite(
     /// >   .dependency(\.apiClient.fetchUser, fetchUser)
     /// > )
     /// > struct FeatureTests { /* ... */ }
+    /// ```
     ///
     /// - Parameters:
     ///   - keyPath: A key path to a dependency value.

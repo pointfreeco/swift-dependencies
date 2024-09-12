@@ -91,7 +91,6 @@ func retryFlow() async {
   } operation: {
     LoginModel()
   }
-  
   await model.loginButtonTapped()
   #expect(model.errorMessage == "We could not log you in. Please try again")
 

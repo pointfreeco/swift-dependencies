@@ -124,8 +124,8 @@ That is all it takes to start using controllable dependencies in your features. 
 bit of upfront work done you can start to take advantage of the library's powers.
 
 For example, you can easily control these dependencies in tests. If you want to test the logic
-inside the `addButtonTapped` method, you can use the `.dependency` test trait
-to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
+inside the `addButtonTapped` method, you can use the [`withDependencies`][withdependencies-docs]
+function to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
 
 ```swift
 @Test

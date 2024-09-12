@@ -6,9 +6,13 @@
   /// an observable object:
   ///
   /// ```swift
-  /// final class FeatureModel: ObservableObject {
+  /// @Observable
+  /// final class FeatureModel {
+  ///   @ObservationIgnored
   ///   @Dependency(\.apiClient) var apiClient
+  ///   @ObservationIgnored
   ///   @Dependency(\.continuousClock) var clock
+  ///   @ObservationIgnored
   ///   @Dependency(\.uuid) var uuid
   ///
   ///   // ...
@@ -18,7 +22,8 @@
   /// Or, if you are using [the Composable Architecture][tca]:
   ///
   /// ```swift
-  /// struct Feature: ReducerProtocol {
+  /// @Reducer
+  /// struct Feature {
   ///   @Dependency(\.apiClient) var apiClient
   ///   @Dependency(\.continuousClock) var clock
   ///   @Dependency(\.uuid) var uuid
@@ -108,7 +113,9 @@
     /// reflect:
     ///
     /// ```swift
-    /// final class FeatureModel: ObservableObject {
+    /// @Observable
+    /// final class FeatureModel {
+    ///   @ObservationIgnored
     ///   @Dependency(\.date) var date
     ///
     ///   // ...
@@ -158,7 +165,9 @@ extension Dependency {
   /// One can access the dependency using this property wrapper:
   ///
   /// ```swift
-  /// final class FeatureModel: ObservableObject {
+  /// @Observable
+  /// final class FeatureModel {
+  ///   @ObservationIgnored
   ///   @Dependency(Settings.self) var settings
   ///
   ///   // ...

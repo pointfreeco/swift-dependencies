@@ -11,7 +11,9 @@ extension DependencyValues {
   /// wrapper to the generator's ``DateGenerator/now`` property:
   ///
   /// ```swift
-  /// final class FeatureModel: ObservableObject {
+  /// @Observable
+  /// final class FeatureModel {
+  ///   @ObservationIgnored
   ///   @Dependency(\.date.now) var now
   ///   // ...
   /// }

@@ -1,5 +1,7 @@
 #if canImport(Testing)
   import Dependencies
+  import DependenciesTestSupport
+  import Foundation
   import Testing
 
   struct SwiftTestingTests {
@@ -44,6 +46,37 @@
       #else
         #expect(value == 1)
       #endif
+    }
+
+    @Test(.dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 0)))
+    func trait() {
+      @Dependency(\.date.now) var now
+      #expect(now == Date(timeIntervalSinceReferenceDate: 0))
+    }
+
+    @Suite(.dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 0)))
+    struct InnerSuite {
+      @Test
+      func traitInherited() {
+        @Dependency(\.date.now) var now
+        #expect(now == Date(timeIntervalSinceReferenceDate: 0))
+      }
+
+      @Test(.dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 1)))
+      func traitOverridden() {
+        @Dependency(\.date.now) var now
+        #expect(now == Date(timeIntervalSinceReferenceDate: 1))
+      }
+
+      @Test(.dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 1)))
+      func traitOverriddenWithDependencies() {
+        withDependencies {
+          $0.date.now = Date(timeIntervalSinceReferenceDate: 2)
+        } operation: {
+          @Dependency(\.date.now) var now
+          #expect(now == Date(timeIntervalSinceReferenceDate: 2))
+        }
+      }
     }
   }
 

@@ -143,7 +143,9 @@ needs the `play` endpoint, and doesn't need to loop, set volume or stop audio, t
 a dependency on just that one function:
 
 ```swift
-final class FeatureModel: ObservableObject {
+@Observable
+final class FeatureModel {
+  @ObservationIgnored
   @Dependency(\.audioPlayer.play) var play
   // ...
 }

@@ -14,16 +14,18 @@ extension DependencyValues {
   /// handles rolling a couple dice:
   ///
   /// ```swift
-  /// final class GameModel: ObservableObject {
-  ///   @Published var dice = (1, 1)
+  /// @Observable
+  /// final class GameModel {
+  ///   var dice = (1, 1)
   ///
+  ///   @ObservationIgnored
   ///   @Dependency(\.withRandomNumberGenerator) var withRandomNumberGenerator
   ///
   ///   func rollDice() {
-  ///     self.dice = self.withRandomNumberGenerator { generator in
+  ///     dice = withRandomNumberGenerator { generator in
   ///       (
-  ///         Int.random(in: 1...6, using: &generator),
-  ///         Int.random(in: 1...6, using: &generator)
+  ///         .random(in: 1...6, using: &generator),
+  ///         .random(in: 1...6, using: &generator)
   ///       )
   ///     }
   ///   }
@@ -40,7 +42,8 @@ extension DependencyValues {
   /// a game's model by supplying a seeded random number generator as a dependency:
   ///
   /// ```swift
-  /// func testRoll() {
+  /// @Test
+  /// func roll() {
   ///   let model = withDependencies {
   ///     $0.withRandomNumberGenerator = WithRandomNumberGenerator(LCRNG(seed: 0))
   ///   } operation: {

@@ -34,7 +34,9 @@ extension APIClient: DependencyKey {
 With that done you can instantly access your API client dependency from any part of your code base:
 
 ```swift
-final class TodosModel: ObservableObject {
+@Observable
+final class TodosModel {
+  @ObservationIgnored
   @Dependency(APIClient.self) var apiClient
   // ...
 }
@@ -45,7 +47,8 @@ you can override the dependency to return mock data:
 
 ```swift
 @MainActor
-func testFetchUser() async {
+@Test
+func fetchUser() async {
   let model = withDependencies {
     $0[APIClient.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
   } operation: {
@@ -53,9 +56,8 @@ func testFetchUser() async {
   }
 
   await store.loadButtonTapped()
-  XCTAssertEqual(
-    model.todos,
-    [Todo(id: 1, title: "Get milk")]
+  #expect(
+    model.todos == [Todo(id: 1, title: "Get milk")]
   )
 }
 ```

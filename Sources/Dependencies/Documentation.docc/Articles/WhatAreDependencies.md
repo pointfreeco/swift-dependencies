@@ -20,13 +20,14 @@ Suppose that you are building a feature that displays a message to the user afte
 logic can be packaged up into an observable object:
 
 ```swift
-final class FeatureModel: ObservableObject {
-  @Published var message: String?
+@Observable
+final class FeatureModel {
+  var message: String?
 
   func onAppear() async {
     do {
       try await Task.sleep(for: .seconds(10))
-      self.message = "Welcome!"
+      message = "Welcome!"
     } catch {}
   }
 }
@@ -36,17 +37,17 @@ And a view can make use of that model:
 
 ```swift
 struct FeatureView: View {
-  @ObservedObject var model: FeatureModel
+  let model: FeatureModel
 
   var body: some View {
     Form {
-      if let message = self.model.message {
+      if let message = model.message {
         Text(message)
       }
 
       // ...
     }
-    .task { await self.model.onAppear() }
+    .task { await model.onAppear() }
   }
 }
 ```
@@ -77,14 +78,17 @@ time-based asynchrony by holding onto a clock in the feature's model by using th
 property  wrapper and ``DependencyValues/continuousClock`` dependency value:
 
 ```swift
-final class FeatureModel: ObservableObject {
-  @Published var message: String?
+@Observable
+final class FeatureModel {
+  var message: String?
+
+  @ObservationIgnored
   @Dependency(\.continuousClock) var clock
 
   func onAppear() async {
     do {
-      try await self.clock.sleep(for: .seconds(10))
-      self.message = "Welcome!"
+      try await clock.sleep(for: .seconds(10))
+      message = "Welcome!"
     } catch {}
   }
 }
@@ -92,21 +96,21 @@ final class FeatureModel: ObservableObject {
 
 That small change makes this feature much friendlier to Xcode previews and testing.
 
-For previews, you can use ``withDependencies(_:operation:)-4uz6m`` to override the
+For previews, you can use the `.dependencies` preview trait to override the
 ``DependencyValues/continuousClock`` dependency to be an "immediate" clock, which is a clock that
 does not actually sleep for any amount of time:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.continuousClock = ImmediateClock()
-      } operation: {
-        FeatureModel()
-      }
-    )
-  }
+#Preview(
+  .dependencies { $0.continuousClock = .immediate }
+) {
+  FeatureView(
+    model: withDependencies {
+      $0.continuousClock = ImmediateClock()
+    } operation: {
+      FeatureModel()
+    }
+  )
 }
 ```
 
@@ -119,16 +123,17 @@ Further, in tests you can also override the clock dependency to use an immediate
 the ``withDependencies(_:operation:)-4uz6m`` helper:
 
 ```swift
-func testMessage() async {
+@Test
+func message() async {
   let model = withDependencies {
-    $0.continuousClock = ImmediateClock()
+    $0.continuousClock = .immediate
   } operation: {
     FeatureModel()
   }
 
-  XCTAssertEqual(model.message, nil)
+  #expect(model.message == nil)
   await model.onAppear()
-  XCTAssertEqual(model.message, "Welcome!")
+  #expect(model.message == "Welcome!")
 }
 ```
 

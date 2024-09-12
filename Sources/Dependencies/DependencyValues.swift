@@ -184,6 +184,11 @@ public struct DependencyValues: Sendable {
     #endif
   }
 
+  package init(context: DependencyContext) {
+    self.init()
+    self.context = context
+  }
+
   @_disfavoredOverload
   public subscript<Key: TestDependencyKey>(type: Key.Type) -> Key.Value {
     get { self[type] }
@@ -356,6 +361,8 @@ private let defaultContext: DependencyContext = {
 
 @_spi(Internals)
 public final class CachedValues: @unchecked Sendable {
+  @TaskLocal static var isAccessingCachedDependencies = false
+
   public struct CacheKey: Hashable, Sendable {
     let id: TypeIdentifier
     let context: DependencyContext
@@ -397,9 +404,24 @@ public final class CachedValues: @unchecked Sendable {
         case .live:
           value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
         case .preview:
-          value = Key.previewValue
+          if !CachedValues.isAccessingCachedDependencies {
+            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
+              previewValues.withValue { $0[key] }
+            }
+          } else {
+            value = Key.previewValue
+          }
         case .test:
-          value = Key.testValue
+          if !CachedValues.isAccessingCachedDependencies,
+            case let .swiftTesting(.some(testing)) = TestContext.current,
+            let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
+          {
+            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
+              testValues[key]
+            }
+          } else {
+            value = Key.testValue
+          }
         }
 
         guard let value

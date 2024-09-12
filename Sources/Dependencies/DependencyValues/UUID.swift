@@ -13,12 +13,15 @@ extension DependencyValues {
   /// that creates to-dos with unique identifiers:
   ///
   /// ```swift
-  /// final class TodosModel: ObservableObject {
-  ///   @Published var todos: [Todo] = []
+  /// @Observable
+  /// final class TodosModel {
+  ///   var todos: [Todo] = []
+  ///
+  ///   @ObservationIgnored
   ///   @Dependency(\.uuid) var uuid
   ///
   ///   func addButtonTapped() {
-  ///     self.todos.append(Todo(id: self.uuid()))
+  ///     todos.append(Todo(id: uuid()))
   ///   }
   /// }
   /// ```
@@ -39,7 +42,8 @@ extension DependencyValues {
   /// ``UUIDGenerator/incrementing`` generator as a dependency:
   ///
   /// ```swift
-  /// func testFeature() {
+  /// @Test
+  /// func feature() {
   ///   let model = withDependencies {
   ///     $0.uuid = .incrementing
   ///   } operation: {
@@ -47,12 +51,16 @@ extension DependencyValues {
   ///   }
   ///
   ///   model.addButtonTapped()
-  ///   XCTAssertEqual(
-  ///     model.todos,
-  ///     [Todo(id: UUID(uuidString: "00000000-0000-0000-0000-000000000000")!)]
+  ///   #expect(
+  ///     model.todos == [
+  ///       Todo(id: UUID(0))
+  ///     ]
   ///   )
   /// }
   /// ```
+  ///
+  /// > Note: This test uses the special ``Foundation/UUID/init(_:)`` UUID initializer that comes
+  /// with this library.
   public var uuid: UUIDGenerator {
     get { self[UUIDGeneratorKey.self] }
     set { self[UUIDGeneratorKey.self] = newValue }

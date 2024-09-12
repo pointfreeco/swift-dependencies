@@ -25,7 +25,7 @@
     ) -> PreviewTrait {
       .dependencies { $0[keyPath: keyPath] = value }
     }
-    
+
     /// A trait that overrides a preview's dependencies.
     ///
     /// Useful for overriding several dependencies in a preview without incurring the nesting and

@@ -38,7 +38,7 @@ feature:
 func todos() async {
   let model = withDependencies {
     $0.continuousClock = .immediate
-    $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890
+    $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
     $0.uuid = .incrementing
   } operation: {
     TodosModel()

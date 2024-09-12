@@ -361,7 +361,7 @@ private let defaultContext: DependencyContext = {
 
 @_spi(Internals)
 public final class CachedValues: @unchecked Sendable {
-  @TaskLocal static var isAccessingOverriddenDependencies = false
+  @TaskLocal static var isAccessingCachedDependencies = false
 
   public struct CacheKey: Hashable, Sendable {
     let id: TypeIdentifier
@@ -404,19 +404,19 @@ public final class CachedValues: @unchecked Sendable {
         case .live:
           value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
         case .preview:
-          if !CachedValues.isAccessingOverriddenDependencies {
-            value = CachedValues.$isAccessingOverriddenDependencies.withValue(true) {
+          if !CachedValues.isAccessingCachedDependencies {
+            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
               previewValues.withValue { $0[key] }
             }
           } else {
             value = Key.previewValue
           }
         case .test:
-          if !CachedValues.isAccessingOverriddenDependencies,
+          if !CachedValues.isAccessingCachedDependencies,
             case let .swiftTesting(.some(testing)) = TestContext.current,
-            let testValues = _DependenciesTrait.all.withValue({ $0[testing.test.id.rawValue] })
+            let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
           {
-            value = CachedValues.$isAccessingOverriddenDependencies.withValue(true) {
+            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
               testValues[key]
             }
           } else {

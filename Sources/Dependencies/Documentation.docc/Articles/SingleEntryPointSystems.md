@@ -35,7 +35,8 @@ returning effects to execute:
 ```swift
 import ComposableArchitecture
 
-struct Feature: ReducerProtocol {
+@Reducer
+struct Feature {
   struct State {
     // ...
   }
@@ -123,7 +124,8 @@ the `.dependency` method on reducers, which acts similarly to the
 [`.environment`][env-view-modifier-docs] view modifier from SwiftUI:
 
 ```swift
-struct Feature: ReducerProtocol {
+@Reducer
+struct Feature {
   struct State {
     // ...
   }
@@ -131,7 +133,7 @@ struct Feature: ReducerProtocol {
     // ...
   }
 
-  var body: some ReducerProtocolOf<Self> {
+  var body: some ReducerOf<Self> {
     Header()
       .dependency(\.fileManager, .mock)
       .dependency(\.userDefaults, .mock)

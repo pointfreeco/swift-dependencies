@@ -2,7 +2,7 @@
   import Dependencies
   import Testing
 
-  extension Trait where Self == _DependenciesTestTrait {
+  extension Trait where Self == _DependenciesTrait {
     /// A trait that overrides a test's or suite's dependency.
     ///
     /// Useful for overriding a dependency in a test without incurring the nesting and
@@ -55,7 +55,7 @@
     }
   }
 
-  extension _DependenciesTestTrait: SuiteTrait, TestTrait {
+  extension _DependenciesTrait: SuiteTrait, TestTrait {
     public var isRecursive: Bool { true }
 
     public func prepare(for test: Test) async throws {

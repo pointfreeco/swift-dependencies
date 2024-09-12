@@ -87,7 +87,7 @@ func add() async throws {
     // 1️⃣ Override any dependencies that your feature uses.
     $0.clock = .immediate
     $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
-    $0.uuid = .incrementing)
+    $0.uuid = .incrementing
   } operation: {
     // 2️⃣ Construct the feature's model
     FeatureModel()

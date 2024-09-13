@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1430"
+   LastUpgradeVersion = "1600"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -37,6 +37,17 @@
                BlueprintIdentifier = "CAF21DE529B66D7700368A47"
                BuildableName = "IntegrationUITests.xctest"
                BlueprintName = "IntegrationUITests"
+               ReferencedContainer = "container:Integration.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "CA5C90662C94BF6F00CA0F02"
+               BuildableName = "IntegrationTests.xctest"
+               BlueprintName = "IntegrationTests"
                ReferencedContainer = "container:Integration.xcodeproj">
             </BuildableReference>
          </TestableReference>

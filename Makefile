@@ -1,9 +1,9 @@
 CONFIG = debug
-PLATFORM_IOS = iOS Simulator,id=$(call udid_for,iOS 17,iPhone \d\+ Pro [^M])
+PLATFORM_IOS = iOS Simulator,id=$(call udid_for,iOS,iPhone \d\+ Pro [^M])
 PLATFORM_MACOS = macOS
 PLATFORM_MAC_CATALYST = macOS,variant=Mac Catalyst
-PLATFORM_TVOS = tvOS Simulator,id=$(call udid_for,tvOS 17,TV)
-PLATFORM_WATCHOS = watchOS Simulator,id=$(call udid_for,watchOS 10,Watch)
+PLATFORM_TVOS = tvOS Simulator,id=$(call udid_for,tvOS,TV)
+PLATFORM_WATCHOS = watchOS Simulator,id=$(call udid_for,watchOS,Watch)
 
 default: test
 
@@ -16,6 +16,7 @@ build-all-platforms:
 	  "$(PLATFORM_WATCHOS)"; \
 	do \
 		xcrun xcodebuild build \
+		  -quiet \
 			-workspace Dependencies.xcworkspace \
 			-scheme Dependencies \
 			-configuration $(CONFIG) \
@@ -40,6 +41,7 @@ build-for-static-stdlib:
 
 test-integration:
 	xcrun xcodebuild test \
+	  -quiet \
 		-scheme "Integration" \
 		-destination platform="$(PLATFORM_IOS)" || exit 1; \
 

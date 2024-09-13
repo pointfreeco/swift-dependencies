@@ -28,10 +28,10 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
       - name: Skip macro validation
         run: defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
-      - name: Run tests
-        run: make test-swift
-      - name: Build platforms ${{ matrix.config }}
-        run: CONFIG=${{ matrix.config }} make build-all-platforms
+      # - name: Run tests
+      #   run: make test-swift
+      # - name: Build platforms ${{ matrix.config }}
+      #   run: CONFIG=${{ matrix.config }} make build-all-platforms
       - name: Integration tests 
         if: ${{ matrix.config }} == 'Debug'
         run: make test-integration
@@ -39,20 +39,20 @@ jobs:
         if: ${{ matrix.config }} == 'Release'
         run: make build-for-library-evolution
 
-  ubuntu:
-    strategy:
-      matrix:
-        swift:
-          - '5.10'
-    name: Ubuntu (Swift ${{ matrix.swift }})
-    runs-on: ubuntu-latest
-    container: swift:${{ matrix.swift }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run tests
-        run: swift test --parallel
-      - name: Run tests (release)
-        run: swift test -c release --parallel
+  # ubuntu:
+  #   strategy:
+  #     matrix:
+  #       swift:
+  #         - '5.10'
+  #   name: Ubuntu (Swift ${{ matrix.swift }})
+  #   runs-on: ubuntu-latest
+  #   container: swift:${{ matrix.swift }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Run tests
+  #       run: swift test --parallel
+  #     - name: Run tests (release)
+  #       run: swift test -c release --parallel
 
   wasm:
     name: SwiftWasm

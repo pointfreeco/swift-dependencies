@@ -33,10 +33,10 @@ jobs:
       - name: Build platforms ${{ matrix.config }}
         run: CONFIG=${{ matrix.config }} make build-all-platforms
       - name: Integration tests 
-        if: {{ matrix.config }} == 'Debug'
+        if: ${{ matrix.config }} == 'Debug'
         run: make test-integration
       - name: Build for library evolution
-        if: {{ matrix.config }} == 'Release'
+        if: ${{ matrix.config }} == 'Release'
         run: make build-for-library-evolution
 
   ubuntu:

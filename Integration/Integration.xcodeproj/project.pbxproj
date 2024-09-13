@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CA2B1B662C93960E00417018 /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = CA2B1B652C93960E00417018 /* DependenciesMacros */; };
 		CAF21DD029B66D7500368A47 /* IntegrationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF21DCF29B66D7500368A47 /* IntegrationApp.swift */; };
 		CAF21DD429B66D7600368A47 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CAF21DD329B66D7600368A47 /* Assets.xcassets */; };
 		CAF21DD729B66D7600368A47 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CAF21DD629B66D7600368A47 /* Preview Assets.xcassets */; };
@@ -39,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA2B1B662C93960E00417018 /* DependenciesMacros in Frameworks */,
 				CAF21DFC29B66DAB00368A47 /* Dependencies in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -124,6 +126,7 @@
 			name = Integration;
 			packageProductDependencies = (
 				CAF21DFB29B66DAB00368A47 /* Dependencies */,
+				CA2B1B652C93960E00417018 /* DependenciesMacros */,
 			);
 			productName = Integration;
 			productReference = CAF21DCC29B66D7500368A47 /* Integration.app */;
@@ -473,6 +476,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		CA2B1B652C93960E00417018 /* DependenciesMacros */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DependenciesMacros;
+		};
 		CAF21DFB29B66DAB00368A47 /* Dependencies */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Dependencies;

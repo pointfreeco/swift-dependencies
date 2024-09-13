@@ -80,6 +80,19 @@
     }
   }
 
+@Suite(.dependency(Client.self, .testValue))
+private struct AutocloseDependencyValueTrait {
+  @Dependency(Client.self) var client
+  @Test
+  func testValuePollution1() {
+    #expect(client.increment() == 1)
+  }
+  @Test
+  func testValuePollution2() {
+    #expect(client.increment() == 1)
+  }
+}
+
   private struct Client: TestDependencyKey {
     var increment: @Sendable () -> Int
     static var testValue: Client {

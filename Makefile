@@ -43,6 +43,7 @@ test-integration:
 	xcrun xcodebuild test \
 	  -quiet \
 		-scheme "Integration" \
+		-testPlan "Integration" \
 		-destination platform="$(PLATFORM_IOS)" || exit 1; \
 
 build-for-library-evolution:

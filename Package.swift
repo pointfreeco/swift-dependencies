@@ -33,12 +33,12 @@ let package = Package(
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"601.0.0-prerelease"),
   ],
   targets: [
-    .target(
-      name: "DependenciesTestObserver",
-      dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
-      ]
-    ),
+//    .target(
+//      name: "DependenciesTestObserver",
+//      dependencies: [
+//        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
+//      ]
+//    ),
     .target(
       name: "Dependencies",
       dependencies: [
@@ -53,7 +53,7 @@ let package = Package(
       name: "DependenciesTestSupport",
       dependencies: [
         "Dependencies",
-        //.product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
       ]
     ),
     .testTarget(
@@ -82,15 +82,15 @@ let package = Package(
   ]
 )
 
-#if !os(macOS) && !arch(wasm32)
-  package.products.append(
-    .library(
-      name: "DependenciesTestObserver",
-      type: .dynamic,
-      targets: ["DependenciesTestObserver"]
-    )
-  )
-#endif
+//#if !os(macOS) && !arch(wasm32)
+//  package.products.append(
+//    .library(
+//      name: "DependenciesTestObserver",
+//      type: .dynamic,
+//      targets: ["DependenciesTestObserver"]
+//    )
+//  )
+//#endif
 
 #if !os(WASI)
   package.dependencies.append(contentsOf: [

@@ -47,7 +47,7 @@ let package = Package(
       name: "DependenciesTestSupport",
       dependencies: [
         "Dependencies",
-        //.product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
       ]
     ),
     .testTarget(
@@ -78,23 +78,23 @@ let package = Package(
   swiftLanguageVersions: [.v6]
 )
 
-#if !os(macOS) && !arch(wasm32)
-  package.products.append(
-    .library(
-      name: "DependenciesTestObserver",
-      type: .dynamic,
-      targets: ["DependenciesTestObserver"]
-    )
-  )
-  package.targets.append(
-    .target(
-      name: "DependenciesTestObserver",
-      dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-      ]
-    )
-  )
-#endif
+//#if !os(macOS) && !arch(wasm32)
+//  package.products.append(
+//    .library(
+//      name: "DependenciesTestObserver",
+//      type: .dynamic,
+//      targets: ["DependenciesTestObserver"]
+//    )
+//  )
+//  package.targets.append(
+//    .target(
+//      name: "DependenciesTestObserver",
+//      dependencies: [
+//        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
+//      ]
+//    )
+//  )
+//#endif
 
 #if !os(WASI)
   package.dependencies.append(

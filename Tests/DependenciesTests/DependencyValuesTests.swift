@@ -400,15 +400,15 @@ final class DependencyValuesTests: XCTestCase {
 
     @MainActor
     func testEscapingInFeatureModel_InstanceVariablePropagated() async {
-      let expectation = self.expectation(description: "escape")
+      let finished = LockIsolated(false)
 
       @MainActor
       class FeatureModel /*: ObservableObject*/ {
         @Dependency(\.fullDependency) var fullDependency
-        func doSomething(expectation: XCTestExpectation) {
+        func doSomething(finished: LockIsolated<Bool>) {
           DispatchQueue.main.async {
             XCTAssertEqual(self.fullDependency.value, 42)
-            expectation.fulfill()
+            finished.withValue { $0 = true }
           }
         }
       }
@@ -419,8 +419,10 @@ final class DependencyValuesTests: XCTestCase {
         FeatureModel()
       }
 
-      model.doSomething(expectation: expectation)
-      await fulfillment(of: [expectation], timeout: 1)
+      model.doSomething(finished: finished)
+      while !finished.withValue({ $0 }) {
+        await Task.yield()
+      }
     }
 
     func testEscapingInFeatureModel_NotPropagated() async {

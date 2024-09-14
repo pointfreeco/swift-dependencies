@@ -1,6 +1,7 @@
 import Dependencies
 import XCTest
 
+#if !arch(wasm32)
 final class BaseTestCaseTests: DerivedBaseTestCase {
   override func setUp() async throws {
     try await super.setUp()
@@ -30,7 +31,9 @@ final class BaseTestCaseTests: DerivedBaseTestCase {
     XCTAssertEqual(DependencyValues._current.uuid(), .deadbeef)
   }
 }
+#endif
 
+#if !arch(wasm32)
 class DerivedBaseTestCase: BaseTestCase {
   override func setUp() async throws {
     try await super.setUp()
@@ -47,6 +50,7 @@ class DerivedBaseTestCase: BaseTestCase {
     }
   }
 }
+#endif
 
 class BaseTestCase: XCTestCase {
   override func setUp() async throws {
@@ -55,18 +59,15 @@ class BaseTestCase: XCTestCase {
     XCTAssertEqual(DependencyValues._current.uuid(), .deadbeef)
   }
 
+#if !arch(wasm32)
   override func invokeTest() {
     withDependencies {
-      // NB: It doesn't seem possible to detect a test context from Wasm:
-      //     https://github.com/swiftwasm/carton/issues/400
-      #if os(WASI)
-        $0.context = .test
-      #endif
       $0.uuid = .constant(.deadbeef)
     } operation: {
       super.invokeTest()
     }
   }
+#endif
 }
 
 extension UUID {

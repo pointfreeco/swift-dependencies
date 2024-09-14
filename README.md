@@ -130,7 +130,7 @@ function to override any dependencies for the scope of one single test. It's as 
 ```swift
 @Test
 func add() async throws {
-  withDependencies {
+  let model = withDependencies {
     // 1️⃣ Override any dependencies that your feature uses.
     $0.clock = .immediate
     $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)

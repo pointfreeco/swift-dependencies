@@ -34,12 +34,6 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "DependenciesTestObserver",
-      dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-      ]
-    ),
-    .target(
       name: "Dependencies",
       dependencies: [
         .product(name: "Clocks", package: "swift-clocks"),
@@ -90,6 +84,14 @@ let package = Package(
       name: "DependenciesTestObserver",
       type: .dynamic,
       targets: ["DependenciesTestObserver"]
+    )
+  )
+  package.targets.append(
+    .target(
+      name: "DependenciesTestObserver",
+      dependencies: [
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
+      ]
     )
   )
 #endif

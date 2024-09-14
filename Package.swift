@@ -20,6 +20,10 @@ let package = Package(
       name: "DependenciesMacros",
       targets: ["DependenciesMacros"]
     ),
+    .library(
+      name: "DependenciesTestSupport",
+      targets: ["DependenciesTestSupport"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.2"),
@@ -43,6 +47,13 @@ let package = Package(
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+      ]
+    ),
+    .target(
+      name: "DependenciesTestSupport",
+      dependencies: [
+        "Dependencies",
+        //.product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
       ]
     ),
     .testTarget(

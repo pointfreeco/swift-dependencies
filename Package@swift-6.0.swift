@@ -84,7 +84,7 @@ let package = Package(
   swiftLanguageVersions: [.v6]
 )
 
-#if !os(macOS) && !os(WASI)
+#if !os(macOS) && !arch(wasm32)
   package.products.append(
     .library(
       name: "DependenciesTestObserver",

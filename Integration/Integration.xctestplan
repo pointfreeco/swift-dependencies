@@ -1,0 +1,36 @@
+{
+  "configurations" : [
+    {
+      "id" : "3CB380BB-1E92-48E7-8E9F-85A85AE0686A",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Integration.xcodeproj",
+      "identifier" : "CAF21DCB29B66D7500368A47",
+      "name" : "Integration"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Integration.xcodeproj",
+        "identifier" : "CAF21DE529B66D7700368A47",
+        "name" : "IntegrationUITests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Integration.xcodeproj",
+        "identifier" : "CA5C90662C94BF6F00CA0F02",
+        "name" : "IntegrationTests"
+      }
+    }
+  ],
+  "version" : 1
+}

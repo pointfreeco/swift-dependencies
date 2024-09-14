@@ -74,5 +74,5 @@ format:
 .PHONY: test test-swift test-linux build-for-library-evolution format
 
 define udid_for
-$(shell xcrun simctl list devices available '$(1)' | grep '$(2)' | sort -r | head -1 | awk -F '[()]' '{ print $$(NF-3) }')
+$(shell xcrun simctl list devices available '$(1)' | grep '$(2)' | tail -1 | awk -F '[()]' '{ print $$(NF-3) }')
 endef

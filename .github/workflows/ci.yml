@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         config: ['debug', 'release']
-        xcode: ['15.4', '16_beta_6']
+        xcode: ['15.4', '16.0']
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
@@ -31,8 +31,6 @@ jobs:
         run: make test-swift
       - name: Build platforms ${{ matrix.config }}
         run: CONFIG=${{ matrix.config }} make build-all-platforms
-      # - name: Build for library evolution
-      #   run: make build-for-library-evolution
 
   ubuntu:
     strategy:

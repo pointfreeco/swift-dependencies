@@ -53,6 +53,7 @@ let package = Package(
       name: "DependenciesTestSupport",
       dependencies: [
         "Dependencies",
+        .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
       ]
     ),
     .testTarget(

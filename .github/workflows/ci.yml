@@ -16,7 +16,7 @@ concurrency:
 jobs:
   macos:
     name: macOS
-    runs-on: macos-latest
+    runs-on: macos-14
     strategy:
       matrix:
         config: ['debug', 'release']

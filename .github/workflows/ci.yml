@@ -31,6 +31,8 @@ jobs:
         run: make test-swift
       - name: Build platforms ${{ matrix.config }}
         run: CONFIG=${{ matrix.config }} make build-all-platforms
+      - name: Build for library evolution
+        run: make build-for-library-evolution
 
   ubuntu:
     strategy:

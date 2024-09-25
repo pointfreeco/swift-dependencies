@@ -50,6 +50,13 @@ build-for-library-evolution:
 		-Xswiftc -emit-module-interface \
 		-Xswiftc -enable-library-evolution
 
+	swift build \
+		-c release \
+		--target DependenciesMacros \
+		-Xswiftc -emit-module-interface \
+		-Xswiftc -enable-library-evolution \
+		-Xswiftc -DRESILIENT_LIBRARIES # Required to build swift-syntax; see https://github.com/swiftlang/swift-syntax/pull/2540
+
 build-for-static-stdlib-docker:
 	@docker run \
 		-v "$(PWD):$(PWD)" \

@@ -3,6 +3,8 @@ import IssueReporting
 
 #if os(Windows)
   import WinSDK
+#elseif canImport(Android)
+  import Android
 #elseif os(Linux)
   import Glibc
 #endif

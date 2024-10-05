@@ -77,3 +77,15 @@ jobs:
   #       run: swift test
   #     - name: Run tests (release)
   #       run: swift test -c release
+
+  check-macro-compatibility:
+    name: Check Macro Compatibility
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run Swift Macro Compatibility Check
+        uses: Matejkob/swift-macro-compatibility-check@v1
+        with:
+          run-tests: false
+          major-versions-only: true

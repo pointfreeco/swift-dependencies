@@ -1,5 +1,14 @@
 import Foundation
 
+public func prepareDependencies(
+  _ updateValues: (inout DependencyValues) throws -> Void
+) rethrows {
+  var dependencies = DependencyValues._current
+  try DependencyValues.$isPreparing.withValue(true) {
+    try updateValues(&dependencies)
+  }
+}
+
 /// Updates the current dependencies for the duration of a synchronous operation.
 ///
 /// Any mutations made to ``DependencyValues`` inside `updateValuesForOperation` will be visible to

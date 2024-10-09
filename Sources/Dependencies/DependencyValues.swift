@@ -118,6 +118,7 @@ import IssueReporting
 /// Read the article <doc:RegisteringDependencies> for more information.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
+  @TaskLocal static var isPreparing = false
   @TaskLocal static var isSetting = false
   @TaskLocal static var currentDependency = CurrentDependency()
 
@@ -263,7 +264,63 @@ public struct DependencyValues: Sendable {
       return dependency
     }
     set {
-      self.storage[ObjectIdentifier(key)] = newValue
+      if DependencyValues.isPreparing {
+        let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
+        guard !cachedValues.cached.keys.contains(cacheKey) else {
+          #if DEBUG
+            var dependencyDescription = ""
+            if let fileID = DependencyValues.currentDependency.fileID,
+              let line = DependencyValues.currentDependency.line
+            {
+              dependencyDescription.append(
+                """
+                  Location:
+                    \(fileID):\(line)
+
+                """
+              )
+            }
+            dependencyDescription.append(
+              Key.self == Key.Value.self
+                ? """
+                  Dependency:
+                    \(typeName(Key.Value.self))
+                """
+                : """
+                  Key:
+                    \(typeName(Key.self))
+                  Value:
+                    \(typeName(Key.Value.self))
+                """
+            )
+
+            var argument: String {
+              "\(function)" == "subscript(key:)"
+                ? "\(typeName(Key.self)).self"
+                : "\\.\(function)"
+            }
+
+            reportIssue(
+              """
+              @Dependency(\(argument)) has already been prepared.
+
+              \(dependencyDescription)
+
+              A global dependency can only be prepared a single time. To temporarily override a \
+              dependency, use 'withDependencies' to do so in a well-defined scope.
+              """,
+              fileID: DependencyValues.currentDependency.fileID ?? fileID,
+              filePath: DependencyValues.currentDependency.filePath ?? filePath,
+              line: DependencyValues.currentDependency.line ?? line,
+              column: DependencyValues.currentDependency.column ?? column
+            )
+          #endif
+          return
+        }
+        cachedValues.cached[cacheKey] = newValue
+      } else {
+        self.storage[ObjectIdentifier(key)] = newValue
+      }
     }
   }
 

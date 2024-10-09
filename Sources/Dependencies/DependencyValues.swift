@@ -302,12 +302,16 @@ public struct DependencyValues: Sendable {
 
             reportIssue(
               """
-              @Dependency(\(argument)) has already been prepared.
+              @Dependency(\(argument)) has already been accessed or prepared.
 
               \(dependencyDescription)
 
-              A global dependency can only be prepared a single time. To temporarily override a \
-              dependency, use 'withDependencies' to do so in a well-defined scope.
+              A global dependency can only be prepared a single time and cannot be accessed \
+              beforehand. Prepare dependencies as early as possible in the lifecycle of your \
+              application.
+
+              To temporarily override a dependency in your application, use 'withDependencies' to \
+              do so in a well-defined scope.
               """,
               fileID: DependencyValues.currentDependency.fileID ?? fileID,
               filePath: DependencyValues.currentDependency.filePath ?? filePath,

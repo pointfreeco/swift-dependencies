@@ -701,7 +701,7 @@ final class DependencyValuesTests: XCTestCase {
     prepareDependencies {
       $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
     }
-    #if DEBUG
+    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
       XCTExpectFailure {
         $0.compactDescription == """
           failed - @Dependency(\\.date) has already been accessed or prepared.
@@ -733,7 +733,7 @@ final class DependencyValuesTests: XCTestCase {
     } operation: {
       @Dependency(\.date.now) var now
       _ = now
-      #if DEBUG
+      #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
         XCTExpectFailure {
           $0.compactDescription == """
             failed - @Dependency(\\.date) has already been accessed or prepared.

@@ -697,11 +697,11 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
   }
 
-  func testPrepareDependencies_alreadyPrepared() {
-    prepareDependencies {
-      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
-    }
-    #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_alreadyPrepared() {
+      prepareDependencies {
+        $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
+      }
       XCTExpectFailure {
         $0.compactDescription == """
           failed - @Dependency(\\.date) has already been accessed or prepared.
@@ -719,21 +719,21 @@ final class DependencyValuesTests: XCTestCase {
           so in a well-defined scope.
           """
       }
-    #endif
-    prepareDependencies {
-      $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
-    }
-    @Dependency(\.date.now) var now
-    XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
-  }
-
-  func testPrepareDependencies_alreadyCached() {
-    withDependencies {
-      $0.context = .live
-    } operation: {
+      prepareDependencies {
+        $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
+      }
       @Dependency(\.date.now) var now
-      _ = now
-      #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+      XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
+    }
+  #endif
+
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_alreadyCached() {
+      withDependencies {
+        $0.context = .live
+      } operation: {
+        @Dependency(\.date.now) var now
+        _ = now
         XCTExpectFailure {
           $0.compactDescription == """
             failed - @Dependency(\\.date) has already been accessed or prepared.
@@ -751,12 +751,12 @@ final class DependencyValuesTests: XCTestCase {
             so in a well-defined scope.
             """
         }
-      #endif
-      prepareDependencies {
-        $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
+        prepareDependencies {
+          $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
+        }
       }
     }
-  }
+  #endif
 }
 
 struct CountInitDependency: TestDependencyKey {

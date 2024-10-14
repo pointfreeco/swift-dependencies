@@ -236,8 +236,9 @@ final class DependencyValuesTests: XCTestCase {
         $0.context = .live
       } operation: {
         withDependencies {
-          XCTAssertEqual($0.reuseClient.count(), 0)
-          XCTAssertEqual(reuseClient.count(), 0)
+          $0.reuseClient.setCount(42)
+          XCTAssertEqual($0.reuseClient.count(), 42)
+          XCTAssertEqual(reuseClient.count(), 42)
         } operation: {
           #if DEBUG
             XCTExpectFailure {
@@ -249,9 +250,10 @@ final class DependencyValuesTests: XCTestCase {
               )
             }
           #endif
-          XCTAssertEqual(reuseClient.count(), 0)
+          XCTAssertEqual(reuseClient.count(), 42)
         }
       }
+      XCTAssertEqual(reuseClient.count(), 0)
     #endif
   }
 

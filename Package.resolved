@@ -1,5 +1,5 @@
 {
-  "originHash" : "ac879199bc109c96e02f389573ce5b101fa5c8a274b809fc57dba0d4736f5b6f",
+  "originHash" : "dc8209f1497546c820fac828af8d595b6882cb88310f412367280d8cde593506",
   "pins" : [
     {
       "identity" : "combine-schedulers",
@@ -76,10 +76,10 @@
     {
       "identity" : "xctest-dynamic-overlay",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
+      "location" : "https://github.com/jflan-dd/xctest-dynamic-overlay",
       "state" : {
-        "revision" : "27d767d643fa2cf083d0a73d74fa84cacb53e85c",
-        "version" : "1.4.1"
+        "branch" : "jflan/override-test-id",
+        "revision" : "09a97f20368a8c47b1fd86c4be9beb49585414ea"
       }
     }
   ],

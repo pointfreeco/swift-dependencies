@@ -362,31 +362,6 @@ private let defaultContext: DependencyContext = {
 }()
 
 @_spi(Internals)
-public struct TestID: @unchecked Sendable {
-  @TaskLocal private static var override: Self?
-  
-  public let value: AnyHashable
-  
-  public init(_ value: AnyHashable) {
-    self.value = value
-  }
-  
-  public static func withCurrent<R>(_ testID: AnyHashable, perform body: () async throws -> R) async rethrows -> R {
-    try await Self.$override.withValue(TestID(testID), operation: body)
-  }
-  
-  public static var current: Self? {
-    if let value = override { return value }
-    
-    if case let .swiftTesting(.some(testing)) = TestContext.current {
-      return .init(testing.test.id.rawValue)
-    }
-    
-    return nil
-  }
-}
-
-@_spi(Internals)
 public final class CachedValues: @unchecked Sendable {
   @TaskLocal static var isAccessingCachedDependencies = false
 
@@ -398,10 +373,10 @@ public final class CachedValues: @unchecked Sendable {
     init(id: TypeIdentifier, context: DependencyContext) {
       self.id = id
       self.context = context
-      if let testID = TestID.current {
-        // unsafeBitCast used because current version of xctest-dynamic-overlay does not expose init
-        self.testIdentifier = unsafeBitCast(testID, to: TestContext.Testing.Test.ID.self)
-      } else {
+      switch TestContext.current {
+      case let .swiftTesting(.some(testing)):
+        self.testIdentifier = testing.test.id
+      default:
         self.testIdentifier = nil
       }
     }
@@ -440,8 +415,8 @@ public final class CachedValues: @unchecked Sendable {
           }
         case .test:
           if !CachedValues.isAccessingCachedDependencies,
-            let testID = TestID.current,
-            let testValues = testValuesByTestID.withValue({ $0[testID.value] })
+            case let .swiftTesting(.some(testing)) = TestContext.current,
+            let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
           {
             value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
               testValues[key]

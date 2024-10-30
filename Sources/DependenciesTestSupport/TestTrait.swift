@@ -1,5 +1,5 @@
 #if canImport(Testing)
-  @_spi(Internals) import Dependencies
+  import Dependencies
   import Testing
 
   extension Trait where Self == _DependenciesTrait {
@@ -59,7 +59,7 @@
     public var isRecursive: Bool { true }
 
     public func prepare(for test: Test) async throws {
-      await TestID.withCurrent(test.id) {
+      TestContext.withTestID(test.id) {
         testValuesByTestID.withValue { values in
           self.updateValues(&values[test.id, default: DependencyValues(context: .test)])
         }

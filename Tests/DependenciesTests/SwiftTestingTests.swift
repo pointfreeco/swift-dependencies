@@ -48,6 +48,24 @@
       #endif
     }
 
+    static let updateValues: @Sendable (inout DependencyValues) -> Void = {
+      $0[ValueProvidingKey.self].setValue(5)
+    }
+    
+    @Test(.dependencies(updateValues))
+    func cachedTraitUpdate() {
+      @Dependency(ValueProvidingKey.self) var provider
+
+      #expect(provider.value == 5, "Updates in made in .dependencies closure update cached dependency")
+    }
+    
+    @Test
+    func cacheIsolatedBetweenTests() {
+      @Dependency(ValueProvidingKey.self) var provider
+
+      #expect(provider.value == 0)
+    }
+
     @Test(.dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 0)))
     func trait() {
       @Dependency(\.date.now) var now
@@ -91,5 +109,29 @@
         }
       }
     }
+  }
+
+  private protocol ValueProviding: Sendable {
+    var value: Int { get }
+    
+    func setValue(_ value: Int)
+  }
+
+  private final class ValueProvidingMock: ValueProviding {
+    let _value: LockIsolated<Int>
+
+    var value: Int { _value.value }
+    
+    init(value: Int) {
+      _value = .init(value)
+    }
+    
+    func setValue(_ value: Int) {
+      _value.setValue(value)
+    }
+  }
+
+  private enum ValueProvidingKey: TestDependencyKey {
+    static var testValue: ValueProviding { ValueProvidingMock(value: 0) }
   }
 #endif

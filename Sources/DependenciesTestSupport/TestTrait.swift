@@ -59,8 +59,10 @@
     public var isRecursive: Bool { true }
 
     public func prepare(for test: Test) async throws {
-      testValuesByTestID.withValue {
-        self.updateValues(&$0[test.id, default: DependencyValues(context: .test)])
+      TestContext.withTestID(test.id) {
+        testValuesByTestID.withValue { values in
+          self.updateValues(&values[test.id, default: DependencyValues(context: .test)])
+        }
       }
     }
   }

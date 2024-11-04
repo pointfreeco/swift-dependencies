@@ -300,31 +300,31 @@ public struct DependencyValues: Sendable {
                 : "\\.\(function)"
             }
 
-          if cachedValues.cached[cacheKey]?.prepareID != DependencyValues.prepareID {
-            reportIssue(
-              """
-              @Dependency(\(argument)) has already been accessed or prepared.
-              
-              \(dependencyDescription)
-              
-              A global dependency can only be prepared a single time and cannot be accessed \
-              beforehand. Prepare dependencies as early as possible in the lifecycle of your \
-              application.
-              
-              To temporarily override a dependency in your application, use 'withDependencies' to \
-              do so in a well-defined scope.
-              """,
-              fileID: DependencyValues.currentDependency.fileID ?? fileID,
-              filePath: DependencyValues.currentDependency.filePath ?? filePath,
-              line: DependencyValues.currentDependency.line ?? line,
-              column: DependencyValues.currentDependency.column ?? column
-            )
-          } else {
-            cachedValues.cached[cacheKey] = CachedValues.CachedValue(
-              value: newValue,
-              prepareID: DependencyValues.prepareID
-            )
-          }
+            if cachedValues.cached[cacheKey]?.prepareID != DependencyValues.prepareID {
+              reportIssue(
+                """
+                @Dependency(\(argument)) has already been accessed or prepared.
+
+                \(dependencyDescription)
+
+                A global dependency can only be prepared a single time and cannot be accessed \
+                beforehand. Prepare dependencies as early as possible in the lifecycle of your \
+                application.
+
+                To temporarily override a dependency in your application, use 'withDependencies' to \
+                do so in a well-defined scope.
+                """,
+                fileID: DependencyValues.currentDependency.fileID ?? fileID,
+                filePath: DependencyValues.currentDependency.filePath ?? filePath,
+                line: DependencyValues.currentDependency.line ?? line,
+                column: DependencyValues.currentDependency.column ?? column
+              )
+            } else {
+              cachedValues.cached[cacheKey] = CachedValues.CachedValue(
+                value: newValue,
+                prepareID: DependencyValues.prepareID
+              )
+            }
           #endif
           return
         }
@@ -460,7 +460,6 @@ public final class CachedValues: @unchecked Sendable {
 
   private let lock = NSRecursiveLock()
   public var cached = [CacheKey: CachedValue]()
-
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,

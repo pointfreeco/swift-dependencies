@@ -707,7 +707,7 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
   }
 
-  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+  #if !os(Linux) && !os(WASI) && !os(Windows)
     func testPrepareDependencies_alreadyPrepared() {
       prepareDependencies {
         $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
@@ -733,7 +733,7 @@ final class DependencyValuesTests: XCTestCase {
         $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
       }
       @Dependency(\.date.now) var now
-      XCTAssertEqual(now, Date(timeIntervalSince1970: 0))
+      XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
     }
   #endif
 
@@ -744,6 +744,38 @@ final class DependencyValuesTests: XCTestCase {
     }
     @Dependency(\.date.now) var now
     XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 1729))
+  }
+
+  #if !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_DependencyAccessBeforePrepare() {
+      withDependencies {
+        $0.context = .live
+      } operation: {
+        @Dependency(\.date) var date
+        _ = date()
+        XCTExpectFailure {
+          prepareDependencies {
+            $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 42) }
+          }
+        } issueMatcher: {
+          $0.compactDescription.hasPrefix(
+            #"""
+            failed - @Dependency(\.date) has already been accessed or prepared.
+            """#)
+        }
+        XCTAssertNotEqual(date(), Date(timeIntervalSinceReferenceDate: 42))
+      }
+    }
+  #endif
+
+  func testPrepareDependencies_PrepareContext() {
+    prepareDependencies { $0.context = .live }
+
+    XCTTODO("""
+      Currently 'context' cannot be overridden with 'prepareDependencies'.
+      """)
+    @Dependency(\.date) var date
+    _ = date()
   }
 
   func testPrepareDependencies_setDependencyEndpoint() {

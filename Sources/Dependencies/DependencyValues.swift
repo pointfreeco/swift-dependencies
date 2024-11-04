@@ -319,12 +319,13 @@ public struct DependencyValues: Sendable {
               line: DependencyValues.currentDependency.line ?? line,
               column: DependencyValues.currentDependency.column ?? column
             )
+          } else {
+            cachedValues.cached[cacheKey] = CachedValues.CachedValue(
+              value: newValue,
+              prepareID: DependencyValues.prepareID
+            )
           }
           #endif
-          cachedValues.cached[cacheKey] = CachedValues.CachedValue(
-            value: newValue,
-            prepareID: DependencyValues.prepareID
-          )
           return
         }
         cachedValues.cached[cacheKey] = CachedValues.CachedValue(

@@ -729,11 +729,11 @@ final class DependencyValuesTests: XCTestCase {
 
   func testPrepareDependencies_setDependencyMultipleTimesInSamePrepare() {
     prepareDependencies {
-      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
-      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 1) }
+      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 1234567890) }
+      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0987654321) }
     }
     @Dependency(\.date.now) var now
-    XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 1))
+    XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0987654321))
   }
 
   func testPrepareDependencies_setDependencyEndpoint() {

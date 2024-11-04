@@ -300,16 +300,17 @@ public struct DependencyValues: Sendable {
                 : "\\.\(function)"
             }
 
+//          if cachedValues.cached[cacheKey]?.prepareID != DependencyValues.prepareID {
             reportIssue(
               """
               @Dependency(\(argument)) has already been accessed or prepared.
-
+              
               \(dependencyDescription)
-
+              
               A global dependency can only be prepared a single time and cannot be accessed \
               beforehand. Prepare dependencies as early as possible in the lifecycle of your \
               application.
-
+              
               To temporarily override a dependency in your application, use 'withDependencies' to \
               do so in a well-defined scope.
               """,
@@ -318,10 +319,14 @@ public struct DependencyValues: Sendable {
               line: DependencyValues.currentDependency.line ?? line,
               column: DependencyValues.currentDependency.column ?? column
             )
+//          }
           #endif
           return
         }
-        cachedValues.cached[cacheKey] = newValue
+        cachedValues.cached[cacheKey] = CachedValues.CachedValue(
+          value: newValue,
+          prepareID: DependencyValues.prepareID
+        )
       } else {
         self.storage[ObjectIdentifier(key)] = newValue
       }
@@ -385,6 +390,7 @@ struct CurrentDependency {
   var filePath: StaticString?
   var line: UInt?
   var column: UInt?
+  var prepareID: UUID?
 }
 
 private let defaultContext: DependencyContext = {
@@ -443,8 +449,14 @@ public final class CachedValues: @unchecked Sendable {
     }
   }
 
+  public struct CachedValue {
+    var value: any Sendable
+    let prepareID: UUID?
+  }
+
   private let lock = NSRecursiveLock()
-  public var cached = [CacheKey: any Sendable]()
+  public var cached = [CacheKey: CachedValue]()
+
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,
@@ -549,12 +561,12 @@ public final class CachedValues: @unchecked Sendable {
           #endif
           let value = Key.testValue
           if !DependencyValues.isSetting {
-            cached[cacheKey] = value
+            cached[cacheKey] = CachedValue(value: value, prepareID: DependencyValues.prepareID)
           }
           return value
         }
 
-        cached[cacheKey] = value
+        cached[cacheKey] = CachedValue(value: value, prepareID: DependencyValues.prepareID)
         return value
       }
 

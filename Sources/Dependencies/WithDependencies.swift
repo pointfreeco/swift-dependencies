@@ -11,10 +11,16 @@ import Foundation
 public func prepareDependencies(
   _ updateValues: (inout DependencyValues) throws -> Void
 ) rethrows {
-  var dependencies = DependencyValues._current
-  try DependencyValues.$isPreparing.withValue(true) {
-    try updateValues(&dependencies)
+  try DependencyValues.$prepareID.withValue(UUID()) {
+    var dependencies = DependencyValues._current
+    try DependencyValues.$isPreparing.withValue(true) {
+      try updateValues(&dependencies)
+    }
   }
+}
+
+extension DependencyValues {
+  @TaskLocal static var prepareID: UUID?
 }
 
 /// Updates the current dependencies for the duration of a synchronous operation.

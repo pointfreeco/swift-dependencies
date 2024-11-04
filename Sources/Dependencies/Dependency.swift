@@ -200,6 +200,7 @@ extension Dependency {
       currentDependency.filePath = self.filePath
       currentDependency.line = self.line
       currentDependency.column = self.column
+      currentDependency.prepareID = DependencyValues.prepareID
       return DependencyValues.$currentDependency.withValue(currentDependency) {
         let dependencies = self.initialValues.merging(DependencyValues._current)
         return DependencyValues.$_current.withValue(dependencies) {

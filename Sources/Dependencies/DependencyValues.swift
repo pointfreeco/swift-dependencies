@@ -119,10 +119,11 @@ import IssueReporting
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
   @TaskLocal static var currentDependency = CurrentDependency()
-//  @TaskLocal static var isPreparing = false
-  static var isPreparing: Bool { preparationID != nil }
   @TaskLocal static var isSetting = false
   @TaskLocal static var preparationID: UUID?
+  static var isPreparing: Bool {
+    preparationID != nil
+  }
 
   @_spi(Internals)
   public var cachedValues = CachedValues()

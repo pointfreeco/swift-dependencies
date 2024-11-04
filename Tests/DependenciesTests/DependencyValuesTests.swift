@@ -708,11 +708,16 @@ final class DependencyValuesTests: XCTestCase {
   }
 
   #if !os(Linux) && !os(WASI) && !os(Windows)
-    func testPrepareDependencies_alreadyPrepared() {
+    func testPrepareDependencies_MultiplePreparesWithNoAccessBetween() {
       prepareDependencies {
         $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
       }
-      XCTExpectFailure {
+      XCTExpectFailure(
+        """
+        Currently this fails, but in the future we may allow a dependency to be changed in
+        multiple 'prepareDependencies' as long as the dependency has not yet been accessed.
+        """
+      ) {
         $0.compactDescription == """
           failed - @Dependency(\\.date) has already been accessed or prepared.
 
@@ -734,6 +739,36 @@ final class DependencyValuesTests: XCTestCase {
       }
       @Dependency(\.date.now) var now
       XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
+    }
+  #endif
+
+  #if !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_MultiplePreparesWithAccessBetween() {
+      prepareDependencies {
+        $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
+      }
+      XCTExpectFailure {
+        $0.compactDescription == """
+          failed - @Dependency(\\.date) has already been accessed or prepared.
+
+            Key:
+              DependencyValues.DateGeneratorKey
+            Value:
+              DateGenerator
+
+          A global dependency can only be prepared a single time and cannot be accessed \
+          beforehand. Prepare dependencies as early as possible in the lifecycle of your \
+          application.
+
+          To temporarily override a dependency in your application, use 'withDependencies' to do \
+          so in a well-defined scope.
+          """
+      }
+      @Dependency(\.date) var date
+      _ = date
+      prepareDependencies {
+        $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
+      }
     }
   #endif
 
@@ -771,7 +806,8 @@ final class DependencyValuesTests: XCTestCase {
   func testPrepareDependencies_PrepareContext() {
     prepareDependencies { $0.context = .live }
 
-    XCTTODO("""
+    XCTTODO(
+      """
       Currently 'context' cannot be overridden with 'prepareDependencies'.
       """)
     @Dependency(\.date) var date

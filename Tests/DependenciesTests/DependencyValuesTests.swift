@@ -733,7 +733,7 @@ final class DependencyValuesTests: XCTestCase {
         $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
       }
       @Dependency(\.date.now) var now
-      XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
+      XCTAssertEqual(now, Date(timeIntervalSince1970: 0))
     }
   #endif
 

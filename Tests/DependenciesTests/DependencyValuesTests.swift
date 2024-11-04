@@ -727,6 +727,15 @@ final class DependencyValuesTests: XCTestCase {
     }
   #endif
 
+  func testPrepareDependencies_setDependencyMultipleTimesInSamePrepare() {
+    prepareDependencies {
+      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
+      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 1) }
+    }
+    @Dependency(\.date.now) var now
+    XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 1))
+  }
+
   #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
     func testPrepareDependencies_alreadyCached() {
       withDependencies {

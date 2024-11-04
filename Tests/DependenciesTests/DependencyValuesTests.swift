@@ -736,6 +736,14 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 1))
   }
 
+  func testPrepareDependencies_setDependencyEndpoint() {
+    prepareDependencies {
+      $0[ClientWithEndpoint.self].get = { @Sendable in 42 }
+    }
+    @Dependency(ClientWithEndpoint.self) var client
+    XCTAssertEqual(client.get(), 42)
+  }
+
   #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
     func testPrepareDependencies_alreadyCached() {
       withDependencies {
@@ -901,5 +909,12 @@ extension DependencyValues {
   fileprivate var fullDependency: FullDependency {
     get { self[FullDependency.self] }
     set { self[FullDependency.self] = newValue }
+  }
+}
+
+private struct ClientWithEndpoint: TestDependencyKey {
+  var get: @Sendable () -> Int
+  static var testValue: ClientWithEndpoint {
+    Self { 42 }
   }
 }

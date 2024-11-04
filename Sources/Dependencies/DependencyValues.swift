@@ -300,7 +300,7 @@ public struct DependencyValues: Sendable {
                 : "\\.\(function)"
             }
 
-//          if cachedValues.cached[cacheKey]?.prepareID != DependencyValues.prepareID {
+          if cachedValues.cached[cacheKey]?.prepareID != DependencyValues.prepareID {
             reportIssue(
               """
               @Dependency(\(argument)) has already been accessed or prepared.
@@ -319,8 +319,12 @@ public struct DependencyValues: Sendable {
               line: DependencyValues.currentDependency.line ?? line,
               column: DependencyValues.currentDependency.column ?? column
             )
-//          }
+          }
           #endif
+          cachedValues.cached[cacheKey] = CachedValues.CachedValue(
+            value: newValue,
+            prepareID: DependencyValues.prepareID
+          )
           return
         }
         cachedValues.cached[cacheKey] = CachedValues.CachedValue(
@@ -390,7 +394,6 @@ struct CurrentDependency {
   var filePath: StaticString?
   var line: UInt?
   var column: UInt?
-  var prepareID: UUID?
 }
 
 private let defaultContext: DependencyContext = {
@@ -472,7 +475,7 @@ public final class CachedValues: @unchecked Sendable {
 
     return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
       let cacheKey = CacheKey(id: TypeIdentifier(key), context: context)
-      guard let base = cached[cacheKey], let value = base as? Key.Value
+      guard let base = cached[cacheKey]?.value, let value = base as? Key.Value
       else {
         let value: Key.Value?
         switch context {

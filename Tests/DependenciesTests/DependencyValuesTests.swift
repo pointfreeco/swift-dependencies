@@ -121,6 +121,16 @@ final class DependencyValuesTests: XCTestCase {
     }
   }
 
+  func testSetDependencyAcrossMultipleLines() {
+    withDependencies {
+      $0.date = .constant(someDate)
+      $0.date = .constant(someDate.addingTimeInterval(10))
+    } operation: {
+      @Dependency(\.date) var date
+      XCTAssertEqual(date.now, someDate.addingTimeInterval(10))
+    }
+  }
+
   func testOptionalDependency() {
     for value in [nil, ""] {
       withDependencies {
@@ -729,11 +739,11 @@ final class DependencyValuesTests: XCTestCase {
 
   func testPrepareDependencies_setDependencyMultipleTimesInSamePrepare() {
     prepareDependencies {
-      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 1234567890) }
-      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0987654321) }
+      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 42) }
+      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 1729) }
     }
     @Dependency(\.date.now) var now
-    XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0987654321))
+    XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 1729))
   }
 
   func testPrepareDependencies_setDependencyEndpoint() {

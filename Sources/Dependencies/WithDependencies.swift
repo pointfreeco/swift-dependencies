@@ -19,10 +19,6 @@ public func prepareDependencies(
   }
 }
 
-extension DependencyValues {
-  @TaskLocal static var prepareID: UUID?
-}
-
 /// Updates the current dependencies for the duration of a synchronous operation.
 ///
 /// Any mutations made to ``DependencyValues`` inside `updateValuesForOperation` will be visible to

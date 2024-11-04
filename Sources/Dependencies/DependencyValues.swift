@@ -118,9 +118,10 @@ import IssueReporting
 /// Read the article <doc:RegisteringDependencies> for more information.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
+  @TaskLocal static var currentDependency = CurrentDependency()
   @TaskLocal static var isPreparing = false
   @TaskLocal static var isSetting = false
-  @TaskLocal static var currentDependency = CurrentDependency()
+  @TaskLocal static var prepareID: UUID?
 
   @_spi(Internals)
   public var cachedValues = CachedValues()
@@ -321,7 +322,7 @@ public struct DependencyValues: Sendable {
               )
             } else {
               cachedValues.cached[cacheKey] = CachedValues.CachedValue(
-                value: newValue,
+                base: newValue,
                 prepareID: DependencyValues.prepareID
               )
             }
@@ -329,7 +330,7 @@ public struct DependencyValues: Sendable {
           return
         }
         cachedValues.cached[cacheKey] = CachedValues.CachedValue(
-          value: newValue,
+          base: newValue,
           prepareID: DependencyValues.prepareID
         )
       } else {
@@ -454,7 +455,7 @@ public final class CachedValues: @unchecked Sendable {
   }
 
   public struct CachedValue {
-    var value: any Sendable
+    let base: any Sendable
     let prepareID: UUID?
   }
 
@@ -475,7 +476,7 @@ public final class CachedValues: @unchecked Sendable {
 
     return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
       let cacheKey = CacheKey(id: TypeIdentifier(key), context: context)
-      guard let base = cached[cacheKey]?.value, let value = base as? Key.Value
+      guard let base = cached[cacheKey]?.base, let value = base as? Key.Value
       else {
         let value: Key.Value?
         switch context {
@@ -564,12 +565,12 @@ public final class CachedValues: @unchecked Sendable {
           #endif
           let value = Key.testValue
           if !DependencyValues.isSetting {
-            cached[cacheKey] = CachedValue(value: value, prepareID: DependencyValues.prepareID)
+            cached[cacheKey] = CachedValue(base: value, prepareID: DependencyValues.prepareID)
           }
           return value
         }
 
-        cached[cacheKey] = CachedValue(value: value, prepareID: DependencyValues.prepareID)
+        cached[cacheKey] = CachedValue(base: value, prepareID: DependencyValues.prepareID)
         return value
       }
 

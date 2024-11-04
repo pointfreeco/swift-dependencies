@@ -11,11 +11,9 @@ import Foundation
 public func prepareDependencies(
   _ updateValues: (inout DependencyValues) throws -> Void
 ) rethrows {
-  try DependencyValues.$prepareID.withValue(UUID()) {
-    var dependencies = DependencyValues._current
-    try DependencyValues.$isPreparing.withValue(true) {
-      try updateValues(&dependencies)
-    }
+  var dependencies = DependencyValues._current
+  try DependencyValues.$preparationID.withValue(UUID()) {
+    try updateValues(&dependencies)
   }
 }
 

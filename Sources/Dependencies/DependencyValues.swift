@@ -119,9 +119,10 @@ import IssueReporting
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
   @TaskLocal static var currentDependency = CurrentDependency()
-  @TaskLocal static var isPreparing = false
+//  @TaskLocal static var isPreparing = false
+  static var isPreparing: Bool { preparationID != nil }
   @TaskLocal static var isSetting = false
-  @TaskLocal static var prepareID: UUID?
+  @TaskLocal static var preparationID: UUID?
 
   @_spi(Internals)
   public var cachedValues = CachedValues()
@@ -301,7 +302,7 @@ public struct DependencyValues: Sendable {
                 : "\\.\(function)"
             }
 
-            if cachedValues.cached[cacheKey]?.prepareID != DependencyValues.prepareID {
+            if cachedValues.cached[cacheKey]?.prepareID != DependencyValues.preparationID {
               reportIssue(
                 """
                 @Dependency(\(argument)) has already been accessed or prepared.
@@ -323,7 +324,7 @@ public struct DependencyValues: Sendable {
             } else {
               cachedValues.cached[cacheKey] = CachedValues.CachedValue(
                 base: newValue,
-                prepareID: DependencyValues.prepareID
+                prepareID: DependencyValues.preparationID
               )
             }
           #endif
@@ -331,7 +332,7 @@ public struct DependencyValues: Sendable {
         }
         cachedValues.cached[cacheKey] = CachedValues.CachedValue(
           base: newValue,
-          prepareID: DependencyValues.prepareID
+          prepareID: DependencyValues.preparationID
         )
       } else {
         self.storage[ObjectIdentifier(key)] = newValue
@@ -565,12 +566,12 @@ public final class CachedValues: @unchecked Sendable {
           #endif
           let value = Key.testValue
           if !DependencyValues.isSetting {
-            cached[cacheKey] = CachedValue(base: value, prepareID: DependencyValues.prepareID)
+            cached[cacheKey] = CachedValue(base: value, prepareID: DependencyValues.preparationID)
           }
           return value
         }
 
-        cached[cacheKey] = CachedValue(base: value, prepareID: DependencyValues.prepareID)
+        cached[cacheKey] = CachedValue(base: value, prepareID: DependencyValues.preparationID)
         return value
       }
 

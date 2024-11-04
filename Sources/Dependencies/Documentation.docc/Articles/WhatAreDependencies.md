@@ -94,6 +94,9 @@ final class FeatureModel {
 }
 ```
 
+> Note: Using the `@ObservationIgnored` macro is necessary when using `@Observable` because 
+> `@Dependency` is a property wrapper. 
+
 That small change makes this feature much friendlier to Xcode previews and testing.
 
 For previews, you can use the `.dependencies` preview trait to override the

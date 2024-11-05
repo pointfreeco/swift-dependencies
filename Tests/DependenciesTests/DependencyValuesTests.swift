@@ -742,7 +742,7 @@ final class DependencyValuesTests: XCTestCase {
     }
   #endif
 
-  #if !os(Linux) && !os(WASI) && !os(Windows)
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
     func testPrepareDependencies_MultiplePreparesWithAccessBetween() {
       prepareDependencies {
         $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
@@ -781,7 +781,7 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 1729))
   }
 
-  #if !os(Linux) && !os(WASI) && !os(Windows)
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
     func testPrepareDependencies_DependencyAccessBeforePrepare() {
       withDependencies {
         $0.context = .live
@@ -803,7 +803,7 @@ final class DependencyValuesTests: XCTestCase {
     }
   #endif
 
-  #if !os(Linux) && !os(WASI) && !os(Windows)
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
     func testPrepareDependencies_PrepareContext() {
       prepareDependencies { $0.context = .live }
 

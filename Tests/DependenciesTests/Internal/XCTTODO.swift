@@ -1,3 +1,4 @@
+#if !os(Linux) && !os(WASI) && !os(Windows)
 import XCTest
 
 @_transparent
@@ -9,3 +10,4 @@ import XCTest
 func XCTTODO(_ message: String) {
   XCTExpectFailure(message)
 }
+#endif

@@ -803,16 +803,18 @@ final class DependencyValuesTests: XCTestCase {
     }
   #endif
 
-  func testPrepareDependencies_PrepareContext() {
-    prepareDependencies { $0.context = .live }
+  #if !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_PrepareContext() {
+      prepareDependencies { $0.context = .live }
 
-    XCTTODO(
-      """
-      Currently 'context' cannot be overridden with 'prepareDependencies'.
-      """)
-    @Dependency(\.date) var date
-    _ = date()
-  }
+      XCTTODO(
+        """
+        Currently 'context' cannot be overridden with 'prepareDependencies'.
+        """)
+      @Dependency(\.date) var date
+      _ = date()
+    }
+  #endif
 
   func testPrepareDependencies_setDependencyEndpoint() {
     prepareDependencies {

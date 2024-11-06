@@ -707,7 +707,7 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
   }
 
-  #if !os(Linux) && !os(WASI) && !os(Windows)
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
     func testPrepareDependencies_MultiplePreparesWithNoAccessBetween() {
       prepareDependencies {
         $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }

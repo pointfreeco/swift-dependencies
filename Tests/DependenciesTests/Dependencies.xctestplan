@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "AAA44865-978E-4BB3-B5D5-4875FE9FCB65",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "DependenciesTests",
+        "name" : "DependenciesTests"
+      }
+    }
+  ],
+  "version" : 1
+}

@@ -12,7 +12,7 @@ public func prepareDependencies(
   _ updateValues: (inout DependencyValues) throws -> Void
 ) rethrows {
   var dependencies = DependencyValues._current
-  try DependencyValues.$isPreparing.withValue(true) {
+  try DependencyValues.$preparationID.withValue(UUID()) {
     try updateValues(&dependencies)
   }
 }

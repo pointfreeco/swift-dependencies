@@ -565,7 +565,8 @@ public final class CachedValues: @unchecked Sendable {
           #endif
           let value = Key.testValue
           if !DependencyValues.isSetting {
-            cached[cacheKey] = CachedValue(base: value, preparationID: DependencyValues.preparationID)
+            cached[cacheKey] = CachedValue(
+              base: value, preparationID: DependencyValues.preparationID)
           }
           return value
         }

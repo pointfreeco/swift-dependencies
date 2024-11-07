@@ -60,10 +60,10 @@ let package = Package(
       name: "DependenciesTests",
       dependencies: [
         "Dependencies",
-        "DependenciesMacros",
         "DependenciesTestSupport",
         .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
-      ]
+      ],
+      exclude: ["Dependencies.xctestplan"]
     ),
     .target(
       name: "DependenciesMacros",
@@ -102,6 +102,7 @@ let package = Package(
     .testTarget(
       name: "DependenciesMacrosPluginTests",
       dependencies: [
+        "Dependencies",
         "DependenciesMacros",
         "DependenciesMacrosPlugin",
         .product(name: "MacroTesting", package: "swift-macro-testing"),

@@ -1,5 +1,22 @@
 import Foundation
 
+/// Prepares global dependencies for the lifetime of your application.
+///
+/// > Important: A dependency key can be prepared at most a single time, and _must_ be prepared
+/// > before it has been accessed. Call `prepareDependencies` as early as possible in your
+/// > application.
+///
+/// - Parameter updateValues: A closure for updating the current dependency values for the
+///   lifetime of your application.
+public func prepareDependencies(
+  _ updateValues: (inout DependencyValues) throws -> Void
+) rethrows {
+  var dependencies = DependencyValues._current
+  try DependencyValues.$preparationID.withValue(UUID()) {
+    try updateValues(&dependencies)
+  }
+}
+
 /// Updates the current dependencies for the duration of a synchronous operation.
 ///
 /// Any mutations made to ``DependencyValues`` inside `updateValuesForOperation` will be visible to

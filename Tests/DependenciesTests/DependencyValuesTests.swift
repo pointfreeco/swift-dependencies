@@ -265,6 +265,35 @@ final class DependencyValuesTests: XCTestCase {
     #endif
   }
 
+  func testUpdatingTestDependencyFromLiveContext_WhenUpdatingDependencies() {
+    @Dependency(\.reuseClient) var reuseClient: ReuseClient
+
+    #if !os(Linux) && !os(WASI) && !os(Windows)
+      withDependencies {
+        $0.context = .live
+      } operation: {
+        withDependencies {
+          $0.reuseClient.setCount(42)
+          XCTAssertEqual($0.reuseClient.count(), 42)
+          XCTAssertEqual(reuseClient.count(), 42)
+        } operation: {
+          #if DEBUG
+            XCTExpectFailure {
+              $0.compactDescription.contains(
+                """
+                @Dependency(\\.reuseClient) has no live implementation, but was accessed from a \
+                live context.
+                """
+              )
+            }
+          #endif
+          XCTAssertEqual(reuseClient.count(), 42)
+        }
+      }
+      XCTAssertEqual(reuseClient.count(), 0)
+    #endif
+  }
+
   func testBinding() {
     withDependencies {
       $0.context = .test
@@ -854,6 +883,22 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
   #endif
+
+  func testPrepareDependencies_WithDependencies() {
+    prepareDependencies {
+      $0.date.now = Date(timeIntervalSince1970: 42)
+    }
+
+    withDependencies {
+      $0.date.now = Date(timeIntervalSince1970: 1729)
+    } operation: {
+      @Dependency(\.date.now) var now
+      XCTAssertEqual(now, Date(timeIntervalSince1970: 1729))
+    }
+
+    @Dependency(\.date.now) var now
+    XCTAssertEqual(now, Date(timeIntervalSince1970: 42))
+  }
 }
 
 struct CountInitDependency: TestDependencyKey {

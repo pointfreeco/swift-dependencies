@@ -883,6 +883,22 @@ final class DependencyValuesTests: XCTestCase {
       }
     }
   #endif
+
+  func testPrepareDependencies_WithDependencies() {
+    prepareDependencies {
+      $0.date.now = Date(timeIntervalSince1970: 42)
+    }
+
+    withDependencies {
+      $0.date.now = Date(timeIntervalSince1970: 1729)
+    } operation: {
+      @Dependency(\.date.now) var now
+      XCTAssertEqual(now, Date(timeIntervalSince1970: 1729))
+    }
+
+    @Dependency(\.date.now) var now
+    XCTAssertEqual(now, Date(timeIntervalSince1970: 42))
+  }
 }
 
 struct CountInitDependency: TestDependencyKey {

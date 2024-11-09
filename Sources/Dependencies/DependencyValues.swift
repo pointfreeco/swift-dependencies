@@ -545,7 +545,11 @@ public final class CachedValues: @unchecked Sendable {
         case .preview:
           if !CachedValues.isAccessingCachedDependencies {
             value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
-              previewValues.withValue { $0[key] }
+              #if compiler(>=6)
+                return previewValues[key]
+              #else
+                return Key.previewValue
+              #endif
             }
           } else {
             value = Key.previewValue

@@ -19,7 +19,7 @@
     /// - Parameters:
     ///   - keyPath: A key path to a dependency value.
     ///   - value: A dependency value to override for the lifetime of the preview.
-    public static func dependency<Value: Sendable>(
+    public static func dependency<Value>(
       _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
       _ value: Value
     ) -> PreviewTrait {
@@ -45,14 +45,12 @@
     /// - Parameter updateValuesForPreview: A closure for updating the current dependency values for
     ///   the lifetime of the preview.
     public static func dependencies(
-      _ updateValuesForPreview: @Sendable (inout DependencyValues) -> Void
+      _ updateValuesForPreview: (inout DependencyValues) -> Void
     ) -> PreviewTrait {
-      previewValues.withValue {
-        updateValuesForPreview(&$0)
-      }
+      updateValuesForPreview(&previewValues)
       return PreviewTrait()
     }
   }
-#endif
 
-let previewValues = LockIsolated(DependencyValues(context: .preview))
+  nonisolated(unsafe) var previewValues = DependencyValues(context: .preview)
+#endif

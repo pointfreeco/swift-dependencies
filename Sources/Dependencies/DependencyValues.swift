@@ -118,8 +118,12 @@ import IssueReporting
 /// Read the article <doc:RegisteringDependencies> for more information.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
-  @TaskLocal static var isSetting = false
   @TaskLocal static var currentDependency = CurrentDependency()
+  @TaskLocal static var isSetting = false
+  @TaskLocal static var preparationID: UUID?
+  static var isPreparing: Bool {
+    preparationID != nil
+  }
 
   @_spi(Internals)
   public var cachedValues = CachedValues()
@@ -263,7 +267,75 @@ public struct DependencyValues: Sendable {
       return dependency
     }
     set {
-      self.storage[ObjectIdentifier(key)] = newValue
+      if DependencyValues.isPreparing {
+        let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
+        guard !cachedValues.cached.keys.contains(cacheKey) else {
+          if cachedValues.cached[cacheKey]?.preparationID != DependencyValues.preparationID {
+            reportIssue(
+              {
+                var dependencyDescription = ""
+                if let fileID = DependencyValues.currentDependency.fileID,
+                  let line = DependencyValues.currentDependency.line
+                {
+                  dependencyDescription.append(
+                    """
+                      Location:
+                        \(fileID):\(line)
+
+                    """
+                  )
+                }
+                dependencyDescription.append(
+                  Key.self == Key.Value.self
+                    ? """
+                      Dependency:
+                        \(typeName(Key.Value.self))
+                    """
+                    : """
+                      Key:
+                        \(typeName(Key.self))
+                      Value:
+                        \(typeName(Key.Value.self))
+                    """
+                )
+                var argument: String {
+                  "\(function)" == "subscript(key:)"
+                    ? "\(typeName(Key.self)).self"
+                    : "\\.\(function)"
+                }
+                return """
+                  @Dependency(\(argument)) has already been accessed or prepared.
+
+                  \(dependencyDescription)
+
+                  A global dependency can only be prepared a single time and cannot be accessed \
+                  beforehand. Prepare dependencies as early as possible in the lifecycle of your \
+                  application.
+
+                  To temporarily override a dependency in your application, use 'withDependencies' \
+                  to do so in a well-defined scope.
+                  """
+              }(),
+              fileID: DependencyValues.currentDependency.fileID ?? fileID,
+              filePath: DependencyValues.currentDependency.filePath ?? filePath,
+              line: DependencyValues.currentDependency.line ?? line,
+              column: DependencyValues.currentDependency.column ?? column
+            )
+          } else {
+            cachedValues.cached[cacheKey] = CachedValues.CachedValue(
+              base: newValue,
+              preparationID: DependencyValues.preparationID
+            )
+          }
+          return
+        }
+        cachedValues.cached[cacheKey] = CachedValues.CachedValue(
+          base: newValue,
+          preparationID: DependencyValues.preparationID
+        )
+      } else {
+        self.storage[ObjectIdentifier(key)] = newValue
+      }
     }
   }
 
@@ -382,8 +454,13 @@ public final class CachedValues: @unchecked Sendable {
     }
   }
 
+  public struct CachedValue {
+    let base: any Sendable
+    let preparationID: UUID?
+  }
+
   private let lock = NSRecursiveLock()
-  public var cached = [CacheKey: any Sendable]()
+  public var cached = [CacheKey: CachedValue]()
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,
@@ -399,37 +476,10 @@ public final class CachedValues: @unchecked Sendable {
 
     return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
       let cacheKey = CacheKey(id: TypeIdentifier(key), context: context)
-      guard let base = cached[cacheKey], let value = base as? Key.Value
-      else {
-        let value: Key.Value?
-        switch context {
-        case .live:
-          value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
-        case .preview:
-          if !CachedValues.isAccessingCachedDependencies {
-            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
-              previewValues.withValue { $0[key] }
-            }
-          } else {
-            value = Key.previewValue
-          }
-        case .test:
-          if !CachedValues.isAccessingCachedDependencies,
-            case let .swiftTesting(.some(testing)) = TestContext.current,
-            let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
-          {
-            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
-              testValues[key]
-            }
-          } else {
-            value = Key.testValue
-          }
-        }
-
-        guard let value
-        else {
-          #if DEBUG
-            if !DependencyValues.isSetting {
+      #if DEBUG
+        if context == .live, !DependencyValues.isSetting, !(key is any DependencyKey.Type) {
+          reportIssue(
+            {
               var dependencyDescription = ""
               if let fileID = DependencyValues.currentDependency.fileID,
                 let line = DependencyValues.currentDependency.line
@@ -461,9 +511,7 @@ public final class CachedValues: @unchecked Sendable {
                   ? "\(typeName(Key.self)).self"
                   : "\\.\(function)"
               }
-
-              reportIssue(
-                """
+              return """
                 @Dependency(\(argument)) has no live implementation, but was accessed from a live \
                 context.
 
@@ -478,23 +526,52 @@ public final class CachedValues: @unchecked Sendable {
                 • Override the implementation of '\(typeName(Key.self))' using \
                 'withDependencies'. This is typically done at the entry point of your \
                 application, but can be done later too.
-                """,
-                fileID: DependencyValues.currentDependency.fileID ?? fileID,
-                filePath: DependencyValues.currentDependency.filePath ?? filePath,
-                line: DependencyValues.currentDependency.line ?? line,
-                column: DependencyValues.currentDependency.column ?? column
-              )
+                """
+            }(),
+            fileID: DependencyValues.currentDependency.fileID ?? fileID,
+            filePath: DependencyValues.currentDependency.filePath ?? filePath,
+            line: DependencyValues.currentDependency.line ?? line,
+            column: DependencyValues.currentDependency.column ?? column
+          )
+        }
+      #endif
+
+      guard let base = cached[cacheKey]?.base, let value = base as? Key.Value
+      else {
+        let value: Key.Value?
+        switch context {
+        case .live:
+          value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
+        case .preview:
+          if !CachedValues.isAccessingCachedDependencies {
+            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
+              #if compiler(>=6)
+                return previewValues[key]
+              #else
+                return Key.previewValue
+              #endif
             }
-          #endif
-          let value = Key.testValue
-          if !DependencyValues.isSetting {
-            cached[cacheKey] = value
+          } else {
+            value = Key.previewValue
           }
-          return value
+        case .test:
+          if !CachedValues.isAccessingCachedDependencies,
+            case let .swiftTesting(.some(testing)) = TestContext.current,
+            let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
+          {
+            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
+              testValues[key]
+            }
+          } else {
+            value = Key.testValue
+          }
         }
 
-        cached[cacheKey] = value
-        return value
+        let cacheableValue = value ?? Key.testValue
+        cached[cacheKey] = CachedValue(
+          base: cacheableValue, preparationID: DependencyValues.preparationID
+        )
+        return cacheableValue
       }
 
       return value

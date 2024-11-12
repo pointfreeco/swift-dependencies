@@ -1,9 +1,9 @@
 CONFIG = debug
-PLATFORM_IOS = iOS Simulator,id=$(call udid_for,iOS 17,iPhone \d\+ Pro [^M])
+PLATFORM_IOS = iOS Simulator,id=$(call udid_for,iOS,iPhone \d\+ Pro [^M])
 PLATFORM_MACOS = macOS
 PLATFORM_MAC_CATALYST = macOS,variant=Mac Catalyst
-PLATFORM_TVOS = tvOS Simulator,id=$(call udid_for,tvOS 17,TV)
-PLATFORM_WATCHOS = watchOS Simulator,id=$(call udid_for,watchOS 10,Watch)
+PLATFORM_TVOS = tvOS Simulator,id=$(call udid_for,tvOS,TV)
+PLATFORM_WATCHOS = watchOS Simulator,id=$(call udid_for,watchOS,Watch)
 
 default: test
 

@@ -47,7 +47,9 @@
     public static func dependencies(
       _ updateValuesForPreview: (inout DependencyValues) -> Void
     ) -> PreviewTrait {
-      updateValuesForPreview(&previewValues)
+      var copy = previewValues
+      defer { previewValues = copy }
+      updateValuesForPreview(&copy)
       return PreviewTrait()
     }
   }

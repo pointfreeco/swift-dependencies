@@ -1,5 +1,5 @@
-#if canImport(Testing)
-import ConcurrencyExtras
+#if canImport(Testing) && compiler(>=6)
+  import ConcurrencyExtras
   import Dependencies
   import Testing
 

@@ -1,4 +1,5 @@
 #if canImport(Testing)
+import ConcurrencyExtras
   import Dependencies
   import Testing
 
@@ -40,11 +41,13 @@
     /// - Parameters:
     ///   - keyPath: A key path to a dependency value.
     ///   - value: A dependency value to override for the test.
-    public static func dependency<Value: Sendable>(
+    public static func dependency<Value>(
       _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
-      _ value: Value
+      _ value: sending Value
     ) -> Self {
-      Self { $0[keyPath: keyPath] = value }
+      Self { [uncheckedValue = UncheckedSendable(value)] in
+        $0[keyPath: keyPath] = uncheckedValue.wrappedValue
+      }
     }
 
     /// A trait that overrides a test's or suite's dependency.

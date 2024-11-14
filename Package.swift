@@ -50,6 +50,7 @@ let package = Package(
       dependencies: [
         "Dependencies",
         "DependenciesMacros",
+        .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
       ]
     ),

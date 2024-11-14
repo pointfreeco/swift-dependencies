@@ -71,7 +71,6 @@
     /// > )
     /// > struct FeatureTests { /* ... */ }
     /// > ```
-    /// ```
     ///
     /// - Parameters:
     ///   - keyPath: A key path to a dependency value.

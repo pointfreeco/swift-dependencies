@@ -78,6 +78,13 @@
         }
       }
     }
+
+    private static let mockClient = Client { 42 }
+    @Test(.dependency(Client.self, mockClient))
+    func dependencyKeyTypeTrait() {
+      @Dependency(Client.self) var client
+      #expect(client.increment() == 42)
+    }
   }
 
   private struct Client: TestDependencyKey {

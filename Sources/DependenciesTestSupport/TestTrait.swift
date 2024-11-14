@@ -55,7 +55,7 @@
     /// ```swift
     /// struct Client: DependencyKey { … }
     /// @Test(
-    ///   .dependency(Client.self, .mock)
+    ///   .dependency(Client.mock)
     /// )
     /// func feature() {
     ///   // ...
@@ -67,7 +67,7 @@
     /// >
     /// > ```swift
     /// > @Suite(
-    /// >   .dependency(Client.self, Client { _ in .mock })  // 🛑
+    /// >   .dependency(Client { _ in .mock })  // 🛑
     /// > )
     /// > struct FeatureTests { /* ... */ }
     /// > ```

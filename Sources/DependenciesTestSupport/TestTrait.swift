@@ -77,10 +77,9 @@
     ///   - keyPath: A key path to a dependency value.
     ///   - value: A dependency value to override for the test.
     public static func dependency<Value: TestDependencyKey>(
-      _ type: Value.Type,
-      _ value: Value.Value
-    ) -> Self {
-      Self { $0[type] = value }
+      _ value: Value
+    ) -> Self where Value == Value.Value {
+      Self { $0[Value.self] = value }
     }
 
     /// A trait that overrides a test's or suite's dependencies.

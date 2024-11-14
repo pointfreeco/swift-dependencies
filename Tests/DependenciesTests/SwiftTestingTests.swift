@@ -80,7 +80,7 @@
     }
 
     private static let mockClient = Client { 42 }
-    @Test(.dependency(Client.self, mockClient))
+    @Test(.dependency(mockClient))
     func dependencyKeyTypeTrait() {
       @Dependency(Client.self) var client
       #expect(client.increment() == 42)

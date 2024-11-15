@@ -53,6 +53,7 @@ let package = Package(
       name: "DependenciesTestSupport",
       dependencies: [
         "Dependencies",
+        .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
       ]
     ),

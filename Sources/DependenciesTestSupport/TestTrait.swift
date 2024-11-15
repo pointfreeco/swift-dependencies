@@ -43,10 +43,10 @@
     ///   - value: A dependency value to override for the test.
     public static func dependency<Value>(
       _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
-      _ value: sending Value
+      _ value: @escaping @Sendable @autoclosure () -> Value
     ) -> Self {
-      Self { [uncheckedValue = UncheckedSendable(value)] in
-        $0[keyPath: keyPath] = uncheckedValue.wrappedValue
+      Self {
+        $0[keyPath: keyPath] = value()
       }
     }
 
@@ -79,9 +79,9 @@
     ///   - keyPath: A key path to a dependency value.
     ///   - value: A dependency value to override for the test.
     public static func dependency<Value: TestDependencyKey>(
-      _ value: Value
+      _ value: @escaping @Sendable @autoclosure () -> Value
     ) -> Self where Value == Value.Value {
-      Self { $0[Value.self] = value }
+      Self { $0[Value.self] = value() }
     }
 
     /// A trait that overrides a test's or suite's dependencies.

@@ -92,6 +92,43 @@ import ConcurrencyExtras
     func dependencyKeyNonSendableValue() {
       // NB: This test is to prove this trait compiles with a non-sendable type.
     }
+    
+    // NB: This is to prove that a new instance of the dependency is used for each test.
+    struct NewClassInstanceSuite {
+      @Suite(.serialized, .dependency(\.classClient, ClassClient()))
+      struct DependencyValues {
+        @Test
+        func test1() {
+          @Dependency(\.classClient) var client
+          client.count += 1
+          #expect(client.count == 1)
+        }
+        
+        @Test
+        func test2() {
+          @Dependency(\.classClient) var client
+          client.count += 1
+          #expect(client.count == 1)
+        }
+      }
+      
+      @Suite(.serialized, .dependency(SendableClassClient()))
+      struct DependencyKey {
+        @Test
+        func test1() {
+          @Dependency(SendableClassClient.self) var client
+          client.count.withValue { $0 += 1 }
+          #expect(client.count.value == 1)
+        }
+        
+        @Test
+        func test2() {
+          @Dependency(SendableClassClient.self) var client
+          client.count.withValue { $0 += 1 }
+          #expect(client.count.value == 1)
+        }
+      }
+    }
   }
 
   private struct Client: TestDependencyKey {
@@ -107,6 +144,10 @@ import ConcurrencyExtras
     }
   }
 
+  private final class SendableClassClient: TestDependencyKey, Sendable {
+    static var testValue: SendableClassClient { .init() }
+    let count = LockIsolated(0)
+  }
   class ClassClient {
     var count = 0
   }

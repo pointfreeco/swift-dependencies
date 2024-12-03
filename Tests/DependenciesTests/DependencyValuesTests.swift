@@ -736,6 +736,18 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
   }
 
+  func testPrepareDependencies_setsDependency_LiveContext() {
+    withDependencies {
+      $0.context = .live
+    } operation: {
+      prepareDependencies {
+        $0[ClientWithEndpoint.self] = ClientWithEndpoint(get: { 1729 })
+      }
+      @Dependency(ClientWithEndpoint.self) var client
+      XCTAssertEqual(client.get(), 1729)
+    }
+  }
+
   #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
     func testPrepareDependencies_MultiplePreparesWithNoAccessBetween() {
       prepareDependencies {

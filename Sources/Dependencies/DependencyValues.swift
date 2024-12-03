@@ -480,7 +480,7 @@ public final class CachedValues: @unchecked Sendable {
         if
           context == .live,
           !DependencyValues.isSetting,
-          (cached[cacheKey] == nil || cached[cacheKey]?.preparationID == nil),
+          !(cached[cacheKey] != nil && cached[cacheKey]?.preparationID != nil),
           !(key is any DependencyKey.Type)
         {
           reportIssue(

@@ -12,7 +12,7 @@
 
   @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
   private enum OpenURLKey: DependencyKey {
-    static let liveValue = OpenURLEffect { url in
+    static let liveValue = OpenURLEffect { @MainActor url in
       let stream = AsyncStream<Bool> { continuation in
         let task = Task { @MainActor in
           #if os(watchOS)

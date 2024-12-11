@@ -2,9 +2,44 @@ import Foundation
 
 /// Prepares global dependencies for the lifetime of your application.
 ///
-/// > Important: A dependency key can be prepared at most a single time, and _must_ be prepared
-/// > before it has been accessed. Call `prepareDependencies` as early as possible in your
-/// > application.
+/// A dependency key can be prepared at most a single time, and _must_ be prepared
+/// before it has been accessed. Call `prepareDependencies` as early as possible in your
+/// application.
+///
+/// For example, in a SwiftUI entry point:
+///
+/// ```swift
+/// @main
+/// struct EntryPoint: App {
+///   init() {
+///     prepareDependencies {
+///       $0.defaultDatabase = try! DatabaseQueue(/* ... */)
+///     }
+///   }
+///
+///   // ...
+/// }
+/// ```
+///
+/// For those that use AppDelegate in UIKit as an entry point:
+///
+/// ```swift
+/// @main
+/// class AppDelegate: UIResponder, UIApplicationDelegate {
+///   func application(
+///     _ application: UIApplication,
+///     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+///   ) -> Bool {
+///     prepareDependencies {
+///       $0.defaultDatabase = DatabaseQueue(…)
+///     }
+///     // Override point for customization after application launch.
+///     return true
+///   }
+///
+///   // ...
+/// }
+/// ```
 ///
 /// - Parameter updateValues: A closure for updating the current dependency values for the
 ///   lifetime of your application.

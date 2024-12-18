@@ -67,7 +67,7 @@ you are faced with a whole set of new problems:
     handy for overriding dependencies for tests and SwiftUI previews, as well as specific user 
     flows such as onboarding experiences.
     
-  * How can you be sure you **overrode _all_ dependencies** a feature uses in tests? It would be
+  * How can you be sure you **override _all_ dependencies** a feature uses in tests? It would be
     incorrect for a test to mock out some dependencies but leave others as interacting with the
     outside world.
 

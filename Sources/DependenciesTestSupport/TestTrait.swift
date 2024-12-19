@@ -43,10 +43,10 @@
     ///   - value: A dependency value to override for the test.
     public static func dependency<Value>(
       _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
-      _ value: @autoclosure @escaping @Sendable () -> Value
+      _ value: @autoclosure @escaping @Sendable () throws -> Value
     ) -> Self {
       Self {
-        $0[keyPath: keyPath] = value()
+        $0[keyPath: keyPath] = try value()
       }
     }
 
@@ -79,9 +79,9 @@
     ///   - keyPath: A key path to a dependency value.
     ///   - value: A dependency value to override for the test.
     public static func dependency<Value: TestDependencyKey>(
-      _ value: @autoclosure @escaping @Sendable () -> Value
+      _ value: @autoclosure @escaping @Sendable () throws -> Value
     ) -> Self where Value == Value.Value {
-      Self { $0[Value.self] = value() }
+      Self { $0[Value.self] = try value() }
     }
 
     /// A trait that overrides a test's or suite's dependencies.
@@ -96,8 +96,8 @@
     public var isRecursive: Bool { true }
 
     public func prepare(for test: Test) async throws {
-      testValuesByTestID.withValue {
-        self.updateValues(&$0[test.id, default: DependencyValues(context: .test)])
+      try testValuesByTestID.withValue {
+        try self.updateValues(&$0[test.id, default: DependencyValues(context: .test)])
       }
     }
   }

@@ -18,7 +18,7 @@ import Foundation
 /// >   // ...
 /// > }
 /// > ```
-/// > 
+/// >
 /// > Or your app delegate:
 /// >
 /// > ```swift

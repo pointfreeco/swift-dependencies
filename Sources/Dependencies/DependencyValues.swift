@@ -269,7 +269,7 @@ public struct DependencyValues: Sendable {
     set {
       if DependencyValues.isPreparing {
         if context == .preview, Thread.isPreviewAppEntryPoint {
-          reportIssue("Ignoring dependencies prepared in app entry point")
+          reportIssue("Ignoring dependencies prepared in preview app entry point")
           return
         }
         let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)

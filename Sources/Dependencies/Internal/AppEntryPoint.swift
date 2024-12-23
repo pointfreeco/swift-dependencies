@@ -2,20 +2,29 @@ import Foundation
 
 extension Thread {
   public static var isPreviewAppEntryPoint: Bool {
-    containsSymbol("$s7SwiftUI3AppPAAE4mainyyFZ")
-      && !containsSymbol("$s7SwiftUI6runAppys5NeverOxAA0D0RzlF")
-  }
+    guard ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+    else { return false }
 
-  static func containsSymbol(_ symbol: String) -> Bool {
-    func frameContainsSymbol(_ frame: String) -> Bool {
-      frame.utf8
-        .reversed()
-        .drop(while: { (48...57).contains($0) })
-        .dropFirst(3)
-        .starts(with: symbol.utf8.reversed())
+    var isPreviewAppEntryPoint = false
+    for frame in callStackSymbols.reversed() {
+      if !isPreviewAppEntryPoint, frame.containsSymbol("$s7SwiftUI3AppPAAE4mainyyFZ") {
+        isPreviewAppEntryPoint = true
+      } else if isPreviewAppEntryPoint,
+        frame.containsSymbol("$s7SwiftUI6runAppys5NeverOxAA0D0RzlF")
+      {
+        isPreviewAppEntryPoint = false
+      }
     }
-    return callStackSymbols
+    return isPreviewAppEntryPoint
+  }
+}
+
+extension String {
+  fileprivate func containsSymbol(_ symbol: String) -> Bool {
+    utf8
       .reversed()
-      .contains(where: frameContainsSymbol)
+      .drop(while: { (48...57).contains($0) })
+      .dropFirst(3)
+      .starts(with: symbol.utf8.reversed())
   }
 }

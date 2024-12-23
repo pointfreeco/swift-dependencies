@@ -1,3 +1,5 @@
+import ConcurrencyExtras
+
 #if canImport(Testing)
   import Dependencies
   import DependenciesTestSupport
@@ -78,6 +80,18 @@
         }
       }
     }
+
+    private static let mockClient = Client { 42 }
+    @Test(.dependency(mockClient))
+    func dependencyKeyTypeTrait() {
+      @Dependency(Client.self) var client
+      #expect(client.increment() == 42)
+    }
+
+    @Test(.dependency(\.classClient, ClassClient()))
+    func dependencyKeyNonSendableValue() {
+      // NB: This test is to prove this trait compiles with a non-sendable type.
+    }
   }
 
   private struct Client: TestDependencyKey {
@@ -90,6 +104,21 @@
           return $0
         }
       }
+    }
+  }
+
+  class ClassClient {
+    var count = 0
+  }
+  extension DependencyValues {
+    var classClient: ClassClient {
+      get { self[ClassClientKey.self].wrappedValue }
+      set { self[ClassClientKey.self] = UncheckedSendable(newValue) }
+    }
+  }
+  enum ClassClientKey: TestDependencyKey {
+    static var testValue: UncheckedSendable<ClassClient> {
+      UncheckedSendable(ClassClient())
     }
   }
 #endif

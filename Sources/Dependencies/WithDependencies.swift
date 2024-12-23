@@ -4,7 +4,40 @@ import Foundation
 ///
 /// > Important: A dependency key can be prepared at most a single time, and _must_ be prepared
 /// > before it has been accessed. Call `prepareDependencies` as early as possible in your
-/// > application.
+/// > application, for example in your SwiftUI entry point:
+/// >
+/// > ```swift
+/// > @main
+/// > struct MyApp: App {
+/// >   init() {
+/// >     prepareDependencies {
+/// >       $0.defaultDatabase = try! DatabaseQueue(/* ... */)
+/// >     }
+/// >   }
+/// >
+/// >   // ...
+/// > }
+/// > ```
+/// >
+/// > Or your app delegate:
+/// >
+/// > ```swift
+/// > @main
+/// > class AppDelegate: UIResponder, UIApplicationDelegate {
+/// >   func application(
+/// >     _ application: UIApplication,
+/// >     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+/// >   ) -> Bool {
+/// >     prepareDependencies {
+/// >       $0.defaultDatabase = try! DatabaseQueue(/* ... */)
+/// >     }
+/// >     // Override point for customization after application launch.
+/// >     return true
+/// >   }
+/// >
+/// >   // ...
+/// > }
+/// > ```
 ///
 /// - Parameter updateValues: A closure for updating the current dependency values for the
 ///   lifetime of your application.

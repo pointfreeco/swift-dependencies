@@ -477,7 +477,11 @@ public final class CachedValues: @unchecked Sendable {
     return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
       let cacheKey = CacheKey(id: TypeIdentifier(key), context: context)
       #if DEBUG
-        if context == .live, !DependencyValues.isSetting, !(key is any DependencyKey.Type) {
+        if context == .live,
+          !DependencyValues.isSetting,
+          !(cached[cacheKey] != nil && cached[cacheKey]?.preparationID != nil),
+          !(key is any DependencyKey.Type)
+        {
           reportIssue(
             {
               var dependencyDescription = ""

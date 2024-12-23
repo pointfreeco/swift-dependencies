@@ -26,6 +26,15 @@
       .dependencies { $0[keyPath: keyPath] = value }
     }
 
+    /// A trait that overrides a preview's dependency.
+    ///
+    /// - Parameter value: A dependency value to override for the test.
+    public static func dependency<Value: TestDependencyKey>(
+      _ value: Value
+    ) -> PreviewTrait where Value == Value.Value {
+      .dependencies { $0[Value.self] = value }
+    }
+
     /// A trait that overrides a preview's dependencies.
     ///
     /// Useful for overriding several dependencies in a preview without incurring the nesting and

@@ -12,7 +12,7 @@ extension Thread {
       } else if isPreviewAppEntryPoint,
         frame.containsSymbol("$s7SwiftUI6runAppys5NeverOxAA0D0RzlF")
       {
-        isPreviewAppEntryPoint = false
+        return false
       }
     }
     return isPreviewAppEntryPoint

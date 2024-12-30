@@ -267,7 +267,8 @@ If you want to discuss this library or have a question about how to use it to so
 a particular problem, there are a number of places you can discuss with fellow 
 [Point-Free](http://www.pointfree.co) enthusiasts:
 
-* For long-form discussions, we recommend the [discussions](http://github.com/pointfreeco/swift-dependencies/discussions) tab of this repo.
+* For long-form discussions, we recommend the
+  [discussions](http://github.com/pointfreeco/swift-dependencies/discussions) tab of this repo.
 * For casual chat, we recommend the [Point-Free Community Slack](http://pointfree.co/slack-invite).
 
 ## Extensions
@@ -277,7 +278,8 @@ following projects all build on top of Dependencies:
 
   * [Dependencies Additions](https://github.com/tgrapperon/swift-dependencies-additions): A
     companion library that provides higher-level dependencies.
-  * [Dependencies Protocol Extras](https://github.com/arasan01/swift-dependencies-extras): Library to make swift-dependencies even more useful when using Protocol
+  * [Dependencies Protocol Extras](https://github.com/arasan01/swift-dependencies-extras): A library
+    to make swift-dependencies even more useful when using protocols.
 
 ## Alternatives
 
@@ -310,5 +312,5 @@ This library is released under the MIT license. See [LICENSE](LICENSE) for detai
 [syncups-demo]: https://github.com/pointfreeco/syncups
 [swiftui-nav-gh]: http://github.com/pointfreeco/swiftui-navigation
 [dep-values-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/dependencyvalues#dependency-values
-[withdependencies-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/withdependencies(_:operation:)-4uz6m
+[withdependencies-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/withdependencies(isolation:_:operation:)
 [immediate-clock-docs]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/immediateclock

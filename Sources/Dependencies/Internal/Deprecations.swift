@@ -10,6 +10,7 @@
         Use 'withDependencies' or 'prepareDependencies' from the body of the preview, instead.
         """
     )
+    @_documentation(visibility:private)
     public static func dependency<Value>(
       _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
       _ value: Value
@@ -22,6 +23,7 @@
         Use 'withDependencies' or 'prepareDependencies' from the body of the preview, instead.
         """
     )
+    @_documentation(visibility:private)
     public static func dependency<Value: TestDependencyKey>(
       _ value: Value
     ) -> PreviewTrait where Value == Value.Value {
@@ -33,6 +35,7 @@
         Use 'withDependencies' or 'prepareDependencies' from the body of the preview, instead.
         """
     )
+    @_documentation(visibility:private)
     public static func dependencies(
       _ updateValuesForPreview: (inout DependencyValues) -> Void
     ) -> PreviewTrait {
@@ -50,6 +53,7 @@
 
 extension AsyncStream {
   @available(*, deprecated, renamed: "makeStream(of:bufferingPolicy:)")
+  @_documentation(visibility:private)
   public static func streamWithContinuation(
     _ elementType: Element.Type = Element.self,
     bufferingPolicy limit: Continuation.BufferingPolicy = .unbounded
@@ -61,6 +65,7 @@ extension AsyncStream {
 
 extension AsyncThrowingStream where Failure == Error {
   @available(*, deprecated, renamed: "makeStream(of:throwing:bufferingPolicy:)")
+  @_documentation(visibility:private)
   public static func streamWithContinuation(
     _ elementType: Element.Type = Element.self,
     bufferingPolicy limit: Continuation.BufferingPolicy = .unbounded
@@ -78,6 +83,7 @@ extension ActorIsolated {
     deprecated,
     message: "Use the non-async version of 'withValue'."
   )
+  @_documentation(visibility:private)
   public func withValue<T: Sendable>(
     _ operation: @Sendable (inout Value) async throws -> T
   ) async rethrows -> T where Value: Sendable {
@@ -93,6 +99,7 @@ extension AsyncStream where Element: Sendable {
     deprecated,
     message: "Do not configure streams with a buffering policy 'limit' parameter."
   )
+  @_documentation(visibility:private)
   public init<S: AsyncSequence & Sendable>(
     _ sequence: S,
     bufferingPolicy limit: Continuation.BufferingPolicy
@@ -122,6 +129,7 @@ extension AsyncThrowingStream where Element: Sendable, Failure == Error {
     deprecated,
     message: "Do not configure streams with a buffering policy 'limit' parameter."
   )
+  @_documentation(visibility:private)
   public init<S: AsyncSequence & Sendable>(
     _ sequence: S,
     bufferingPolicy limit: Continuation.BufferingPolicy

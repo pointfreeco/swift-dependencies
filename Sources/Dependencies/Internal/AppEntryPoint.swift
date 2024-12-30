@@ -1,7 +1,7 @@
 import Foundation
 
 extension Thread {
-  public static var isPreviewAppEntryPoint: Bool {
+  static var isPreviewAppEntryPoint: Bool {
     guard ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
     else { return false }
 

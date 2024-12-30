@@ -60,7 +60,7 @@ overwriting settings in user defaults.
 
 Extra care must be taken when overriding dependencies in order for the new dependencies to propagate
 down to child models, and grandchild models, and on and on. All child models constructed should be
-done so inside an invocation of ``withDependencies(from:operation:file:line:)-8e74m`` so
+done so inside an invocation of ``withDependencies(from:operation:fileID:filePath:line:column:)`` so
 that the child model picks up the exact dependencies the parent is using.
 
 For example, taking the code sample from above, suppose that the `TodosModel` could drill down to an
@@ -94,7 +94,7 @@ any of the overridden dependencies from when the `TodosModel` was created.
 
 In order to make sure the overridden dependencies continue to propagate to the child feature, you
 must wrap the creation of the child model in
-``withDependencies(from:operation:file:line:)-8e74m``:
+``withDependencies(from:operation:fileID:filePath:line:column:)``:
 
 ```swift
 func tappedTodo(_ todo: Todo) {

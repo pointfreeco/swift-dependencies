@@ -191,7 +191,7 @@ to the child.
 
 For example, if your SwiftUI model holds a piece of optional state that drives a sheet, then when
 hydrating that state you will want to wrap it in
-``withDependencies(from:operation:file:line:)-8e74m``:
+``withDependencies(from:operation:fileID:filePath:line:column:)``:
 
 ```swift
 @Observable
@@ -216,7 +216,7 @@ This makes it so that if `FeatureModel` were constructed with some of its depend
 
 The same principle holds for UIKit. When constructing a child view controller to be presented,
 be sure to wrap its construction in
-``withDependencies(from:operation:file:line:)-8e74m``:
+``withDependencies(from:operation:fileID:filePath:line:column:)``:
 
 ```swift
 final class FeatureViewController: UIViewController {
@@ -232,7 +232,7 @@ final class FeatureViewController: UIViewController {
 }
 ```
 
-If you make sure to always use ``withDependencies(from:operation:file:line:)-8e74m``
+If you make sure to always use ``withDependencies(from:operation:fileID:filePath:line:column:)``
 when constructing child models and controllers you can be sure that changes to dependencies at
 any layer of your application will be visible at any layer below it. See <doc:Lifetimes> for
 more information on how dependency lifetimes work.

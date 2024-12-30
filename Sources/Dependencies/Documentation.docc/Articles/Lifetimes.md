@@ -190,7 +190,7 @@ the scope of the `operation` closure.
 
 However, care must be taken when creating a child model from a parent model. In order for the
 child's dependencies to inherit from the parent's dependencies, you must make use of
-``withDependencies(from:operation:file:line:)-8e74m`` when creating the child model:
+``withDependencies(from:operation:fileID:filePath:line:column:)`` when creating the child model:
 
 ```swift
 let onboardingModel = withDependencies(from: self) {
@@ -205,7 +205,7 @@ override any additional dependencies you want.
 
 In general, if you want dependencies to be properly inherited through every layer of feature in your
 application, you should make sure to create any observable models inside a
-``withDependencies(from:operation:file:line:)-8e74m`` scope.
+``withDependencies(from:operation:fileID:filePath:line:column:)`` scope.
 
 If you do this, it also allows you to run previews in a very specific environment. Dependencies
 already support the concept of a ``TestDependencyKey/previewValue-8u2sy``, which is an

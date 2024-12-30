@@ -218,6 +218,10 @@ public func withDependencies<Model: AnyObject, R>(
 ///   - model: An object with dependencies. The given model should have at least one `@Dependency`
 ///     property, or should have been initialized and returned from a `withDependencies` operation.
 ///   - operation: The operation to run with the updated dependencies.
+///   - fileID: The source `#fileID` associated with the caller.
+///   - filePath: The source `#filePath` associated with the caller.
+///   - line: The source `#line` associated with the caller.
+///   - column: The source `#column` associated with the caller.
 /// - Returns: The result returned from `operation`.
 @discardableResult
 public func withDependencies<Model: AnyObject, R>(

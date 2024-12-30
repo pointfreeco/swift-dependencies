@@ -1,7 +1,7 @@
-# ``Dependencies/withDependencies(_:operation:)-4uz6m``
+# ``Dependencies/withDependencies(_:operation:)``
 
 ## Topics
 
 ### Overloads
 
-- ``withDependencies(_:operation:)``
+- ``withDependencies(isolation:_:operation:)``

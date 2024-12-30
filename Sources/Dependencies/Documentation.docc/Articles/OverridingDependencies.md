@@ -49,8 +49,8 @@ interact with the outside world. This way you can be sure that while the user is
 the tutorial sandbox they are not accidentally making network requests, saving data to disk or
 overwriting settings in user defaults.
 
-> Note: The method ``withDependencies(from:_:operation:file:line:)-262kg`` used in the code snippet
-> above is subtly different from ``withDependencies(_:operation:)``. It takes an extra
+> Note: The method ``withDependencies(from:operation:fileID:filePath:line:column:)`` used in the
+> code snippet above is subtly different from ``withDependencies(_:operation:)``. It takes an extra
 > argument, `from`, which is the object from which we propagate the dependencies before overriding 
 > some. This allows you to propagate dependencies from object to object.
 >

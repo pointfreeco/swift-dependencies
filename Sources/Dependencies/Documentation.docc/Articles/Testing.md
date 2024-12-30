@@ -49,7 +49,8 @@ the date is "Feb 13, 2009 at 3:31 PM".
 > models inside its methods, then it has to be careful about how it does so. In order for
 > `FeatureModel`'s dependencies to propagate to the new child model, it must construct the child 
 > model in an altered execution context that passes along the dependencies. The tool for this is
-> ``withDependencies(from:operation:file:line:)-2qx0c`` and can be used simply like this:
+> ``withDependencies(from:operation:fileID:filePath:line:column:)`` and can be used simply like
+> this:
 > 
 >  ```swift
 >  @Observable

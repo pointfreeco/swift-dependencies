@@ -26,7 +26,7 @@ extension APIClient: DependencyKey {
 ```
 
 > Tip: There are two other values you can provide for a dependency. If you implement
-> ``DependencyKey/testValue-5v726`` it will be used when running features in tests, and if you
+> ``DependencyKey/testValue`` it will be used when running features in tests, and if you
 > implement `previewValue` it  will be used while running features in an Xcode preview. You don't
 > need to worry about those values when you are just getting started, and instead can add them
 > later. See <Doc:LivePreviewTest> for more information.

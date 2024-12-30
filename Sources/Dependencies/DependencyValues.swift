@@ -224,11 +224,11 @@ public struct DependencyValues: Sendable {
   /// property wrapper.
   public subscript<Key: TestDependencyKey>(
     key: Key.Type,
-    fileID: StaticString = #fileID,
-    filePath: StaticString = #filePath,
-    line: UInt = #line,
-    column: UInt = #line,
-    function: StaticString = #function
+    fileID fileID: StaticString = #fileID,
+    filePath filePath: StaticString = #filePath,
+    line line: UInt = #line,
+    column column: UInt = #line,
+    function function: StaticString = #function
   ) -> Key.Value {
     get {
       guard let base = self.storage[ObjectIdentifier(key)], let dependency = base as? Key.Value

@@ -79,9 +79,3 @@ This library addresses all of the points above, and much, _much_ more.
 - ``DependencyValues``
 - ``DependencyKey``
 - ``DependencyContext``
-
-### Concurrency support
-
-- ``ActorIsolated``
-- ``LockIsolated``
-- ``UncheckedSendable``

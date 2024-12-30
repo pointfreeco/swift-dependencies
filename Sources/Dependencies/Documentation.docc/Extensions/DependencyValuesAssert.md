@@ -6,7 +6,3 @@
 
 - ``AssertionEffect``
 - ``AssertionFailureEffect``
-
-### Custom assertions
-
-- ``AnyAssertionEffect``

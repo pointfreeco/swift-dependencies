@@ -18,9 +18,10 @@ be written to disk, or user defaults to be written, or any number of things. It 
 use mock versions of those dependencies so that the user can interact with your feature in a fully
 controlled environment.
 
-To do this you need to make use of the ``withDependencies(from:_:operation:file:line:)-2y5dq`` 
-method, which allows you to inherit the dependencies from an existing object _and_ additionally
-override some of those dependencies:
+To do this you need to make use of the
+``withDependencies(from:operation:fileID:filePath:line:column:)`` function, which allows you to
+inherit the dependencies from an existing object _and_ additionally override some of those
+dependencies:
 
 ```swift
 @Observable
@@ -48,8 +49,8 @@ interact with the outside world. This way you can be sure that while the user is
 the tutorial sandbox they are not accidentally making network requests, saving data to disk or
 overwriting settings in user defaults.
 
-> Note: The method ``withDependencies(from:_:operation:file:line:)-262kg`` used in the code snippet
-> above is subtly different from ``withDependencies(_:operation:)-3vrqy``. It takes an extra 
+> Note: The method ``withDependencies(from:operation:fileID:filePath:line:column:)`` used in the
+> code snippet above is subtly different from ``withDependencies(_:operation:)``. It takes an extra
 > argument, `from`, which is the object from which we propagate the dependencies before overriding 
 > some. This allows you to propagate dependencies from object to object.
 >
@@ -60,7 +61,7 @@ overwriting settings in user defaults.
 
 Extra care must be taken when overriding dependencies in order for the new dependencies to propagate
 down to child models, and grandchild models, and on and on. All child models constructed should be
-done so inside an invocation of ``withDependencies(from:operation:file:line:)-8e74m`` so
+done so inside an invocation of ``withDependencies(from:operation:fileID:filePath:line:column:)`` so
 that the child model picks up the exact dependencies the parent is using.
 
 For example, taking the code sample from above, suppose that the `TodosModel` could drill down to an
@@ -94,7 +95,7 @@ any of the overridden dependencies from when the `TodosModel` was created.
 
 In order to make sure the overridden dependencies continue to propagate to the child feature, you
 must wrap the creation of the child model in
-``withDependencies(from:operation:file:line:)-8e74m``:
+``withDependencies(from:operation:fileID:filePath:line:column:)``:
 
 ```swift
 func tappedTodo(_ todo: Todo) {

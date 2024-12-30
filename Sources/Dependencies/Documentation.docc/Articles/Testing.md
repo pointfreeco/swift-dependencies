@@ -22,7 +22,7 @@ great for tests. It means your feature doesn't need to actually make network req
 how your feature deals with data returned from an API, and your feature doesn't need to interact
 with the file system just to test how data gets loaded or persisted.
 
-The tool for doing this is ``withDependencies(_:operation:)-3vrqy``, which allows you to specify
+The tool for doing this is ``withDependencies(_:operation:)``, which allows you to specify
 which dependencies should be overridden for the test, and then construct your feature's model in
 that context:
 
@@ -49,7 +49,8 @@ the date is "Feb 13, 2009 at 3:31 PM".
 > models inside its methods, then it has to be careful about how it does so. In order for
 > `FeatureModel`'s dependencies to propagate to the new child model, it must construct the child 
 > model in an altered execution context that passes along the dependencies. The tool for this is
-> ``withDependencies(from:operation:file:line:)-2qx0c`` and can be used simply like this:
+> ``withDependencies(from:operation:fileID:filePath:line:column:)`` and can be used simply like
+> this:
 > 
 >  ```swift
 >  @Observable
@@ -78,7 +79,7 @@ For example, suppose we have a login feature such that if you try logging in and
 causing a message to appear. But then later, if login succeeds that message goes away. We can
 test that entire flow, from end-to-end, but starting the API client dependency in a state where
 login fails, and then later change the dependency so that it succeeds using 
-``withDependencies(_:operation:)-3vrqy``:
+``withDependencies(_:operation:)``:
 
 ```swift
 @Test
@@ -242,7 +243,7 @@ still features missing from the Testing framework that XCTest has, there may be 
 steps you must take.
 
 If you are are writing a _parameterized_ test using the `@Test` macro, you will need to surround the
-entire body of your test in [`withDependencies`](<doc:withDependencies(_:operation:)-3vrqy>) that
+entire body of your test in [`withDependencies`](<doc:withDependencies(_:operation:)>) that
 resets the entire set of values to guarantee that a fresh set of dependencies is used per parameter:
 
 ```swift

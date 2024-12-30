@@ -5,3 +5,7 @@
 ### Dependency value
 
 - ``UUIDGenerator``
+
+### Helpers
+
+- ``Foundation/UUID``

@@ -104,16 +104,11 @@ For previews, you can use the `.dependencies` preview trait to override the
 does not actually sleep for any amount of time:
 
 ```swift
-#Preview(
-  .dependencies { $0.continuousClock = .immediate }
-) {
-  FeatureView(
-    model: withDependencies {
-      $0.continuousClock = ImmediateClock()
-    } operation: {
-      FeatureModel()
-    }
-  )
+#Preview {
+  let _ = prepareDependencies {
+    $0.continuousClock = .immediate
+  }
+  FeatureView(model: FeatureModel())
 }
 ```
 

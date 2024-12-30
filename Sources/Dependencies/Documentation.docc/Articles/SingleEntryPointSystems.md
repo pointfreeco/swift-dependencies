@@ -43,8 +43,7 @@ struct Feature {
   enum Action {
     // ...
   }
-
-  func reduce(into state: inout State, action: Action) -> EffectTask<Action> {
+  var body: some Reducer<State, Action> {
     // All of the feature's logic and behavior is implemented here...
   }
 }
@@ -132,8 +131,7 @@ struct Feature {
   enum Action {
     // ...
   }
-
-  var body: some ReducerOf<Self> {
+  var body: some Reducer<State, Action> {
     Header()
       .dependency(\.fileManager, .mock)
       .dependency(\.userDefaults, .mock)

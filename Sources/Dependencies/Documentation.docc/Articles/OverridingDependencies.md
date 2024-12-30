@@ -49,7 +49,7 @@ the tutorial sandbox they are not accidentally making network requests, saving d
 overwriting settings in user defaults.
 
 > Note: The method ``withDependencies(from:_:operation:file:line:)-262kg`` used in the code snippet
-> above is subtly different from ``withDependencies(_:operation:)-3vrqy``. It takes an extra 
+> above is subtly different from ``withDependencies(_:operation:)``. It takes an extra
 > argument, `from`, which is the object from which we propagate the dependencies before overriding 
 > some. This allows you to propagate dependencies from object to object.
 >

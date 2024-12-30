@@ -243,19 +243,19 @@ extension DependencyValues {
     get {
       self[
         Key.self,
-        key.fileID,
-        key.filePath,
-        key.line,
-        key.column
+        fileID: key.fileID,
+        filePath: key.filePath,
+        line: key.line,
+        column: key.column
       ]
     }
     set {
       self[
         Key.self,
-        key.fileID,
-        key.filePath,
-        key.line,
-        key.column
+        fileID: key.fileID,
+        filePath: key.filePath,
+        line: key.line,
+        column: key.column
       ] = newValue
     }
   }

@@ -5,7 +5,8 @@
 ### Creating and accessing values
 
 - ``init()``
-- ``subscript(key:file:function:line:)
+- ``subscript(_:fileID:filePath:line:column:function:)``
+- ``subscript(_:)``
 
 ### Overriding values
 

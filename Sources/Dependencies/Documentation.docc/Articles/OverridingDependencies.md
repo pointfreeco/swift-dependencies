@@ -18,9 +18,10 @@ be written to disk, or user defaults to be written, or any number of things. It 
 use mock versions of those dependencies so that the user can interact with your feature in a fully
 controlled environment.
 
-To do this you need to make use of the ``withDependencies(from:_:operation:file:line:)-2y5dq`` 
-method, which allows you to inherit the dependencies from an existing object _and_ additionally
-override some of those dependencies:
+To do this you need to make use of the
+``withDependencies(from:operation:fileID:filePath:line:column:)`` function, which allows you to
+inherit the dependencies from an existing object _and_ additionally override some of those
+dependencies:
 
 ```swift
 @Observable

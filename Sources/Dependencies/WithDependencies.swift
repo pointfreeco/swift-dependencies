@@ -105,6 +105,7 @@ public func withDependencies<R>(
   /// ```
   ///
   /// - Parameters:
+  ///   - isolation: The isolation associated with the operation.
   ///   - updateValuesForOperation: A closure for updating the current dependency values for the
   ///     duration of the operation.
   ///   - operation: An operation to perform wherein dependencies have been overridden.
@@ -173,6 +174,10 @@ public func withDependencies<R>(
 ///   - updateValuesForOperation: A closure for updating the current dependency values for the
 ///     duration of the operation.
 ///   - operation: The operation to run with the updated dependencies.
+///   - fileID: The source `#fileID` associated with the operation.
+///   - filePath: The source `#filePath` associated with the operation.
+///   - line: The source `#line` associated with the operation.
+///   - column: The source `#column` associated with the operation.
 /// - Returns: The result returned from `operation`.
 @discardableResult
 public func withDependencies<Model: AnyObject, R>(
@@ -218,10 +223,10 @@ public func withDependencies<Model: AnyObject, R>(
 ///   - model: An object with dependencies. The given model should have at least one `@Dependency`
 ///     property, or should have been initialized and returned from a `withDependencies` operation.
 ///   - operation: The operation to run with the updated dependencies.
-///   - fileID: The source `#fileID` associated with the caller.
-///   - filePath: The source `#filePath` associated with the caller.
-///   - line: The source `#line` associated with the caller.
-///   - column: The source `#column` associated with the caller.
+///   - fileID: The source `#fileID` associated with the operation.
+///   - filePath: The source `#filePath` associated with the operation.
+///   - line: The source `#line` associated with the operation.
+///   - column: The source `#column` associated with the operation.
 /// - Returns: The result returned from `operation`.
 @discardableResult
 public func withDependencies<Model: AnyObject, R>(
@@ -251,14 +256,14 @@ public func withDependencies<Model: AnyObject, R>(
   ///   - model: An object with dependencies. The given model should have at least one `@Dependency`
   ///     property, or should have been initialized and returned from a `withDependencies`
   ///       operation.
-  ///   - isolation: The isolation associated with the caller.
+  ///   - isolation: The isolation associated with the operation.
   ///   - updateValuesForOperation: A closure for updating the current dependency values for the
   ///     duration of the operation.
   ///   - operation: The operation to run with the updated dependencies.
-  ///   - fileID: The source `#fileID` associated with the caller.
-  ///   - filePath: The source `#filePath` associated with the caller.
-  ///   - line: The source `#line` associated with the caller.
-  ///   - column: The source `#column` associated with the caller.
+  ///   - fileID: The source `#fileID` associated with the operation.
+  ///   - filePath: The source `#filePath` associated with the operation.
+  ///   - line: The source `#line` associated with the operation.
+  ///   - column: The source `#column` associated with the operation.
   /// - Returns: The result returned from `operation`.
   @discardableResult
   public func withDependencies<Model: AnyObject, R>(
@@ -305,12 +310,12 @@ public func withDependencies<Model: AnyObject, R>(
   ///   - model: An object with dependencies. The given model should have at least one `@Dependency`
   ///     property, or should have been initialized and returned from a `withDependencies`
   ///     operation.
-  ///   - isolation: The isolation associated with the caller.
+  ///   - isolation: The isolation associated with the operation.
   ///   - operation: The operation to run with the updated dependencies.
-  ///   - fileID: The source `#fileID` associated with the caller.
-  ///   - filePath: The source `#filePath` associated with the caller.
-  ///   - line: The source `#line` associated with the caller.
-  ///   - column: The source `#column` associated with the caller.
+  ///   - fileID: The source `#fileID` associated with the operation.
+  ///   - filePath: The source `#filePath` associated with the operation.
+  ///   - line: The source `#line` associated with the operation.
+  ///   - column: The source `#column` associated with the operation.
   /// - Returns: The result returned from `operation`.
   @discardableResult
   public func withDependencies<Model: AnyObject, R>(

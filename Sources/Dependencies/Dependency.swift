@@ -122,7 +122,12 @@
     /// }
     /// ```
     ///
-    /// - Parameter keyPath: A key path to a specific resulting value.
+    /// - Parameters
+    ///   - keyPath: A key path to a specific resulting value.
+    ///   - fileID: The source `#fileID` associated with the dependency.
+    ///   - filePath: The source `#filePath` associated with the dependency.
+    ///   - line: The source `#line` associated with the dependency.
+    ///   - column: The source `#column` associated with the dependency.
     public init(
       _ keyPath: KeyPath<DependencyValues, Value> & Sendable,
       fileID: StaticString = #fileID,
@@ -174,7 +179,12 @@ extension Dependency {
   /// }
   /// ```
   ///
-  /// - Parameter key: A dependency key to a specific resulting value.
+  /// - Parameters
+  ///   - key: A dependency key to a specific resulting value.
+  ///   - fileID: The source `#fileID` associated with the dependency.
+  ///   - filePath: The source `#filePath` associated with the dependency.
+  ///   - line: The source `#line` associated with the dependency.
+  ///   - column: The source `#column` associated with the dependency.
   public init<Key: TestDependencyKey>(
     _ key: Key.Type,
     fileID: StaticString = #fileID,
@@ -233,19 +243,19 @@ extension DependencyValues {
     get {
       self[
         Key.self,
-        key.fileID,
-        key.filePath,
-        key.line,
-        key.column
+        fileID: key.fileID,
+        filePath: key.filePath,
+        line: key.line,
+        column: key.column
       ]
     }
     set {
       self[
         Key.self,
-        key.fileID,
-        key.filePath,
-        key.line,
-        key.column
+        fileID: key.fileID,
+        filePath: key.filePath,
+        line: key.line,
+        column: key.column
       ] = newValue
     }
   }

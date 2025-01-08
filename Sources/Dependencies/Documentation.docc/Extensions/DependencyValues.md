@@ -5,12 +5,14 @@
 ### Creating and accessing values
 
 - ``init()``
-- ``subscript(key:file:function:line:)
+- ``subscript(_:fileID:filePath:line:column:function:)``
+- ``subscript(_:)``
 
 ### Overriding values
 
 - ``withDependencies(_:operation:)-4uz6m``
-- ``withDependencies(from:operation:file:line:)-8e74m``
+- ``withDependencies(from:operation:fileID:filePath:line:column:)``
+- ``prepareDependencies(_:)``
 
 ### Escaping contexts
 

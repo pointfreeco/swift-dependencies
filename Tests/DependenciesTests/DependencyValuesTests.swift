@@ -736,6 +736,16 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
   }
 
+  func testPrepareDependencies_setsLiveContext() {
+    prepareDependencies {
+      $0.context = .live
+    }
+    @Dependency(\.context) var context
+    XCTAssertEqual(context, .live)
+    @Dependency(FullDependency.self) var client
+    XCTAssertEqual(client.value, FullDependency.liveValue.value)
+  }
+
   func testPrepareDependencies_setsDependency_LiveContext() {
     withDependencies {
       $0.context = .live
@@ -841,19 +851,6 @@ final class DependencyValuesTests: XCTestCase {
         }
         XCTAssertNotEqual(date(), Date(timeIntervalSinceReferenceDate: 42))
       }
-    }
-  #endif
-
-  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
-    func testPrepareDependencies_PrepareContext() {
-      prepareDependencies { $0.context = .live }
-
-      XCTTODO(
-        """
-        Currently 'context' cannot be overridden with 'prepareDependencies'.
-        """)
-      @Dependency(\.date) var date
-      _ = date()
     }
   #endif
 

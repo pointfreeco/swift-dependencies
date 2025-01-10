@@ -235,7 +235,15 @@ public struct DependencyValues: Sendable {
       else {
         let context =
           self.storage[ObjectIdentifier(DependencyContextKey.self)] as? DependencyContext
-          ?? defaultContext
+          ?? self.cachedValues.value(
+            for: DependencyContextKey.self,
+            context: defaultContext,
+            fileID: fileID,
+            filePath: filePath,
+            function: function,
+            line: line,
+            column: column
+          )
 
         switch context {
         case .live, .preview:

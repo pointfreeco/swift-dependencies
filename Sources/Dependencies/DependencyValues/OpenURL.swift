@@ -11,14 +11,38 @@
   }
 
   @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
-  private enum OpenURLKey: DependencyKey {
-    static let liveValue = OpenURLEffect { @MainActor url in
+  internal enum OpenURLKey: DependencyKey {
+    static let liveValue = OpenURLEffect { url in
       let stream = AsyncStream<Bool> { continuation in
         let task = Task { @MainActor in
           #if os(watchOS)
             EnvironmentValues().openURL(url)
             continuation.yield(true)
             continuation.finish()
+          #elseif os(macOS)
+            /// On macOS Sequoia, invokng `EnvironmentValues().openURL(_:completion:)`
+            /// i.e. with the completion handler, causes an `EXC_BREAKPOINT (SIGTRAP), KERN_INVALID_ADDRESS`
+            /// runtime crash with `_dispatch_assert_queue_fail` on a non-main thread.
+            if #available(macOS 15.0, *) {
+              let openURL = OpenURLAction { url in
+                EnvironmentValues().openURL(url)
+                  /// However, using `.systemAction` (which may be needed to indicate whether an app
+                  /// is available to handle a URL scheme), seems to cause the completion handler to never return...
+                  /// Therefore, this implementation is actually equivalent to the  watchOS one, which always
+                  /// yields `true`.
+                  return .handled
+              }
+                
+              openURL(url) { canOpen in
+                  continuation.yield(canOpen)
+                  continuation.finish()
+              }
+            } else {
+              EnvironmentValues().openURL(url) { canOpen in
+                continuation.yield(canOpen)
+                continuation.finish()
+              }
+            }
           #else
             EnvironmentValues().openURL(url) { canOpen in
               continuation.yield(canOpen)

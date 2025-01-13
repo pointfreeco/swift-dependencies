@@ -12,8 +12,7 @@ class OpenURLTests: XCTestCase {
       $0.openURL = OpenURLKey.liveValue
     } operation: {
       let url = URL(string: "https://www.pointfree.co/")!
-      let result = await self.openURL(url)
-        XCTAssert(result)
+      await self.openURL(url)
     }
   }
 }

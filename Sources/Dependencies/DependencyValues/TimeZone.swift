@@ -4,7 +4,7 @@ extension DependencyValues {
   /// The current time zone that features should use when handling dates.
   ///
   /// By default, the time zone returned from `TimeZone.autoupdatingCurrent` is supplied. When used
-  /// in tests, access will call to `XCTFail` when invoked, unless explicitly overridden:
+  /// in tests, access will call to `reportIssue` when invoked, unless explicitly overridden:
   ///
   /// ```swift
   /// // Provision model with overridden dependencies
@@ -17,11 +17,28 @@ extension DependencyValues {
   /// // Make assertions with model...
   /// ```
   public var timeZone: TimeZone {
-    get { self[TimeZoneKey.self] }
-    set { self[TimeZoneKey.self] = newValue }
+    get {
+      #if canImport(Darwin)
+        self[TimeZoneKey.self]
+      #else
+        self[TimeZoneKey.self].wrappedValue
+      #endif
+    }
+    set {
+      #if canImport(Darwin)
+        self[TimeZoneKey.self] = newValue
+      #else
+        self[TimeZoneKey.self].wrappedValue = newValue
+      #endif
+    }
   }
 
   private enum TimeZoneKey: DependencyKey {
-    static let liveValue = TimeZone.autoupdatingCurrent
+    #if canImport(Darwin)
+      static let liveValue = TimeZone.autoupdatingCurrent
+    #else
+      // NB: 'TimeZone' sendability is not yet available in a 'swift-corelibs-foundation' release
+      static let liveValue = UncheckedSendable(TimeZone.autoupdatingCurrent)
+    #endif
   }
 }

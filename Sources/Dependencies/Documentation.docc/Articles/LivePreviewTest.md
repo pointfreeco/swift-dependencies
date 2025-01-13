@@ -38,7 +38,8 @@ Using live dependencies in tests are so problematic that the library will cause 
 if you ever interact with a live dependency while tests are running:
 
 ```swift
-func testFeature() async throws {
+@Test
+func feature() async throws {
   let model = FeatureModel()
 
   model.addButtonTapped()
@@ -53,13 +54,12 @@ func testFeature() async throws {
 }
 ```
 
-
-If you truly want to use
-live dependencies in tests you have to make it explicit by overriding the dependency using 
-``withDependencies(_:operation:)-3vrqy`` and setting the live value:
+If you truly want to use live dependencies in tests you have to make it explicit by overriding the
+dependency and setting the live value:
 
 ```swift
-func testFeature() async throws {
+@Test
+func feature() async throws {
   let model = withDependencies {
     // ⚠️ Explicitly say you want to use a live dependency.
     $0.apiClient = .liveValue
@@ -95,7 +95,7 @@ encourage users of our library to provide what is known as "unimplemented" versi
 dependencies for their ``TestDependencyKey/testValue``. These are implementations that cause a test
 failure if any of its endpoints are invoked.
 
-You can use our [XCTestDynamicOverlay][xctest-dynamic-overlay-gh] library to aid in this, which is
+You can use our [Issue Reporting][issue-reporting-gh] library to aid in this, which is
 immediately accessible as a transitive dependency. It comes with a function called
 [`unimplemented`][unimplemented-docs] that can return a function of nearly any signature with the
 property that if it is invoked it will cause a test failure. For example, the hypothetical analytics
@@ -267,12 +267,15 @@ understand the risks of using a live dependency in tests. To confirm that you tr
 live dependency you can override the dependency with `.liveValue`:
 
 ```swift
-func testFeature() {
+@Test
+func feature() async throws {
   let model = withDependencies {
-    $0.apiClient = .liveValue  // ⬅️
+    // ⚠️ Explicitly say you want to use a live dependency.
+    $0.apiClient = .liveValue
   } operation: {
     FeatureModel()
   }
+
   // ...
 }
 ```
@@ -301,5 +304,5 @@ func testFeature() {
 ```
 
 [unimplemented-docs]: https://pointfreeco.github.io/xctest-dynamic-overlay/main/documentation/xctestdynamicoverlay/unimplemented(_:fileid:line:)-5098a
-[xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay
+[issue-reporting-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay
 

@@ -4,8 +4,8 @@ extension DependencyValues {
   /// The current calendar that features should use when handling dates.
   ///
   /// By default, the calendar returned from `Calendar.autoupdatingCurrent` is supplied. When used
-  /// in a testing context, access will call to `XCTFail` when invoked, unless explicitly overridden
-  /// using ``withDependencies(_:operation:)-4uz6m``:
+  /// in a testing context, access will call to `reportIssue` when invoked, unless explicitly
+  /// overridden using ``withDependencies(_:operation:)-4uz6m``:
   ///
   /// ```swift
   /// // Provision model with overridden dependencies
@@ -18,11 +18,28 @@ extension DependencyValues {
   /// // Make assertions with model...
   /// ```
   public var calendar: Calendar {
-    get { self[CalendarKey.self] }
-    set { self[CalendarKey.self] = newValue }
+    get {
+      #if canImport(Darwin)
+        self[CalendarKey.self]
+      #else
+        self[CalendarKey.self].wrappedValue
+      #endif
+    }
+    set {
+      #if canImport(Darwin)
+        self[CalendarKey.self] = newValue
+      #else
+        self[CalendarKey.self].wrappedValue = newValue
+      #endif
+    }
   }
 
   private enum CalendarKey: DependencyKey {
-    static let liveValue = Calendar.autoupdatingCurrent
+    #if canImport(Darwin)
+      static let liveValue = Calendar.autoupdatingCurrent
+    #else
+      // NB: 'Calendar' sendability is not yet available in a 'swift-corelibs-foundation' release
+      static let liveValue = UncheckedSendable(Calendar.autoupdatingCurrent)
+    #endif
   }
 }

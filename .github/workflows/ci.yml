@@ -14,13 +14,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  macos:
-    name: macOS
-    runs-on: macos-13
+  macos-15:
+    name: macOS 15
+    runs-on: macos-15
     strategy:
       matrix:
         config: ['debug', 'release']
-        xcode: ['14.3.1', '15.0.1']
+        xcode: ['16.0']
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
@@ -34,32 +34,54 @@ jobs:
       - name: Build for library evolution
         run: make build-for-library-evolution
 
-  # integration:
-  #   name: Integration (UI Tests)
-  #   runs-on: macos-13
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Select Xcode 14.3.1
-  #       run: sudo xcode-select -s /Applications/Xcode_14.3.1.app
-  #     - name: Run tests
-  #       run: make test-integration
+  macos-14:
+    name: macOS 14
+    runs-on: macos-14
+    strategy:
+      matrix:
+        config: ['debug', 'release']
+        xcode: ['15.4']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode ${{ matrix.xcode }}
+        run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
+      - name: Skip macro validation
+        run: defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+      - name: Run tests
+        run: make test-swift
+      - name: Build platforms ${{ matrix.config }}
+        run: CONFIG=${{ matrix.config }} make build-all-platforms
+      - name: Build for library evolution
+        run: make build-for-library-evolution
 
   ubuntu:
-    name: Linux
+    strategy:
+      matrix:
+        swift:
+          - '5.10'
+    name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
+    container: swift:${{ matrix.swift }}
     steps:
       - uses: actions/checkout@v4
       - name: Run tests
-        run: make test-swift
+        run: swift test --parallel
+      - name: Run tests (release)
+        run: swift test -c release --parallel
 
   # wasm:
   #   name: Wasm
   #   runs-on: ubuntu-latest
   #   steps:
   #     - uses: actions/checkout@v4
-  #     - uses: swiftwasm/swiftwasm-action@v5.9
+  #     - uses: bytecodealliance/actions/wasmtime/setup@v1
+  #     - uses: swiftwasm/setup-swiftwasm@v1
   #       with:
-  #         shell-action: carton test
+  #         swift-version: "wasm-5.9.2-RELEASE"
+  #     - name: Build tests
+  #       run: swift build --triple wasm32-unknown-wasi --build-tests
+  #     - name: Run tests
+  #       run: wasmtime .build/debug/swift-dependenciesPackageTests.wasm
 
   # windows:
   #   name: Windows
@@ -67,25 +89,23 @@ jobs:
   #   steps:
   #     - uses: compnerd/gha-setup-swift@main
   #       with:
-  #         branch: swift-5.8-release
-  #         tag: 5.8-RELEASE
-
+  #         branch: swift-5.10-release
+  #         tag: 5.10-RELEASE
+  #
   #     - uses: actions/checkout@v4
   #     - name: Run tests
   #       run: swift test
   #     - name: Run tests (release)
   #       run: swift test -c release
 
-  static-stdlib:
-    strategy:
-      matrix:
-        image: ['swift:5.7-focal', 'swift:5.8-focal']
-    runs-on: ubuntu-latest
-    container:
-      image: ${{ matrix.image }}
+  check-macro-compatibility:
+    name: Check Macro Compatibility
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Build for static-stdlib (debug)
-        run: swift build -c debug --static-swift-stdlib
-      - name: Build for static-stdlib (release)
-        run: swift build -c release --static-swift-stdlib
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run Swift Macro Compatibility Check
+        uses: Matejkob/swift-macro-compatibility-check@v1
+        with:
+          run-tests: false
+          major-versions-only: true

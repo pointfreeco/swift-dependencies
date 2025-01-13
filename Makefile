@@ -1,9 +1,9 @@
 CONFIG = debug
-PLATFORM_IOS = iOS Simulator,id=$(call udid_for,iOS 17,iPhone \d\+ Pro [^M])
+PLATFORM_IOS = iOS Simulator,id=$(call udid_for,iOS,iPhone \d\+ Pro [^M])
 PLATFORM_MACOS = macOS
 PLATFORM_MAC_CATALYST = macOS,variant=Mac Catalyst
-PLATFORM_TVOS = tvOS Simulator,id=$(call udid_for,tvOS 17,TV)
-PLATFORM_WATCHOS = watchOS Simulator,id=$(call udid_for,watchOS 10,Watch)
+PLATFORM_TVOS = tvOS Simulator,id=$(call udid_for,tvOS,TV)
+PLATFORM_WATCHOS = watchOS Simulator,id=$(call udid_for,watchOS,Watch)
 
 default: test
 
@@ -31,7 +31,7 @@ test-linux:
 		--rm \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.9-focal \
+		swift:5.10-focal \
 		bash -c 'apt-get update && apt-get -y install make && make test-swift'
 
 build-for-static-stdlib:
@@ -49,6 +49,13 @@ build-for-library-evolution:
 		--target Dependencies \
 		-Xswiftc -emit-module-interface \
 		-Xswiftc -enable-library-evolution
+
+	swift build \
+		-c release \
+		--target DependenciesMacros \
+		-Xswiftc -emit-module-interface \
+		-Xswiftc -enable-library-evolution \
+		-Xswiftc -DRESILIENT_LIBRARIES # Required to build swift-syntax; see https://github.com/swiftlang/swift-syntax/pull/2540
 
 build-for-static-stdlib-docker:
 	@docker run \

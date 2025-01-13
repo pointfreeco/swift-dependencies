@@ -1,6 +1,5 @@
 import Dependencies
 import XCTest
-import XCTestDynamicOverlay
 
 final class UUIDDependencyTests: XCTestCase {
   @Dependency(\.uuid) var uuid

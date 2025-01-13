@@ -4,4 +4,3 @@ builder:
   - documentation_targets:
     - Dependencies
     - DependenciesMacros
-    swift_version: 5.9

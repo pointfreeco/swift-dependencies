@@ -21,12 +21,12 @@ final class AssertTests: XCTestCase {
       XCTExpectFailure {
         assert(false, "Must be true")
       } issueMatcher: {
-        $0.compactDescription == "Must be true"
+        $0.compactDescription == "failed - Must be true"
       }
       XCTExpectFailure {
         assertionFailure("Failure")
       } issueMatcher: {
-        $0.compactDescription == "Failure"
+        $0.compactDescription == "failed - Failure"
       }
       XCTExpectFailure {
         precondition(false)
@@ -34,7 +34,7 @@ final class AssertTests: XCTestCase {
       XCTExpectFailure {
         precondition(false, "Must be true")
       } issueMatcher: {
-        $0.compactDescription == "Must be true"
+        $0.compactDescription == "failed - Must be true"
       }
     }
   #endif

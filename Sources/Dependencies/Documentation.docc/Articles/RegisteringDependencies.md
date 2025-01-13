@@ -26,7 +26,7 @@ extension APIClient: DependencyKey {
 ```
 
 > Tip: There are two other values you can provide for a dependency. If you implement
-> ``DependencyKey/testValue-5v726`` it will be used when running features in tests, and if you
+> ``DependencyKey/testValue`` it will be used when running features in tests, and if you
 > implement `previewValue` it  will be used while running features in an Xcode preview. You don't
 > need to worry about those values when you are just getting started, and instead can add them
 > later. See <Doc:LivePreviewTest> for more information.
@@ -34,7 +34,9 @@ extension APIClient: DependencyKey {
 With that done you can instantly access your API client dependency from any part of your code base:
 
 ```swift
-final class TodosModel: ObservableObject {
+@Observable
+final class TodosModel {
+  @ObservationIgnored
   @Dependency(APIClient.self) var apiClient
   // ...
 }
@@ -45,7 +47,8 @@ you can override the dependency to return mock data:
 
 ```swift
 @MainActor
-func testFetchUser() async {
+@Test
+func fetchUser() async {
   let model = withDependencies {
     $0[APIClient.self].fetchTodos = { _ in Todo(id: 1, title: "Get milk") }
   } operation: {
@@ -53,9 +56,8 @@ func testFetchUser() async {
   }
 
   await store.loadButtonTapped()
-  XCTAssertEqual(
-    model.todos,
-    [Todo(id: 1, title: "Get milk")]
+  #expect(
+    model.todos == [Todo(id: 1, title: "Get milk")]
   )
 }
 ```

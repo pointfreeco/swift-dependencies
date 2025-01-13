@@ -15,9 +15,21 @@
           client.endpoint()
         } issueMatcher: {
           $0.compactDescription == """
-            Unimplemented: 'Client.endpoint'
+            failed - Unimplemented: 'Client.endpoint'
             """
         }
+      }
+
+      func testUnimplementedWithDefault() {
+        struct Client {
+          @DependencyEndpoint
+          var endpoint: () -> Int = { 42 }
+        }
+        let client = Client()
+        // NB: This invocation of 'endpoint' *should* fail, but it does not due to a bug in the
+        //     Swift compiler: https://github.com/apple/swift/issues/71070
+        let output = client.endpoint()
+        XCTAssert(output == 42)
       }
     #endif
   }

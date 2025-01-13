@@ -11,7 +11,9 @@ extension DependencyValues {
   /// wrapper to the generator's ``DateGenerator/now`` property:
   ///
   /// ```swift
-  /// final class FeatureModel: ObservableObject {
+  /// @Observable
+  /// final class FeatureModel {
+  ///   @ObservationIgnored
   ///   @Dependency(\.date.now) var now
   ///   // ...
   /// }
@@ -38,7 +40,7 @@ extension DependencyValues {
   private enum DateGeneratorKey: DependencyKey {
     static let liveValue = DateGenerator { Date() }
     static let testValue = DateGenerator {
-      XCTFail(#"Unimplemented: @Dependency(\.date)"#)
+      reportIssue(#"Unimplemented: @Dependency(\.date)"#)
       return Date()
     }
   }

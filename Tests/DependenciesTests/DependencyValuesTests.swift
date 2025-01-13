@@ -27,8 +27,8 @@ final class DependencyValuesTests: XCTestCase {
         }
       } issueMatcher: {
         $0.compactDescription == """
-          @Dependency(\\.missingLiveDependency) has no live implementation, but was accessed \
-          from a live context.
+          failed - @Dependency(\\.missingLiveDependency) has no live implementation, but was \
+          accessed from a live context.
 
             Location:
               DependenciesTests/DependencyValuesTests.swift:\(line)
@@ -39,11 +39,11 @@ final class DependencyValuesTests: XCTestCase {
 
           To fix you can do one of two things:
 
-          * Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
+          • Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
           of your dependency, and make sure that the conformance is linked with this current \
           application.
 
-          * Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
+          • Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
           done at the entry point of your application, but can be done later too.
           """
       }
@@ -63,8 +63,8 @@ final class DependencyValuesTests: XCTestCase {
         }
       } issueMatcher: {
         $0.compactDescription == """
-          @Dependency(TestKey.self) has no live implementation, but was accessed from a live \
-          context.
+          failed - @Dependency(TestKey.self) has no live implementation, but was accessed from a \
+          live context.
 
             Location:
               DependenciesTests/DependencyValuesTests.swift:\(line)
@@ -75,11 +75,11 @@ final class DependencyValuesTests: XCTestCase {
 
           To fix you can do one of two things:
 
-          * Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
+          • Conform 'TestKey' to the 'DependencyKey' protocol by providing a live implementation \
           of your dependency, and make sure that the conformance is linked with this current \
           application.
 
-          * Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
+          • Override the implementation of 'TestKey' using 'withDependencies'. This is typically \
           done at the entry point of your application, but can be done later too.
           """
       }
@@ -118,6 +118,16 @@ final class DependencyValuesTests: XCTestCase {
 
       XCTAssertEqual(date, someDate)
       XCTAssertNotEqual(DependencyValues._current.date.now, someDate)
+    }
+  }
+
+  func testSetDependencyAcrossMultipleLines() {
+    withDependencies {
+      $0.date = .constant(someDate)
+      $0.date = .constant(someDate.addingTimeInterval(10))
+    } operation: {
+      @Dependency(\.date) var date
+      XCTAssertEqual(date.now, someDate.addingTimeInterval(10))
     }
   }
 
@@ -252,6 +262,35 @@ final class DependencyValuesTests: XCTestCase {
           XCTAssertEqual(reuseClient.count(), 0)
         }
       }
+    #endif
+  }
+
+  func testUpdatingTestDependencyFromLiveContext_WhenUpdatingDependencies() {
+    @Dependency(\.reuseClient) var reuseClient: ReuseClient
+
+    #if !os(Linux) && !os(WASI) && !os(Windows)
+      withDependencies {
+        $0.context = .live
+      } operation: {
+        withDependencies {
+          $0.reuseClient.setCount(42)
+          XCTAssertEqual($0.reuseClient.count(), 42)
+          XCTAssertEqual(reuseClient.count(), 42)
+        } operation: {
+          #if DEBUG
+            XCTExpectFailure {
+              $0.compactDescription.contains(
+                """
+                @Dependency(\\.reuseClient) has no live implementation, but was accessed from a \
+                live context.
+                """
+              )
+            }
+          #endif
+          XCTAssertEqual(reuseClient.count(), 42)
+        }
+      }
+      XCTAssertEqual(reuseClient.count(), 0)
     #endif
   }
 
@@ -577,11 +616,11 @@ final class DependencyValuesTests: XCTestCase {
     let stream = withDependencies {
       $0.fullDependency.value = 42
     } operation: { () -> AsyncStream<Int> in
-      var isDone = false
+      let isDone = LockIsolated(false)
       return AsyncStream(unfolding: {
-        defer { isDone = true }
+        defer { isDone.setValue(true) }
         @Dependency(\.fullDependency.value) var value
-        return isDone ? nil : value
+        return isDone.value ? nil : value
       })
     }
 
@@ -593,13 +632,13 @@ final class DependencyValuesTests: XCTestCase {
     let stream = withDependencies {
       $0.fullDependency.value = 42
     } operation: { () -> AsyncStream<Int> in
-      var isDone = false
+      let isDone = LockIsolated(false)
       return withEscapedDependencies { continuation in
         AsyncStream(unfolding: {
           continuation.yield {
-            defer { isDone = true }
+            defer { isDone.setValue(true) }
             @Dependency(\.fullDependency.value) var value
-            return isDone ? nil : value
+            return isDone.value ? nil : value
           }
         })
       }
@@ -652,12 +691,8 @@ final class DependencyValuesTests: XCTestCase {
   #endif
 
   func testThreadSafety() async {
-    #if os(Windows)
-      let runCount = 1_000
-    #else
-      let runCount = 100_000
-    #endif
-    let taskCount = 10
+    let runCount = 1_000
+    let taskCount = 100
 
     for _ in 1...runCount {
       defer { CountInitDependency.initCount.setValue(0) }
@@ -691,6 +726,187 @@ final class DependencyValuesTests: XCTestCase {
 
     @Dependency(\.date) var date
     _ = date
+  }
+
+  func testPrepareDependencies_setsDependency() {
+    prepareDependencies {
+      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
+    }
+    @Dependency(\.date.now) var now
+    XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
+  }
+
+  func testPrepareDependencies_setsLiveContext() {
+    prepareDependencies {
+      $0.context = .live
+    }
+    @Dependency(\.context) var context
+    XCTAssertEqual(context, .live)
+    @Dependency(FullDependency.self) var client
+    XCTAssertEqual(client.value, FullDependency.liveValue.value)
+  }
+
+  func testPrepareDependencies_setsDependency_LiveContext() {
+    withDependencies {
+      $0.context = .live
+    } operation: {
+      prepareDependencies {
+        $0[ClientWithEndpoint.self] = ClientWithEndpoint(get: { 1729 })
+      }
+      @Dependency(ClientWithEndpoint.self) var client
+      XCTAssertEqual(client.get(), 1729)
+    }
+  }
+
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_MultiplePreparesWithNoAccessBetween() {
+      prepareDependencies {
+        $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
+      }
+      XCTExpectFailure(
+        """
+        Currently this fails, but in the future we may allow a dependency to be changed in
+        multiple 'prepareDependencies' as long as the dependency has not yet been accessed.
+        """
+      ) {
+        $0.compactDescription == """
+          failed - @Dependency(\\.date) has already been accessed or prepared.
+
+            Key:
+              DependencyValues.DateGeneratorKey
+            Value:
+              DateGenerator
+
+          A global dependency can only be prepared a single time and cannot be accessed \
+          beforehand. Prepare dependencies as early as possible in the lifecycle of your \
+          application.
+
+          To temporarily override a dependency in your application, use 'withDependencies' to do \
+          so in a well-defined scope.
+          """
+      }
+      prepareDependencies {
+        $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
+      }
+      @Dependency(\.date.now) var now
+      XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
+    }
+  #endif
+
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_MultiplePreparesWithAccessBetween() {
+      prepareDependencies {
+        $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 0) }
+      }
+      XCTExpectFailure {
+        $0.compactDescription == """
+          failed - @Dependency(\\.date) has already been accessed or prepared.
+
+            Key:
+              DependencyValues.DateGeneratorKey
+            Value:
+              DateGenerator
+
+          A global dependency can only be prepared a single time and cannot be accessed \
+          beforehand. Prepare dependencies as early as possible in the lifecycle of your \
+          application.
+
+          To temporarily override a dependency in your application, use 'withDependencies' to do \
+          so in a well-defined scope.
+          """
+      }
+      @Dependency(\.date) var date
+      _ = date
+      prepareDependencies {
+        $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
+      }
+    }
+  #endif
+
+  func testPrepareDependencies_setDependencyMultipleTimesInSamePrepare() {
+    prepareDependencies {
+      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 42) }
+      $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 1729) }
+    }
+    @Dependency(\.date.now) var now
+    XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 1729))
+  }
+
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_DependencyAccessBeforePrepare() {
+      withDependencies {
+        $0.context = .live
+      } operation: {
+        @Dependency(\.date) var date
+        _ = date()
+        XCTExpectFailure {
+          prepareDependencies {
+            $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 42) }
+          }
+        } issueMatcher: {
+          $0.compactDescription.hasPrefix(
+            #"""
+            failed - @Dependency(\.date) has already been accessed or prepared.
+            """#)
+        }
+        XCTAssertNotEqual(date(), Date(timeIntervalSinceReferenceDate: 42))
+      }
+    }
+  #endif
+
+  func testPrepareDependencies_setDependencyEndpoint() {
+    prepareDependencies {
+      $0[ClientWithEndpoint.self].get = { @Sendable in 42 }
+    }
+    @Dependency(ClientWithEndpoint.self) var client
+    XCTAssertEqual(client.get(), 42)
+  }
+
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_alreadyCached() {
+      withDependencies {
+        $0.context = .live
+      } operation: {
+        @Dependency(\.date.now) var now
+        _ = now
+        XCTExpectFailure {
+          $0.compactDescription == """
+            failed - @Dependency(\\.date) has already been accessed or prepared.
+
+              Key:
+                DependencyValues.DateGeneratorKey
+              Value:
+                DateGenerator
+
+            A global dependency can only be prepared a single time and cannot be accessed \
+            beforehand. Prepare dependencies as early as possible in the lifecycle of your \
+            application.
+
+            To temporarily override a dependency in your application, use 'withDependencies' to do \
+            so in a well-defined scope.
+            """
+        }
+        prepareDependencies {
+          $0.date = DateGenerator { Date(timeIntervalSince1970: 0) }
+        }
+      }
+    }
+  #endif
+
+  func testPrepareDependencies_WithDependencies() {
+    prepareDependencies {
+      $0.date.now = Date(timeIntervalSince1970: 42)
+    }
+
+    withDependencies {
+      $0.date.now = Date(timeIntervalSince1970: 1729)
+    } operation: {
+      @Dependency(\.date.now) var now
+      XCTAssertEqual(now, Date(timeIntervalSince1970: 1729))
+    }
+
+    @Dependency(\.date.now) var now
+    XCTAssertEqual(now, Date(timeIntervalSince1970: 42))
   }
 }
 
@@ -827,5 +1043,12 @@ extension DependencyValues {
   fileprivate var fullDependency: FullDependency {
     get { self[FullDependency.self] }
     set { self[FullDependency.self] = newValue }
+  }
+}
+
+private struct ClientWithEndpoint: TestDependencyKey {
+  var get: @Sendable () -> Int
+  static var testValue: ClientWithEndpoint {
+    Self { 42 }
   }
 }

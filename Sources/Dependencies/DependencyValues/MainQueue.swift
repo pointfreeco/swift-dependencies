@@ -12,16 +12,18 @@
     /// For example, you could introduce controllable timing to an observable object model that
     /// counts the number of seconds it's onscreen:
     ///
-    /// ```
-    /// final class TimerModel: ObservableObject {
-    ///   @Published var elapsed = 0
+    /// ```swift
+    /// @Observable
+    /// final class TimerModel {
+    ///   var elapsed = 0
     ///
+    ///   @ObservationIgnored
     ///   @Dependency(\.mainQueue) var mainQueue
     ///
     ///   @MainActor
     ///   func onAppear() async {
-    ///     for await _ in self.mainQueue.timer(interval: .seconds(1)) {
-    ///       self.elapsed += 1
+    ///     for await _ in mainQueue.timer(interval: .seconds(1)) {
+    ///       elapsed += 1
     ///     }
     ///   }
     /// }
@@ -29,8 +31,9 @@
     ///
     /// And you could test this model by overriding its main queue with a test scheduler:
     ///
-    /// ```
-    /// func testFeature() {
+    /// ```swift
+    /// @Test
+    /// func feature() {
     ///   let mainQueue = DispatchQueue.test
     ///   let model = withDependencies {
     ///     $0.mainQueue = mainQueue.eraseToAnyScheduler()
@@ -40,10 +43,10 @@
     ///
     ///   Task { await model.onAppear() }
     ///
-    ///   mainQueue.advance(by: .seconds(1))
+    ///   await mainQueue.advance(by: .seconds(1))
     ///   XCTAssertEqual(model.elapsed, 1)
     ///
-    ///   mainQueue.advance(by: .seconds(4))
+    ///   await mainQueue.advance(by: .seconds(4))
     ///   XCTAssertEqual(model.elapsed, 5)
     /// }
     /// ```

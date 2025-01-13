@@ -35,10 +35,17 @@ is a good chance you can immediately make use of one. If you are using `Date()`,
 this library.
 
 ```swift
-final class FeatureModel: ObservableObject {
+@Observable
+final class FeatureModel {
+  var items: [Item] = []
+
+  @ObservationIgnored
   @Dependency(\.continuousClock) var clock  // Controllable way to sleep a task
+  @ObservationIgnored
   @Dependency(\.date.now) var now           // Controllable way to ask for current date
+  @ObservationIgnored
   @Dependency(\.mainQueue) var mainQueue    // Controllable scheduling on main queue
+  @ObservationIgnored
   @Dependency(\.uuid) var uuid              // Controllable UUID creation
 
   // ...
@@ -49,16 +56,17 @@ Once your dependencies are declared, rather than reaching out to the `Date()`, `
 directly, you can use the dependency that is defined on your feature's model:
 
 ```swift
-final class FeatureModel: ObservableObject {
+@Observable
+final class FeatureModel {
   // ...
 
   func addButtonTapped() async throws {
-    try await self.clock.sleep(for: .seconds(1))  // 👈 Don't use 'Task.sleep'
-    self.items.append(
+    try await clock.sleep(for: .seconds(1))  // 👈 Don't use 'Task.sleep'
+    items.append(
       Item(
-        id: self.uuid(),  // 👈 Don't use 'UUID()'
+        id: uuid(),  // 👈 Don't use 'UUID()'
         name: "",
-        createdAt: self.now  // 👈 Don't use 'Date()'
+        createdAt: now  // 👈 Don't use 'Date()'
       )
     )
   }
@@ -73,10 +81,11 @@ inside the `addButtonTapped` method, you can use the ``withDependencies(_:operat
 function to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
 
 ```swift
-func testAdd() async throws {
+@Test
+func add() async throws {
   let model = withDependencies {
     // 1️⃣ Override any dependencies that your feature uses.
-    $0.clock = ImmediateClock()
+    $0.clock = .immediate
     $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
     $0.uuid = .incrementing
   } operation: {
@@ -87,9 +96,8 @@ func testAdd() async throws {
   // 3️⃣ The model now executes in a controlled environment of dependencies,
   //    and so we can make assertions against its behavior.
   try await model.addButtonTapped()
-  XCTAssertEqual(
-    model.items,
-    [
+  #expect(
+    model.items == [
       Item(
         id: UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
         name: "",
@@ -110,20 +118,18 @@ and `UUID()`, and we'd have to wait for real world time to pass, making the test
 But, controllable dependencies aren't only useful for tests. They can also be used in Xcode
 previews. Suppose the feature above makes use of a clock to sleep for an amount of time before
 something happens in the view. If you don't want to literally wait for time to pass in order to see
-how the view changes, you can override the clock dependency to be an "immediate" clock using the
-``withDependencies(_:operation:)-4uz6m`` helper:
+how the view changes, you can override the clock dependency to be an "immediate" clock using
+``prepareDependencies(_:)``:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.clock = ImmediateClock()
-      } operation: {
-        FeatureModel()
-      }
-    )
+#Preview {
+  let _ = prepareDependencies {
+    $0.continuousClock = .immediate
   }
+
+  // All access of '@Dependency(\.continuousClock)' in this preview will
+  // use an immediate clock.
+  FeatureView(model: FeatureModel())
 }
 ```
 

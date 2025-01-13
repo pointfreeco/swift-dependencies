@@ -18,16 +18,18 @@ be written to disk, or user defaults to be written, or any number of things. It 
 use mock versions of those dependencies so that the user can interact with your feature in a fully
 controlled environment.
 
-To do this you need to make use of the ``withDependencies(from:_:operation:file:line:)-2y5dq`` 
-method, which allows you to inherit the dependencies from an existing object _and_ additionally
-override some of those dependencies:
+To do this you need to make use of the
+``withDependencies(from:operation:fileID:filePath:line:column:)`` function, which allows you to
+inherit the dependencies from an existing object _and_ additionally override some of those
+dependencies:
 
 ```swift
-final class AppModel: ObservableObject {
-  @Published var onboardingTodos: TodosModel?
+@Observable
+final class AppModel {
+  var onboardingTodos: TodosModel?
 
   func tutorialButtonTapped() {
-    self.onboardingTodos = withDependencies(from: self) {
+    onboardingTodos = withDependencies(from: self) {
       $0.apiClient = .mock
       $0.fileManager = .mock
       $0.userDefaults = .mock
@@ -47,8 +49,8 @@ interact with the outside world. This way you can be sure that while the user is
 the tutorial sandbox they are not accidentally making network requests, saving data to disk or
 overwriting settings in user defaults.
 
-> Note: The method ``withDependencies(from:_:operation:file:line:)-262kg`` used in the code snippet
-> above is subtly different from ``withDependencies(_:operation:)-3vrqy``. It takes an extra 
+> Note: The method ``withDependencies(from:operation:fileID:filePath:line:column:)`` used in the
+> code snippet above is subtly different from ``withDependencies(_:operation:)``. It takes an extra
 > argument, `from`, which is the object from which we propagate the dependencies before overriding 
 > some. This allows you to propagate dependencies from object to object.
 >
@@ -59,7 +61,7 @@ overwriting settings in user defaults.
 
 Extra care must be taken when overriding dependencies in order for the new dependencies to propagate
 down to child models, and grandchild models, and on and on. All child models constructed should be
-done so inside an invocation of ``withDependencies(from:operation:file:line:)-8e74m`` so
+done so inside an invocation of ``withDependencies(from:operation:fileID:filePath:line:column:)`` so
 that the child model picks up the exact dependencies the parent is using.
 
 For example, taking the code sample from above, suppose that the `TodosModel` could drill down to an
@@ -67,16 +69,20 @@ edit screen for a particular todo. You could model that with an `EditTodoModel` 
 optional state that when hydrated causes the drill down:
 
 ```swift
-final class TodosModel: ObservableObject {
-  @Published var todos: [Todo] = []
-  @Published var editTodo: EditTodoModel?
+@Observable
+final class TodosModel {
+  var todos: [Todo] = []
+  var editTodo: EditTodoModel?
 
+  @ObservationIgnored
   @Dependency(\.apiClient) var apiClient
+  @ObservationIgnored
   @Dependency(\.fileManager) var fileManager
+  @ObservationIgnored
   @Dependency(\.userDefaults) var userDefaults
 
   func tappedTodo(_ todo: Todo) {
-    self.editTodo = EditTodoModel(todo: todo)
+    editTodo = EditTodoModel(todo: todo)
   }
 
   // ...
@@ -89,11 +95,11 @@ any of the overridden dependencies from when the `TodosModel` was created.
 
 In order to make sure the overridden dependencies continue to propagate to the child feature, you
 must wrap the creation of the child model in
-``withDependencies(from:operation:file:line:)-8e74m``:
+``withDependencies(from:operation:fileID:filePath:line:column:)``:
 
 ```swift
 func tappedTodo(_ todo: Todo) {
-  self.editTodo = withDependencies(from: self) {
+  editTodo = withDependencies(from: self) {
     EditTodoModel(todo: todo)
   }
 }
@@ -111,16 +117,17 @@ a user when the view appears, a test for this functionality could be written by 
 `apiClient` to return some mock data:
 
 ```swift
-func testOnAppear() async {
+@Test
+func onAppear() async {
   let model = withDependencies {
     $0.apiClient.fetchUser = { _ in User(id: 42, name: "Blob") }
   } operation: {
     FeatureModel()
   }
 
-  XCTAssertEqual(model.user, nil)
+  #expect(model.user == nil)
   await model.onAppear()
-  XCTAssertEqual(model.user, User(id: 42, name: "Blob"))
+  #expect(model.user == User(id: 42, name: "Blob"))
 }
 ```
 
@@ -164,4 +171,3 @@ class BaseTestCase: XCTestCase {
 
 [swift-identified-collections]: https://github.com/pointfreeco/swift-identified-collections
 [environment-values-docs]: https://developer.apple.com/documentation/swiftui/environmentvalues
-[xctest-dynamic-overlay-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay

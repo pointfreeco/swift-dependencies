@@ -1,6 +1,5 @@
 import Dependencies
 import XCTest
-import XCTestDynamicOverlay
 
 final class DateDependencyTests: XCTestCase {
   @Dependency(\.date) var date

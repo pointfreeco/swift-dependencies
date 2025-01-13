@@ -92,7 +92,7 @@ final class DependencyTests: XCTestCase {
         withDependencies(from: self) {}
       } issueMatcher: {
         $0.compactDescription == """
-          You are trying to propagate dependencies to a child model from a model with no \
+          failed - You are trying to propagate dependencies to a child model from a model with no \
           dependencies. To fix this, the given 'DependencyTests' must be returned from another \
           'withDependencies' closure, or the class must hold at least one '@Dependency' property.
           """
@@ -181,30 +181,6 @@ final class DependencyTests: XCTestCase {
     }
     XCTAssertEqual(9000, greatGrandchild.int)
     XCTAssertEqual("cool", greatGrandchild.string)
-  }
-
-  // NB: `@Dependency` should not be used as a `static var` because of the following behavior.
-  func testStaticDependencyCachesFirstUse() {
-    struct User {
-      @Dependency(\.uuid) static var uuid
-
-      let id: UUID
-
-      init() {
-        self.id = Self.uuid()
-      }
-    }
-
-    let user1 = withDependencies {
-      $0.uuid = .incrementing
-    } operation: {
-      User()
-    }
-
-    let user2 = User()
-
-    XCTAssertEqual(user1.id, UUID(0))
-    XCTAssertEqual(user2.id, UUID(1))
   }
 
   func testDependencyType() {

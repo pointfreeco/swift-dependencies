@@ -82,10 +82,17 @@ is a good chance you can immediately make use of one. If you are using `Date()`,
 this library.
 
 ```swift
-final class FeatureModel: ObservableObject {
+@Observable
+final class FeatureModel {
+  var items: [Item] = []
+
+  @ObservationIgnored
   @Dependency(\.continuousClock) var clock  // Controllable way to sleep a task
+  @ObservationIgnored
   @Dependency(\.date.now) var now           // Controllable way to ask for current date
+  @ObservationIgnored
   @Dependency(\.mainQueue) var mainQueue    // Controllable scheduling on main queue
+  @ObservationIgnored
   @Dependency(\.uuid) var uuid              // Controllable UUID creation
 
   // ...
@@ -96,16 +103,17 @@ Once your dependencies are declared, rather than reaching out to the `Date()`, `
 directly, you can use the dependency that is defined on your feature's model:
 
 ```swift
-final class FeatureModel: ObservableObject {
+@Observable
+final class FeatureModel {
   // ...
 
   func addButtonTapped() async throws {
-    try await self.clock.sleep(for: .seconds(1))  // 👈 Don't use 'Task.sleep'
-    self.items.append(
+    try await clock.sleep(for: .seconds(1))  // 👈 Don't use 'Task.sleep'
+    items.append(
       Item(
-        id: self.uuid(),  // 👈 Don't use 'UUID()'
+        id: uuid(),  // 👈 Don't use 'UUID()'
         name: "",
-        createdAt: self.now  // 👈 Don't use 'Date()'
+        createdAt: now  // 👈 Don't use 'Date()'
       )
     )
   }
@@ -120,23 +128,22 @@ inside the `addButtonTapped` method, you can use the [`withDependencies`][withde
 function to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
 
 ```swift
-func testAdd() async throws {
+@Test
+func add() async throws {
   let model = withDependencies {
     // 1️⃣ Override any dependencies that your feature uses.
-    $0.clock = ImmediateClock()
+    $0.clock = .immediate
     $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
     $0.uuid = .incrementing
   } operation: {
     // 2️⃣ Construct the feature's model
     FeatureModel()
   }
-
   // 3️⃣ The model now executes in a controlled environment of dependencies,
   //    and so we can make assertions against its behavior.
   try await model.addButtonTapped()
-  XCTAssertEqual(
-    model.items,
-    [
+  #expect(
+    model.items == [
       Item(
         id: UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
         name: "",
@@ -157,20 +164,18 @@ and `UUID()`, and we'd have to wait for real world time to pass, making the test
 But, controllable dependencies aren't only useful for tests. They can also be used in Xcode
 previews. Suppose the feature above makes use of a clock to sleep for an amount of time before
 something happens in the view. If you don't want to literally wait for time to pass in order to see
-how the view changes, you can override the clock dependency to be an "immediate" clock using the
-[`withDependencies`][withdependencies-docs] helper:
+how the view changes, you can override the clock dependency to be an "immediate" clock using
+`prepareDependencies`:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.clock = ImmediateClock()
-      } operation: {
-        FeatureModel()
-      }
-    )
+#Preview {
+  let _ = prepareDependencies {
+    $0.continuousClock = .immediate
   }
+
+  // All access of '@Dependency(\.continuousClock)' in this preview will 
+  // use an immediate clock.
+  FeatureView(model: FeatureModel())
 }
 ```
 
@@ -262,7 +267,8 @@ If you want to discuss this library or have a question about how to use it to so
 a particular problem, there are a number of places you can discuss with fellow 
 [Point-Free](http://www.pointfree.co) enthusiasts:
 
-* For long-form discussions, we recommend the [discussions](http://github.com/pointfreeco/swift-dependencies/discussions) tab of this repo.
+* For long-form discussions, we recommend the
+  [discussions](http://github.com/pointfreeco/swift-dependencies/discussions) tab of this repo.
 * For casual chat, we recommend the [Point-Free Community Slack](http://pointfree.co/slack-invite).
 
 ## Extensions
@@ -272,14 +278,14 @@ following projects all build on top of Dependencies:
 
   * [Dependencies Additions](https://github.com/tgrapperon/swift-dependencies-additions): A
     companion library that provides higher-level dependencies.
-  * [Dependencies Protocol Extras](https://github.com/arasan01/swift-dependencies-extras): Library to make swift-dependencies even more useful when using Protocol
+  * [Dependencies Protocol Extras](https://github.com/arasan01/swift-dependencies-extras): A library
+    to make swift-dependencies even more useful when using protocols.
 
 ## Alternatives
 
 There are many other dependency injection libraries in the Swift community. Each has its own set of
 priorities and trade-offs that differ from Dependencies. Here are a few well-known examples:
 
-  * [Cleanse](https://github.com/square/Cleanse)
   * [Factory](https://github.com/hmlongco/Factory)
   * [Needle](https://github.com/uber/needle)
   * [Swinject](https://github.com/Swinject/Swinject)
@@ -306,5 +312,5 @@ This library is released under the MIT license. See [LICENSE](LICENSE) for detai
 [syncups-demo]: https://github.com/pointfreeco/syncups
 [swiftui-nav-gh]: http://github.com/pointfreeco/swiftui-navigation
 [dep-values-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/dependencyvalues#dependency-values
-[withdependencies-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/withdependencies(_:operation:)-4uz6m
+[withdependencies-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/withdependencies(isolation:_:operation:)
 [immediate-clock-docs]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/immediateclock

@@ -14,16 +14,18 @@ extension DependencyValues {
   /// handles rolling a couple dice:
   ///
   /// ```swift
-  /// final class GameModel: ObservableObject {
-  ///   @Published var dice = (1, 1)
+  /// @Observable
+  /// final class GameModel {
+  ///   var dice = (1, 1)
   ///
+  ///   @ObservationIgnored
   ///   @Dependency(\.withRandomNumberGenerator) var withRandomNumberGenerator
   ///
   ///   func rollDice() {
-  ///     self.dice = self.withRandomNumberGenerator { generator in
+  ///     dice = withRandomNumberGenerator { generator in
   ///       (
-  ///         Int.random(in: 1...6, using: &generator),
-  ///         Int.random(in: 1...6, using: &generator)
+  ///         .random(in: 1...6, using: &generator),
+  ///         .random(in: 1...6, using: &generator)
   ///       )
   ///     }
   ///   }
@@ -32,7 +34,7 @@ extension DependencyValues {
   ///
   /// By default, a `SystemRandomNumberGenerator` will be provided to the closure, with the
   /// exception of when run in tests, in which an unimplemented dependency will be provided that
-  /// calls `XCTFail`.
+  /// calls `reportIssue`.
   ///
   /// To test a feature that depends on randomness, you can override its random number generator.
   /// Inject a dependency by calling ``WithRandomNumberGenerator/init(_:)`` with a random number
@@ -40,7 +42,8 @@ extension DependencyValues {
   /// a game's model by supplying a seeded random number generator as a dependency:
   ///
   /// ```swift
-  /// func testRoll() {
+  /// @Test
+  /// func roll() {
   ///   let model = withDependencies {
   ///     $0.withRandomNumberGenerator = WithRandomNumberGenerator(LCRNG(seed: 0))
   ///   } operation: {
@@ -64,29 +67,18 @@ extension DependencyValues {
 /// A dependency that yields a random number generator to a closure.
 ///
 /// See ``DependencyValues/withRandomNumberGenerator`` for more information.
-public final class WithRandomNumberGenerator: @unchecked Sendable {
-  private var generator: _AnyRandomNumberGenerator
-  private let lock = NSLock()
+public struct WithRandomNumberGenerator: Sendable {
+  private let generator: LockIsolated<any RandomNumberGenerator & Sendable>
 
-  public init<T: RandomNumberGenerator & Sendable>(_ generator: T) {
-    self.generator = _AnyRandomNumberGenerator(generator)
+  public init(_ generator: some RandomNumberGenerator & Sendable) {
+    self.generator = LockIsolated(generator)
   }
 
-  public func callAsFunction<R>(_ work: (inout _AnyRandomNumberGenerator) -> R) -> R {
-    self.lock.lock()
-    defer { self.lock.unlock() }
-    return work(&self.generator)
-  }
-
-  public class _AnyRandomNumberGenerator: RandomNumberGenerator {
-    private(set) public var base: RandomNumberGenerator
-
-    public init(_ base: RandomNumberGenerator) {
-      self.base = base
-    }
-
-    public func next() -> UInt64 {
-      self.base.next()
+  public func callAsFunction<R: Sendable>(
+    _ work: @Sendable (inout any RandomNumberGenerator & Sendable) throws -> R
+  ) rethrows -> R {
+    try generator.withValue {
+      try work(&$0)
     }
   }
 }

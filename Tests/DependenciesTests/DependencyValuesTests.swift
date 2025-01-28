@@ -736,6 +736,13 @@ final class DependencyValuesTests: XCTestCase {
     XCTAssertEqual(now, Date(timeIntervalSinceReferenceDate: 0))
   }
 
+  func testPrepareDependencies_returnResult() {
+    let result = prepareDependencies { _ in
+      42
+    }
+    XCTAssertEqual(result, 42)
+  }
+
   func testPrepareDependencies_setsLiveContext() {
     prepareDependencies {
       $0.context = .live

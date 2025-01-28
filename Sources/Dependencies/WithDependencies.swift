@@ -41,11 +41,11 @@ import Foundation
 ///
 /// - Parameter updateValues: A closure for updating the current dependency values for the
 ///   lifetime of your application.
-public func prepareDependencies(
-  _ updateValues: (inout DependencyValues) throws -> Void
-) rethrows {
+public func prepareDependencies<R>(
+  _ updateValues: (inout DependencyValues) throws -> R
+) rethrows -> R {
   var dependencies = DependencyValues._current
-  try DependencyValues.$preparationID.withValue(UUID()) {
+  return try DependencyValues.$preparationID.withValue(UUID()) {
     try updateValues(&dependencies)
   }
 }

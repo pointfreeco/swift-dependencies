@@ -224,18 +224,26 @@ public struct DependencyValues: Sendable {
   /// property wrapper.
   public subscript<Key: TestDependencyKey>(
     key: Key.Type,
-    fileID: StaticString = #fileID,
-    filePath: StaticString = #filePath,
-    line: UInt = #line,
-    column: UInt = #line,
-    function: StaticString = #function
+    fileID fileID: StaticString = #fileID,
+    filePath filePath: StaticString = #filePath,
+    line line: UInt = #line,
+    column column: UInt = #line,
+    function function: StaticString = #function
   ) -> Key.Value {
     get {
       guard let base = self.storage[ObjectIdentifier(key)], let dependency = base as? Key.Value
       else {
         let context =
           self.storage[ObjectIdentifier(DependencyContextKey.self)] as? DependencyContext
-          ?? defaultContext
+          ?? self.cachedValues.value(
+            for: DependencyContextKey.self,
+            context: defaultContext,
+            fileID: fileID,
+            filePath: filePath,
+            function: function,
+            line: line,
+            column: column
+          )
 
         switch context {
         case .live, .preview:
@@ -268,6 +276,10 @@ public struct DependencyValues: Sendable {
     }
     set {
       if DependencyValues.isPreparing {
+        if context == .preview, Thread.isPreviewAppEntryPoint {
+          reportIssue("Ignoring dependencies prepared in preview app entry point")
+          return
+        }
         let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
         guard !cachedValues.cached.keys.contains(cacheKey) else {
           if cachedValues.cached[cacheKey]?.preparationID != DependencyValues.preparationID {
@@ -547,6 +559,9 @@ public final class CachedValues: @unchecked Sendable {
         case .live:
           value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
         case .preview:
+          if Thread.isPreviewAppEntryPoint {
+            return Key.previewValue
+          }
           if !CachedValues.isAccessingCachedDependencies {
             value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
               #if canImport(SwiftUI) && compiler(>=6)

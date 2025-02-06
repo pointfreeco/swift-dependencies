@@ -4,3 +4,4 @@ builder:
   - documentation_targets:
     - Dependencies
     - DependenciesMacros
+    - DependenciesTestSupport

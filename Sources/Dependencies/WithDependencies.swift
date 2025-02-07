@@ -46,6 +46,35 @@ import Foundation
 /// > before it has been accessed. If you attempt to prepare a dependency that has previously been
 /// > overridden or accessed, a runtime warning will be emitted.
 ///
+/// You can also use ``prepareDependencies(_:)`` in Xcode previews, but you do have to use
+/// `let _` in order to play nicely with result builders:
+///
+/// ```swift
+/// #Preview {
+///   let _ = prepareDependencies {
+///     $0.defaultDatabase = try! DatabaseQueue(/* ... */)
+///   }
+///   FeatureView()
+/// }
+/// ```
+///
+/// > Note: It is technically possible to use ``prepareDependencies(_:)`` in tests:
+/// >
+/// >```swift
+/// >@Suite struct FeatureTests {
+/// >  init() {
+/// >    prepareDependencies {
+/// >      $0.defaultDatabase = try! DatabaseQueue(/* ... */)
+/// >    }
+/// >  }
+/// >
+/// >  // ...
+/// >}
+/// >```
+/// >
+/// > However, ``prepareDependencies(_:)`` is not compatible with running tests repeatedly or
+/// > parameterized tests, and so you may not want to use it for testing.
+///
 /// - Parameter updateValues: A closure for updating the current dependency values for the
 ///   lifetime of your application.
 public func prepareDependencies<R>(

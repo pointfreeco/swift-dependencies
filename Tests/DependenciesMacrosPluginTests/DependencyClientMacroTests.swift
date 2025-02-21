@@ -1072,4 +1072,94 @@ final class DependencyClientMacroTests: BaseTestCase {
       """
     }
   }
+
+  func testInitializerWithoutEndpoints() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var config: Bool
+        var foo: Int = 42
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        var config: Bool
+        var foo: Int = 42
+      
+        init(
+          config: Bool,
+          foo: Int = 42
+        ) {
+          self.config = config
+          self.foo = foo
+        }
+      }
+      """
+    }
+  }
+
+  func testDependencyComposition() {
+    assertMacro {
+      """
+      @DependencyClient
+      public struct ClientA {
+        public var fetchA: @Sendable (Int) async -> Bool = { false } 
+      }
+      
+      @DependencyClient
+      public struct ClientB {
+        public var fetchB: @Sendable (Int) async throws -> Bool 
+      }
+      
+      @DependencyClient
+      public struct Client {
+        public var a: ClientA
+        public var b: ClientB
+      }
+      """
+    } expansion: {
+      """
+      public struct ClientA {
+        @DependencyEndpoint
+        public var fetchA: @Sendable (Int) async -> Bool = { false } 
+      
+        public init(
+          fetchA: @Sendable @escaping (Int) async -> Bool
+        ) {
+          self.fetchA = fetchA
+        }
+      
+        public init() {
+        }
+      }
+      public struct ClientB {
+        @DependencyEndpoint
+        public var fetchB: @Sendable (Int) async throws -> Bool 
+      
+        public init(
+          fetchB: @Sendable @escaping (Int) async throws -> Bool
+        ) {
+          self.fetchB = fetchB
+        }
+      
+        public init() {
+        }
+      }
+      public struct Client {
+        public var a: ClientA
+        public var b: ClientB
+      
+        public init(
+          a: ClientA,
+          b: ClientB
+        ) {
+          self.a = a
+          self.b = b
+        }
+      }
+      """
+    }
+  }
 }

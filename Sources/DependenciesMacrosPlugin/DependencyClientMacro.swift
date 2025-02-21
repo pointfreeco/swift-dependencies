@@ -216,10 +216,12 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       )
       hasEndpoints = hasEndpoints || isEndpoint
     }
-    guard hasEndpoints else { return [] }
     let access = accesses.min().flatMap { $0.token?.with(\.trailingTrivia, .space) }
+    let propertyCandidates = hasEndpoints
+      ? [properties, properties.filter { !$0.isEndpoint }]
+      : [properties.filter { !$0.isEndpoint }]
     // TODO: Don't define initializers if any single endpoint is invalid
-    return [properties, properties.filter { !$0.isEndpoint }].map {
+    return propertyCandidates.map {
       $0.isEmpty
         ? "\(access)init() {}"
         : """

@@ -1,3 +1,4 @@
+import Foundation
 import IssueReporting
 
 #if canImport(XCTest)

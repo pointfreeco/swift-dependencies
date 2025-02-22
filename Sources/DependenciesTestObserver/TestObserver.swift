@@ -23,7 +23,7 @@ import IssueReporting
 
 public func registerTestObserver(_ resetCache: @convention(c) () -> Void) {
   guard isTesting else { return }
-  #if !_runtime(_ObjC)
+  #if !_runtime(_ObjC) && canImport(XCTest)
     XCTestObservationCenter.shared.addTestObserver(TestObserver(resetCache))
   #endif
 }

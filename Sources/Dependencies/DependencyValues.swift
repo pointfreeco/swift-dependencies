@@ -1,15 +1,16 @@
 import Foundation
 import IssueReporting
 
-#if os(Windows)
-  import WinSDK
-#elseif canImport(Android)
+#if canImport(Android)
   import Android
-#elseif os(Linux)
+#elseif canImport(Glibc)
   import Glibc
-#endif
-// WASI does not support dynamic linking
-#if os(WASI)
+#elseif canImport(Musl)
+  import Musl
+#if canImport(WinSDK)
+  import WinSDK
+#elseif os(WASI)
+  // WASI does not support dynamic linking
   import XCTest
 #endif
 

@@ -11,13 +11,7 @@
     )
     func uuid(value: Int) {
       @Dependency(\.uuid) var uuid
-      if value == 1 {
-        #expect(uuid() == UUID(0))
-      } else {
-        withKnownIssue {
-          #expect(uuid() == UUID(0))
-        }
-      }
+      #expect(uuid() == UUID(0))
     }
 
     @Test func isolation1() {

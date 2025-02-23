@@ -4,7 +4,7 @@
   import Foundation
   import Testing
 
-  @Suite(.dependency(\.uuid, .incrementing))
+//  @Suite(.dependency(\.uuid, .incrementing))
   struct TestTraitTests {
     @Dependency(\.uuid) var uuid
 

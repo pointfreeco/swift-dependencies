@@ -5,18 +5,12 @@
   import Foundation
   import Testing
 
-  struct SwiftTestingTests {
+  @Suite(.resetDependencies) struct SwiftTestingTests {
     @Test(.serialized, arguments: 1...5)
     func parameterizedCachePollution(_ argument: Int) {
       @Dependency(Client.self) var client
       let value = client.increment()
-      if argument == 1 {
-        #expect(value == 1)
-      } else {
-        withKnownIssue {
-          #expect(value == 1)
-        }
-      }
+      #expect(value == 1)
     }
 
     @Test(arguments: 1...5)

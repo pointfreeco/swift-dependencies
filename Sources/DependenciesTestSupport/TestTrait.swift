@@ -23,6 +23,9 @@
     }
 
     extension Trait where Self == _DependenciesScopeTrait {
+      public static var resetDependencies: Self {
+        Self { $0 = DependencyValues() }
+      }
       public static func dependency<Value>(
         _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
         _ value: @autoclosure @escaping @Sendable () throws -> Value

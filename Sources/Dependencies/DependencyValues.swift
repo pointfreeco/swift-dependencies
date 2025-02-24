@@ -151,7 +151,11 @@ public struct DependencyValues: Sendable {
         }
         let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
         class_addMethod(
-          TestObserver.self, Selector(("testCaseWillStart:")), testCaseWillStartImp, nil)
+          TestObserver.self,
+          Selector(("testCaseWillStart:")),
+          testCaseWillStartImp,
+          nil
+        )
         class_addProtocol(TestObserver.self, XCTestObservation)
         _ =
           XCTestObservationCenterShared
@@ -394,7 +398,8 @@ public struct DependencyValues: Sendable {
 
   @_spi(Beta)
   @available(
-    *, deprecated,
+    *,
+    deprecated,
     message: "'resetCache' is no longer necessary for most (unparameterized) '@Test' cases"
   )
   public func resetCache() {
@@ -574,21 +579,26 @@ public final class CachedValues: @unchecked Sendable {
             value = Key.previewValue
           }
         case .test:
-          if !CachedValues.isAccessingCachedDependencies,
-            case let .swiftTesting(.some(testing)) = TestContext.current,
-            let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
-          {
-            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
-              testValues[key]
+          #if compiler(<6.1)
+            if !CachedValues.isAccessingCachedDependencies,
+              case let .swiftTesting(.some(testing)) = TestContext.current,
+              let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
+            {
+              value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
+                testValues[key]
+              }
+            } else {
+              value = Key.testValue
             }
-          } else {
+          #else
             value = Key.testValue
-          }
+          #endif
         }
 
         let cacheableValue = value ?? Key.testValue
         cached[cacheKey] = CachedValue(
-          base: cacheableValue, preparationID: DependencyValues.preparationID
+          base: cacheableValue,
+          preparationID: DependencyValues.preparationID
         )
         return cacheableValue
       }

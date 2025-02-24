@@ -5,13 +5,6 @@
   import Foundation
   import Testing
 
-@Suite(.dependency(\.self, DependencyValues())) struct BaseSuite {}
-//@Suite(.dependencies) struct BaseSuite {}
-//@Suite(.resetDependencies) struct BaseSuite {}
-//@Suite(.setUpDependencies) struct BaseSuite {}
-//@Suite(.prepareDependencies) struct BaseSuite {}
-
-//extension BaseSuite {
   @Suite struct SwiftTestingTests {
     @Test(.dependencies, .serialized, arguments: 1...5)
     func parameterizedCachePollution(_ argument: Int) {
@@ -49,11 +42,11 @@
       @Dependency(Client.self) var client
       let value = client.increment()
       // NB: Wasm has different behavior here.
-#if os(WASI)
-      #expect(value == 2)
-#else
-      #expect(value == 1)
-#endif
+      #if os(WASI)
+        #expect(value == 2)
+      #else
+        #expect(value == 1)
+      #endif
     }
 
     @Test(.dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 0)))
@@ -128,4 +121,3 @@
     }
   }
 #endif
-//}

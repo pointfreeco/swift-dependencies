@@ -3,6 +3,15 @@
   import Dependencies
   import Testing
 
+  @_documentation(visibility: private)
+  public struct _DependenciesTrait: Sendable {
+    package let updateValues: @Sendable (inout DependencyValues) throws -> Void
+
+    package init(_ updateValues: @escaping @Sendable (inout DependencyValues) throws -> Void) {
+      self.updateValues = updateValues
+    }
+  }
+
   extension Trait where Self == _DependenciesTrait {
     /// A trait that overrides a test's or suite's dependency.
     ///

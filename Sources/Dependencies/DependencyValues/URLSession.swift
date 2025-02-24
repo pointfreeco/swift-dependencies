@@ -84,11 +84,6 @@
     private enum URLSessionKey: DependencyKey {
       static let liveValue = URLSession.shared
       static var testValue: URLSession {
-        #if DEBUG
-          if !DependencyValues.isSetting {
-            reportIssue(#"Unimplemented: @Dependency(\.urlSession)"#)
-          }
-        #endif
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [UnimplementedURLProtocol.self]
         return URLSession(configuration: configuration)
@@ -98,18 +93,23 @@
 
   private final class UnimplementedURLProtocol: URLProtocol {
     override class func canInit(with request: URLRequest) -> Bool {
-      true
+      reportIssue(#"Unimplemented: @Dependency(\.urlSession)"#)
+      return true
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-      request
+      reportIssue(#"Unimplemented: @Dependency(\.urlSession)"#)
+      return request
     }
 
     override func startLoading() {
+      reportIssue(#"Unimplemented: @Dependency(\.urlSession)"#)
       struct UnimplementedURLSession: Error {}
       self.client?.urlProtocol(self, didFailWithError: UnimplementedURLSession())
     }
 
-    override func stopLoading() {}
+    override func stopLoading() {
+      reportIssue(#"Unimplemented: @Dependency(\.urlSession)"#)
+    }
   }
 #endif

@@ -8,6 +8,8 @@
     public struct _DependenciesScopeTrait: TestScoping, TestTrait, SuiteTrait {
       let updateValues: @Sendable (inout DependencyValues) throws -> Void
 
+      @TaskLocal static var isRoot = true
+
       public var isRecursive: Bool { true }
       public func provideScope(
         for test: Test,
@@ -15,16 +17,21 @@
         performing function: @Sendable () async throws -> Void
       ) async throws {
         try await withDependencies {
+          if Self.isRoot {
+            $0 = DependencyValues()
+          }
           try updateValues(&$0)
         } operation: {
-          try await function()
+          try await Self.$isRoot.withValue(false) {
+            try await function()
+          }
         }
       }
     }
 
     extension Trait where Self == _DependenciesScopeTrait {
-      public static var resetDependencies: Self {
-        Self { $0 = DependencyValues() }
+      public static var dependencies: Self {
+        Self { _ in }
       }
       public static func dependency<Value>(
         _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,

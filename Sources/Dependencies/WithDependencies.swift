@@ -82,7 +82,9 @@ public func prepareDependencies<R>(
 ) rethrows -> R {
   var dependencies = DependencyValues._current
   return try DependencyValues.$preparationID.withValue(UUID()) {
-    try updateValues(&dependencies)
+    try isSetting(true) {
+      try updateValues(&dependencies)
+    }
   }
 }
 
@@ -153,11 +155,11 @@ public func withDependencies<R>(
     operation: () async throws -> R
   ) async rethrows -> R {
     #if DEBUG
-      try await DependencyValues.$isSetting.withValue(true) {
+      try await isSetting(true) {
         var dependencies = DependencyValues._current
         try await updateValuesForOperation(&dependencies)
         return try await DependencyValues.$_current.withValue(dependencies) {
-          try await DependencyValues.$isSetting.withValue(false) {
+          try await isSetting(false) {
             let result = try await operation()
             if R.self is AnyClass {
               dependencyObjects.store(result as AnyObject)
@@ -595,10 +597,11 @@ private func isSetting<R>(
   #endif
 }
 
-#if swift(<6)
+#if swift(>=6)
   @_transparent
   private func isSetting<R>(
     _ value: Bool,
+    isolation: isolated (any Actor)? = #isolation,
     operation: () async throws -> R
   ) async rethrows -> R {
     #if DEBUG
@@ -607,4 +610,16 @@ private func isSetting<R>(
       try await operation()
     #endif
   }
+#else
+@_transparent
+private func isSetting<R>(
+  _ value: Bool,
+  operation: () async throws -> R
+) async rethrows -> R {
+#if DEBUG
+  try await DependencyValues.$isSetting.withValue(value, operation: operation)
+#else
+  try await operation()
+#endif
+}
 #endif

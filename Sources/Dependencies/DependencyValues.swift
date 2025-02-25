@@ -149,7 +149,7 @@ public struct DependencyValues: Sendable {
             .takeUnretainedValue()
         else { return }
         let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
-          DependencyValues._current.cachedValues.cached = [:]
+          DependencyValues._current.cachedValues.resetCache()
         }
         let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
         class_addMethod(
@@ -167,7 +167,7 @@ public struct DependencyValues: Sendable {
       if isTesting {
         XCTestObservationCenter.shared.addTestObserver(
           TestObserver {
-            DependencyValues._current.cachedValues.cached = [:]
+            DependencyValues._current.cachedValues.resetCache()
           }
         )
       }
@@ -191,7 +191,7 @@ public struct DependencyValues: Sendable {
         }
       #endif
       pRegisterTestObserver?({
-        DependencyValues._current.cachedValues.cached = [:]
+        DependencyValues._current.cachedValues.resetCache()
       })
     #endif
   }
@@ -286,6 +286,8 @@ public struct DependencyValues: Sendable {
           reportIssue("Ignoring dependencies prepared in preview app entry point")
           return
         }
+        cachedValues.lock.lock()
+        defer { cachedValues.lock.unlock() }
         let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
         guard !cachedValues.cached.keys.contains(cacheKey) else {
           if cachedValues.cached[cacheKey]?.preparationID != DependencyValues.preparationID {
@@ -405,7 +407,7 @@ public struct DependencyValues: Sendable {
     message: "'resetCache' is no longer necessary for most (unparameterized) '@Test' cases"
   )
   public func resetCache() {
-    cachedValues.cached = [:]
+    cachedValues.resetCache()
   }
 }
 
@@ -478,8 +480,14 @@ public final class CachedValues: @unchecked Sendable {
     let preparationID: UUID?
   }
 
-  private let lock = NSRecursiveLock()
+  public let lock = NSRecursiveLock()
   public var cached = [CacheKey: CachedValue]()
+
+  public func resetCache() {
+    lock.lock()
+    defer { lock.unlock() }
+    cached = [:]
+  }
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,

@@ -5,7 +5,7 @@ final class CachedValueTests: XCTestCase {
   override func tearDown() {
     super.tearDown()
     CacheLocals.$skipFailure.withValue(true) {
-      DependencyValues._current.cachedValues.cached = [:]
+      DependencyValues._current.cachedValues.resetCache()
     }
   }
 

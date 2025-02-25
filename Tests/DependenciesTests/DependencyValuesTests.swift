@@ -437,30 +437,33 @@ final class DependencyValuesTests: XCTestCase {
       self.wait(for: [expectation], timeout: 1)
     }
 
-    @MainActor
-    func testEscapingInFeatureModel_InstanceVariablePropagated() async {
-      let expectation = self.expectation(description: "escape")
-
+    // TODO: Remove this condition when Linux CI is updated to a more recent Swift 6.
+    #if !os(Linux) || compiler(<6)
       @MainActor
-      class FeatureModel /*: ObservableObject*/ {
-        @Dependency(\.fullDependency) var fullDependency
-        func doSomething(expectation: XCTestExpectation) {
-          DispatchQueue.main.async {
-            XCTAssertEqual(self.fullDependency.value, 42)
-            expectation.fulfill()
+      func testEscapingInFeatureModel_InstanceVariablePropagated() async {
+        let expectation = self.expectation(description: "escape")
+
+        @MainActor
+        class FeatureModel /*: ObservableObject*/ {
+          @Dependency(\.fullDependency) var fullDependency
+          func doSomething(expectation: XCTestExpectation) {
+            DispatchQueue.main.async {
+              XCTAssertEqual(self.fullDependency.value, 42)
+              expectation.fulfill()
+            }
           }
         }
-      }
 
-      let model = withDependencies {
-        $0.fullDependency.value = 42
-      } operation: {
-        FeatureModel()
-      }
+        let model = withDependencies {
+          $0.fullDependency.value = 42
+        } operation: {
+          FeatureModel()
+        }
 
-      model.doSomething(expectation: expectation)
-      await fulfillment(of: [expectation], timeout: 1)
-    }
+        model.doSomething(expectation: expectation)
+        await fulfillment(of: [expectation], timeout: 1)
+      }
+    #endif
 
     func testEscapingInFeatureModel_NotPropagated() async {
       let expectation = self.expectation(description: "escape")

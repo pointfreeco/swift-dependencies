@@ -10,11 +10,151 @@ when registering your dependencies, which will be automatically used during test
 we cover more detailed information about how to actually write tests with overridden dependencies,
 as well as some tips and gotchas to keep in mind.
 
-* [Altered execution contexts](#Altered-execution-contexts)
+* [Swift's native Testing framework](#Swifts-native-Testing-framework)
+* [Xcode's XCTest framework](#Xcodes-XCTest-framework)
 * [Changing dependencies during tests](#Changing-dependencies-during-tests)
 * [Testing gotchas](#Testing-gotchas)
-* [Swift's native Testing framework](#Swifts-native-Testing-framework)
+  * [Testing host application](#Testing-host-application)
+  * [Statically linking your tests target to Dependencies](#Statically-linking-your-tests-target-to-Dependencies)
+  * [Test case leakage](#Test-case-leakage)
+  * [Static @Dependency](#Static-Dependency)
+  * [Parameterized and repeated @Test runs](#Parameterized-and-repeated-Test-runs)
 
+## Swift's native Testing framework
+
+This library has full support for Swift's native Testing framework, in addition to Xcode's XCTest
+framework. It even works with in process concurrent tests without tests bleeding over to other 
+tests.
+
+The most direct way to override dependencies in a test is to simply wrap the entire test function
+in ``withDependencies(_:operation:)`` in order to override the dependencies for the duration of that
+test:
+
+```swift
+@Test func basics() {
+  withDependencies {
+    $0.uuid = .incrementing
+  } operation: {
+    let model = FeatureModel()
+    // Invoke methods on 'model' and make assertions
+  }
+}
+```
+
+The library also ships with test traits that can help allivate the nesting incurred by 
+``withDependencies(_:operation:)``. In order to get access to the test traits you must link the
+DependenciesTestSupport library to your test target, after which you can do the following:
+
+```swift
+@Test(.dependency(\.uuid, .incrementing)) 
+func basics() {
+  let model = FeatureModel()
+  // Invoke methods on 'model' and make assertions
+}
+```
+
+> Important: Make sure to link DependenciesTestSupport only to your test targets and never your 
+> app targets. Linking that library to an app target will cause the project to fail to compile.
+
+It is also possible to override dependencies for an entire `@Suite` using a suite trait:
+
+```swift
+@Suite(.dependency(\.uuid, .incrementing))
+struct MySuite {
+  @Test func basics() {
+    let model = FeatureModel()
+    // Invoke methods on 'model' and make assertions
+  }
+}
+```
+
+If you need to override multiple dependencies you can do so using the `.dependencies` test trait:
+
+```swift
+@Suite(.dependencies {
+  $0.date.now = Date(timeIntervalSince1970:12324567890)
+  $0.uuid = .incrementing
+})
+struct MySuite {
+  @Test func basics() {
+    let model = FeatureModel()
+    // Invoke methods on 'model' and make assertions
+  }
+}
+```
+
+Because tests in Swift's native Testing framework run in parallel and in process, it is possible
+for multiple tests running to access the same dependency. This can be troublesome if those 
+dependencies are stateful, making it possible for one test to make changes to a dependency that
+another test sees. This will cause mysterious test failures and the type of test failure you get
+may even depend on the order the tests ran.
+
+To properly handle this we recommend having a "base suite" that all of your tests and suites are
+nested inside. That will allow you to provide a fresh set of dependencies to each test, and it will
+not be possible for changes in one test to bleed over to another test.
+
+To do this, simply define a `@Suite` and use the `.dependencies` trait:
+
+```swift
+@Suite(.dependencies) struct BaseSuite {}
+```
+
+This type does not need to have anything in its body, and the `.dependencies` trait is responsibly
+for giving each test in the suite its own scratchpad of dependencies.
+
+Then nest all of your `@Suite`s and `@Test`s in this type:
+
+```swift
+extension BaseSuite {
+  @Suite struct FeatureTests {
+    @Test func basics() {
+      // ...  
+    }
+  }
+}
+```
+
+This will allow all tests to run in parallel and in process without them affecting each other.
+
+## Xcode's XCTest framework
+
+This library also works with Xcode's testing framework, known as XCTest. Just as with Swift's 
+Testing framework, one can override dependencies for a test by wrapping the body of a test in
+``withDependencies(_:operation:)``:
+
+```swift
+func testBasics() {
+  withDependencies {
+    $0.uuid = .incrementing
+  } operation: {
+    let model = FeatureModel()
+    // Invoke methods on 'model' and make assertions
+  }
+}
+```
+
+XCTest does not support traits, and so it is not possible to override dependencies on a per-test
+basis without incurring the indentation of ``withDependencies(_:operation:)``. However, you can
+override all dependencies for an entire test case by implementing the `invokeTest` method:
+
+```swift
+class FeatureTests: XCTestCase {
+  override func invokeTest() {
+    withDependencies { 
+      $0.uuid = .incrementing
+    } operation: {
+      super.invokeTest()
+    }
+  }
+
+  func testBasics() {
+    // Test has 'uuid' dependency overridden.
+  }
+}
+```
+
+
+<!--
 ## Altered execution contexts
 
 It is possible to completely alter the execution context in which a feature's logic runs, which is
@@ -68,12 +208,15 @@ the date is "Feb 13, 2009 at 3:31 PM".
 > This guarantees that when `FeatureModel`'s dependencies are overridden in tests that it will also
 > trickle down to `ChildModel`.
 
+--> 
+
 ## Changing dependencies during tests
 
 While it is most common to set up all dependencies at the beginning of a test and then make 
 assertions, sometimes it is necessary to also change the dependencies in the middle of a test.
 This can be very handy for modeling test flows in which a dependency is in a failure state at
-first, but then later becomes successful.
+first, but then later becomes successful. To do this one can simply use 
+``withDependencies(_:operation:)`` again inside the body of your test.
 
 For example, suppose we have a login feature such that if you try logging in and an error is thrown
 causing a message to appear. But then later, if login succeeds that message goes away. We can
@@ -82,16 +225,9 @@ login fails, and then later change the dependency so that it succeeds using
 ``withDependencies(_:operation:)``:
 
 ```swift
-@Test
+@Test(.dependency(\.apiClient.login, { _, _ in throw LoginFailure() }))
 func retryFlow() async {
-  let model = withDependencies { 
-    $0.apiClient.login = { email, password in 
-      struct LoginFailure: Error {}
-      throw LoginFailure()
-    }
-  } operation: {
-    LoginModel()
-  }
+  let model = LoginModel()
   await model.loginButtonTapped()
   #expect(model.errorMessage == "We could not log you in. Please try again")
 
@@ -170,7 +306,7 @@ didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: An
 That will allow tests to run in the application target without your actual application code 
 interfering.
 
-### Statically linking your tests target to `Dependencies`
+### Statically linking your tests target to Dependencies
 
 If you statically link the `Dependencies` module to your tests target, its implementation may clash
 with the implementation that is statically linked to the app itself. It then may use a different
@@ -236,7 +372,10 @@ class Model {
 You will not be able to override this dependency in the normal fashion. In general there is no need
 to ever have a static dependency, and so you should avoid this pattern.
 
-### Parameterized @Test cases
+### Parameterized and repeated @Test runs
+
+> Important: If targeting Swift 6.1+ (Xcode 16.3+), then this gotcha does not apply and can be
+> ignored.
 
 The library comes with support for Swift's new native Testing framework. However, as there are still
 still features missing from the Testing framework that XCTest has, there may be some additional

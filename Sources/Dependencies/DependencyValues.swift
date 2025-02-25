@@ -559,67 +559,51 @@ public final class CachedValues: @unchecked Sendable {
         }
       #endif
 
-      print(#fileID, #line)
       guard let base = cached[cacheKey]?.base, let value = base as? Key.Value
       else {
-        print(#fileID, #line)
         let value: Key.Value?
         switch context {
         case .live:
-          print(#fileID, #line)
           value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
         case .preview:
-          print(#fileID, #line)
           if Thread.isPreviewAppEntryPoint {
             return Key.previewValue
           }
           if !CachedValues.isAccessingCachedDependencies {
-            print(#fileID, #line)
             value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
               #if canImport(SwiftUI) && compiler(>=6)
-              print(#fileID, #line)
                 return previewValues[key]
               #else
-              print(#fileID, #line)
                 return Key.previewValue
               #endif
             }
           } else {
-            print(#fileID, #line)
             value = Key.previewValue
           }
         case .test:
           #if compiler(<6.1)
-          print(#fileID, #line)
             if !CachedValues.isAccessingCachedDependencies,
               case let .swiftTesting(.some(testing)) = TestContext.current,
               let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
             {
-              print(#fileID, #line)
               value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
                 testValues[key]
               }
             } else {
-              print(#fileID, #line)
               value = Key.testValue
             }
           #else
-          print(#fileID, #line)
             value = Key.testValue
           #endif
         }
 
-        print(#fileID, #line)
         let cacheableValue = value ?? Key.testValue
-        print(#fileID, #line)
         cached[cacheKey] = CachedValue(
           base: cacheableValue,
           preparationID: DependencyValues.preparationID
         )
-        print(#fileID, #line)
         return cacheableValue
       }
-      print(#fileID, #line)
 
       return value
     }

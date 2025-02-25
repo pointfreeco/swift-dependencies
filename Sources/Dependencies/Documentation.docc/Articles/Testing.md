@@ -99,7 +99,7 @@ To do this, simply define a `@Suite` and use the `.dependencies` trait:
 @Suite(.dependencies) struct BaseSuite {}
 ```
 
-This type does not need to have anything in its body, and the `.dependencies` trait is responsibly
+This type does not need to have anything in its body, and the `.dependencies` trait is responsible
 for giving each test in the suite its own scratchpad of dependencies.
 
 Then nest all of your `@Suite`s and `@Test`s in this type:

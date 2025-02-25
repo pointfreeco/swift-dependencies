@@ -119,7 +119,9 @@ import IssueReporting
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
   @TaskLocal static var currentDependency = CurrentDependency()
-  @TaskLocal static var isSetting = false
+  #if DEBUG
+    @TaskLocal static var isSetting = false
+  #endif
   @TaskLocal static var preparationID: UUID?
   static var isPreparing: Bool {
     preparationID != nil

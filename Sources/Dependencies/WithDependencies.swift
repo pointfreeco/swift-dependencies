@@ -597,7 +597,7 @@ private func isSetting<R>(
   #endif
 }
 
-#if swift(>=6)
+#if compiler(>=6)
   @_transparent
   private func isSetting<R>(
     _ value: Bool,

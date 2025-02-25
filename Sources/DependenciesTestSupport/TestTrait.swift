@@ -110,4 +110,21 @@
       }
     }
   }
+
+  extension Trait where Self == _DependenciesTrait {
+    public static func dependencies(
+      _ provider: DependenciesProvider
+    ) -> Self {
+      Self(provider.updateValues)
+    }
+  }
+
+  public struct DependenciesProvider {
+    public init(updateValues: @escaping @Sendable (inout DependencyValues) -> Void) {
+      self.updateValues = updateValues
+    }
+  
+    var updateValues: @Sendable (inout DependencyValues) -> Void
+  }
+
 #endif

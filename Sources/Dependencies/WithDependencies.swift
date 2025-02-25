@@ -203,19 +203,31 @@ public func withDependencies<R>(
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
     operation: () async throws -> R
   ) async rethrows -> R {
-    try await isSetting(true) {
+    #if DEBUG
+      try await DependencyValues.$isSetting.withValue(true) {
+        var dependencies = DependencyValues._current
+        try await updateValuesForOperation(&dependencies)
+        return try await DependencyValues.$_current.withValue(dependencies) {
+          try await DependencyValues.$isSetting.withValue(false) {
+            let result = try await operation()
+            if R.self is AnyClass {
+              dependencyObjects.store(result as AnyObject)
+            }
+            return result
+          }
+        }
+      }
+    #else
       var dependencies = DependencyValues._current
       try await updateValuesForOperation(&dependencies)
       return try await DependencyValues.$_current.withValue(dependencies) {
-        try await isSetting(false) {
-          let result = try await operation()
-          if R.self is AnyClass {
-            dependencyObjects.store(result as AnyObject)
-          }
-          return result
+        let result = try await operation()
+        if R.self is AnyClass {
+          dependencyObjects.store(result as AnyObject)
         }
+        return result
       }
-    }
+    #endif
   }
 #endif
 

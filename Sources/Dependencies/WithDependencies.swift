@@ -597,7 +597,7 @@ private func isSetting<R>(
   #endif
 }
 
-#if compiler(>=6)
+#if compiler(>=6.0.2)
   @_transparent
   private func isSetting<R>(
     _ value: Bool,
@@ -611,15 +611,15 @@ private func isSetting<R>(
     #endif
   }
 #else
-@_transparent
-private func isSetting<R>(
-  _ value: Bool,
-  operation: () async throws -> R
-) async rethrows -> R {
-#if DEBUG
-  try await DependencyValues.$isSetting.withValue(value, operation: operation)
-#else
-  try await operation()
-#endif
-}
+  @_transparent
+  private func isSetting<R>(
+    _ value: Bool,
+    operation: () async throws -> R
+  ) async rethrows -> R {
+    #if DEBUG
+      try await DependencyValues.$isSetting.withValue(value, operation: operation)
+    #else
+      try await operation()
+    #endif
+  }
 #endif

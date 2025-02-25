@@ -133,11 +133,13 @@ public func withDependencies<R>(
   #else
     var dependencies = DependencyValues._current
     try updateValuesForOperation(&dependencies)
-    let result = try operation()
-    if R.self is AnyClass {
-      dependencyObjects.store(result as AnyObject)
+    return try DependencyValues.$_current.withValue(dependencies) {
+      let result = try operation()
+      if R.self is AnyClass {
+        dependencyObjects.store(result as AnyObject)
+      }
+      return result
     }
-    return result
   #endif
 }
 

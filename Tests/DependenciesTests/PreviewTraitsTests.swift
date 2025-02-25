@@ -8,6 +8,7 @@
   struct PreviewTraitsTests {
     @Test
     @available(iOS 18, macOS 15, tvOS 18, watchOS 11, visionOS 2, *)
+    @available(*, deprecated, message: "")
     func dependency() {
       _ = PreviewTrait.dependency(\.date.now, Date(timeIntervalSince1970: 1_234_567_890))
       withDependencies {

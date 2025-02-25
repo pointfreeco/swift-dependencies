@@ -39,10 +39,6 @@ extension DependencyValues {
 
   private enum DateGeneratorKey: DependencyKey {
     static let liveValue = DateGenerator { Date() }
-    static let testValue = DateGenerator {
-      reportIssue(#"Unimplemented: @Dependency(\.date)"#)
-      return Date()
-    }
   }
 }
 

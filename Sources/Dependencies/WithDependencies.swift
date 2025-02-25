@@ -82,7 +82,13 @@ public func prepareDependencies<R>(
 ) rethrows -> R {
   var dependencies = DependencyValues._current
   return try DependencyValues.$preparationID.withValue(UUID()) {
-    try updateValues(&dependencies)
+    #if DEBUG
+      try DependencyValues.$isSetting.withValue(true) {
+        try updateValues(&dependencies)
+      }
+    #else
+      try updateValues(&dependencies)
+    #endif
   }
 }
 
@@ -110,19 +116,31 @@ public func withDependencies<R>(
   _ updateValuesForOperation: (inout DependencyValues) throws -> Void,
   operation: () throws -> R
 ) rethrows -> R {
-  try isSetting(true) {
+  #if DEBUG
+    try DependencyValues.$isSetting.withValue(true) {
+      var dependencies = DependencyValues._current
+      try updateValuesForOperation(&dependencies)
+      return try DependencyValues.$_current.withValue(dependencies) {
+        try DependencyValues.$isSetting.withValue(false) {
+          let result = try operation()
+          if R.self is AnyClass {
+            dependencyObjects.store(result as AnyObject)
+          }
+          return result
+        }
+      }
+    }
+  #else
     var dependencies = DependencyValues._current
     try updateValuesForOperation(&dependencies)
     return try DependencyValues.$_current.withValue(dependencies) {
-      try isSetting(false) {
-        let result = try operation()
-        if R.self is AnyClass {
-          dependencyObjects.store(result as AnyObject)
-        }
-        return result
+      let result = try operation()
+      if R.self is AnyClass {
+        dependencyObjects.store(result as AnyObject)
       }
+      return result
     }
-  }
+  #endif
 }
 
 #if swift(>=6)
@@ -185,19 +203,31 @@ public func withDependencies<R>(
     _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
     operation: () async throws -> R
   ) async rethrows -> R {
-    try await isSetting(true) {
+    #if DEBUG
+      try await DependencyValues.$isSetting.withValue(true) {
+        var dependencies = DependencyValues._current
+        try await updateValuesForOperation(&dependencies)
+        return try await DependencyValues.$_current.withValue(dependencies) {
+          try await DependencyValues.$isSetting.withValue(false) {
+            let result = try await operation()
+            if R.self is AnyClass {
+              dependencyObjects.store(result as AnyObject)
+            }
+            return result
+          }
+        }
+      }
+    #else
       var dependencies = DependencyValues._current
       try await updateValuesForOperation(&dependencies)
       return try await DependencyValues.$_current.withValue(dependencies) {
-        try await isSetting(false) {
-          let result = try await operation()
-          if R.self is AnyClass {
-            dependencyObjects.store(result as AnyObject)
-          }
-          return result
+        let result = try await operation()
+        if R.self is AnyClass {
+          dependencyObjects.store(result as AnyObject)
         }
+        return result
       }
-    }
+    #endif
   }
 #endif
 
@@ -582,29 +612,3 @@ private struct DependencyObject: @unchecked Sendable {
     object == nil
   }
 }
-
-@_transparent
-private func isSetting<R>(
-  _ value: Bool,
-  operation: () throws -> R
-) rethrows -> R {
-  #if DEBUG
-    try DependencyValues.$isSetting.withValue(value, operation: operation)
-  #else
-    try operation()
-  #endif
-}
-
-#if swift(<6)
-  @_transparent
-  private func isSetting<R>(
-    _ value: Bool,
-    operation: () async throws -> R
-  ) async rethrows -> R {
-    #if DEBUG
-      try await DependencyValues.$isSetting.withValue(value, operation: operation)
-    #else
-      try await operation()
-    #endif
-  }
-#endif

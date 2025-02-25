@@ -716,8 +716,12 @@ final class DependencyValuesTests: XCTestCase {
   @MainActor
   func testDeadlock() async {
     DispatchQueue(label: "queue", qos: .utility).async {
-      @Dependency(\.date) var date
-      _ = date
+      withDependencies {
+        $0.date = $0.date
+      } operation: {
+        @Dependency(\.date) var date
+        _ = date
+      }
     }
 
     // Block main thread for 0.1 seconds.

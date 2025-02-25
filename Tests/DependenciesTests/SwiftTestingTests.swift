@@ -5,19 +5,34 @@
   import Foundation
   import Testing
 
-  struct SwiftTestingTests {
-    @Test(.serialized, arguments: 1...5)
-    func parameterizedCachePollution(_ argument: Int) {
-      @Dependency(Client.self) var client
-      let value = client.increment()
-      if argument == 1 {
+  @Suite struct SwiftTestingTests {
+    #if swift(>=6.1)
+      @Test(.dependencies, .serialized, arguments: 1...5)
+      func parameterizedCachePollution(_ argument: Int) {
+        @Dependency(Client.self) var client
+        let value = client.increment()
         #expect(value == 1)
-      } else {
-        withKnownIssue {
+      }
+
+      @Test(.dependencies) func repeatedTest() {
+        @Dependency(Client.self) var client
+        let value = client.increment()
+        #expect(value == 1)
+      }
+    #else
+      @Test(.serialized, arguments: 1...5)
+      func parameterizedCachePollution(_ argument: Int) {
+        @Dependency(Client.self) var client
+        let value = client.increment()
+        if argument == 1 {
           #expect(value == 1)
+        } else {
+          withKnownIssue {
+            #expect(value == 1)
+          }
         }
       }
-    }
+    #endif
 
     @Test(arguments: 1...5)
     func parameterizedCachePollution_ResetDependencies(_ argument: Int) {

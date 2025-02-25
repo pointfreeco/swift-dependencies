@@ -4,6 +4,17 @@
   import Testing
 
   @Suite struct PrepareDependenciesTests {
+#if swift(>=6.1)
+    @Test(
+      .serialized,
+      .dependency(\.uuid, .incrementing),
+      arguments: [1, 2, 3]
+    )
+    func uuid(value: Int) {
+      @Dependency(\.uuid) var uuid
+      #expect(uuid() == UUID(0))
+    }
+    #else
     @Test(
       .serialized,
       .dependency(\.uuid, .incrementing),
@@ -19,6 +30,7 @@
         }
       }
     }
+    #endif
 
     @Test func isolation1() {
       prepareDependencies {

@@ -5,7 +5,7 @@
 
   #if swift(>=6.1)
     @_documentation(visibility: private)
-    public struct _DependenciesScopeTrait: TestScoping, TestTrait, SuiteTrait {
+    public struct _DependenciesTrait: TestScoping, TestTrait, SuiteTrait {
       let updateValues: @Sendable (inout DependencyValues) throws -> Void
 
       @TaskLocal static var isRoot = true
@@ -29,7 +29,7 @@
       }
     }
 
-    extension Trait where Self == _DependenciesScopeTrait {
+    extension Trait where Self == _DependenciesTrait {
       /// A trait that quarantines a test's dependencies from other tests.
       ///
       /// When applied to a `@Suite` (or `@Test`), the dependencies used for that suite (or test)

@@ -153,63 +153,6 @@ class FeatureTests: XCTestCase {
 }
 ```
 
-
-<!--
-## Altered execution contexts
-
-It is possible to completely alter the execution context in which a feature's logic runs, which is
-great for tests. It means your feature doesn't need to actually make network requests just to test
-how your feature deals with data returned from an API, and your feature doesn't need to interact
-with the file system just to test how data gets loaded or persisted.
-
-The tool for doing this is ``withDependencies(_:operation:)``, which allows you to specify
-which dependencies should be overridden for the test, and then construct your feature's model in
-that context:
-
-```swift
-@Test
-func feature() async {
-  let model = withDependencies { 
-    $0.continuousClock = .immediate
-    $0.date.now = Date(timeIntervalSince1970: 1234567890)
-  } operation: {
-    FeatureModel()
-  }
-
-  // Call methods on `model` and make assertions
-}
-```
-
-As long as all of your dependencies are declared with `@Dependency` as instance properties on 
-`FeatureModel`, its entire execution will happen in a context in which any reference to 
-`continuousClock` is an `ImmediateClock` and any reference to `date.now` will always report that
-the date is "Feb 13, 2009 at 3:31 PM".
-
-> Note: If you are using XCTest it is important to note that if `FeatureModel` creates _other_
-> models inside its methods, then it has to be careful about how it does so. In order for
-> `FeatureModel`'s dependencies to propagate to the new child model, it must construct the child 
-> model in an altered execution context that passes along the dependencies. The tool for this is
-> ``withDependencies(from:operation:fileID:filePath:line:column:)`` and can be used simply like
-> this:
-> 
->  ```swift
->  @Observable
->  class FeatureModel {
->    // ...
->
->    func buttonTapped() {
->      self.child = withDependencies(from: self) {
->        ChildModel()
->      }
->    }
->  }
->  ```
-> 
-> This guarantees that when `FeatureModel`'s dependencies are overridden in tests that it will also
-> trickle down to `ChildModel`.
-
---> 
-
 ## Changing dependencies during tests
 
 While it is most common to set up all dependencies at the beginning of a test and then make 

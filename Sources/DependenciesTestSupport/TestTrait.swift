@@ -60,7 +60,7 @@
       public static var dependencies: Self {
         Self { _ in }
       }
-      
+
       /// A trait that overrides a test's or suite's dependency.
       ///
       /// Useful for overriding a dependency in a test without incurring the nesting and

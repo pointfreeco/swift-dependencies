@@ -225,11 +225,10 @@ extension PatternBindingListSyntax {
             identifier: identifier.identifier.privatePrefixed(prefix),
             trailingTrivia: identifier.trailingTrivia
           ),
-          typeAnnotation: binding.typeAnnotation,
+          typeAnnotation: binding.typeAnnotation?.with(\.trailingTrivia, ""),
           initializer: InitializerClauseSyntax(value: unimplementedDefault),
           accessorBlock: binding.accessorBlock,
-          trailingComma: binding.trailingComma,
-          trailingTrivia: binding.trailingTrivia
+          trailingComma: binding.trailingComma
         )
       }
     }
@@ -284,8 +283,7 @@ extension VariableDeclSyntax {
         trailingTrivia: .space,
         presence: .present
       ),
-      bindings: bindings.privatePrefixed(prefix, unimplementedDefault: unimplementedDefault),
-      trailingTrivia: trailingTrivia
+      bindings: bindings.privatePrefixed(prefix, unimplementedDefault: unimplementedDefault)
     )
   }
 }

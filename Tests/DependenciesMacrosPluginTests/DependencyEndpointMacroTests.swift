@@ -5,7 +5,7 @@ import XCTest
 final class DependencyEndpointMacroTests: BaseTestCase {
   override func invokeTest() {
     withMacroTesting(
-      // isRecording: true,
+      record: .failed,
       macros: [DependencyEndpointMacro.self]
     ) {
       super.invokeTest()
@@ -991,6 +991,38 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       package struct Client {
         package var endpoint: () -> Void {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
+
+        private var _endpoint: () -> Void = {
+          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+        }
+      }
+      """#
+    }
+  }
+
+  func testComments() {
+    assertMacro {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var endpoint: () -> Void // This is a comment
+      }
+      """
+    } expansion: {
+      #"""
+      struct Client {
+        var endpoint: () -> Void // This is a comment {
           @storageRestrictions(initializes: _endpoint)
           init(initialValue) {
             _endpoint = initialValue

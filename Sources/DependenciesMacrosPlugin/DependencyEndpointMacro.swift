@@ -145,7 +145,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     }
 
     let access = property.modifiers.first {
-        [.keyword(.public), .keyword(.package)].contains($0.name.tokenKind)
+      [.keyword(.public), .keyword(.package)].contains($0.name.tokenKind)
     }
 
     var decls: [DeclSyntax] = []

@@ -1010,6 +1010,42 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """#
     }
   }
+  
+  func testAccessPackageWithMethodsEquivalent() {
+    assertMacro {
+      """
+      package struct Client {
+        @DependencyEndpoint
+        package var endpoint: (_ id: Int) -> Void
+      }
+      """
+    } expansion: {
+      #"""
+      package struct Client {
+        package var endpoint: (_ id: Int) -> Void {
+          @storageRestrictions(initializes: _endpoint)
+          init(initialValue) {
+            _endpoint = initialValue
+          }
+          get {
+            _endpoint
+          }
+          set {
+            _endpoint = newValue
+          }
+        }
+
+        package func endpoint(id p0: Int) -> Void {
+          self.endpoint(p0)
+        }
+
+        private var _endpoint: (_ id: Int) -> Void = { _ in
+          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+        }
+      }
+      """#
+    }
+  }
 
   func testComments() {
     assertMacro {

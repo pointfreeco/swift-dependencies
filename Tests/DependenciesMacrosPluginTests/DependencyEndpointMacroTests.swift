@@ -1011,7 +1011,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     }
   }
   
-  func testAccessPackageWithMethodsEquivalent() {
+  func testAccessPackageWithMethodEquivalent() {
     assertMacro {
       """
       package struct Client {

@@ -189,17 +189,17 @@ final class DependencyKeyTests: XCTestCase {
     #endif
   }
 
-#if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
-  func testShouldReportUnimplemented() {
-    XCTExpectFailure {
-      @Dependency(ReportIssueTestValueClient.self) var client
-      _ = client
-    } issueMatcher: { issue in
-      issue.compactDescription == """
-        failed - Override this dependency.
-        """
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    func testShouldReportUnimplemented() {
+      XCTExpectFailure {
+        @Dependency(ReportIssueTestValueClient.self) var client
+        _ = client
+      } issueMatcher: { issue in
+        issue.compactDescription == """
+          failed - Override this dependency.
+          """
+      }
     }
-  }
   #endif
 
   func testShouldReportUnimplemented_OverrideDependency() {

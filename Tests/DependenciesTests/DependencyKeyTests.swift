@@ -188,6 +188,28 @@ final class DependencyKeyTests: XCTestCase {
       }
     #endif
   }
+
+#if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+  func testShouldReportUnimplemented() {
+    XCTExpectFailure {
+      @Dependency(ReportIssueTestValueClient.self) var client
+      _ = client
+    } issueMatcher: { issue in
+      issue.compactDescription == """
+        failed - Override this dependency.
+        """
+    }
+  }
+  #endif
+
+  func testShouldReportUnimplemented_OverrideDependency() {
+    withDependencies {
+      $0[ReportIssueTestValueClient.self] = ReportIssueTestValueClient()
+    } operation: {
+      @Dependency(ReportIssueTestValueClient.self) var client
+      _ = client
+    }
+  }
 }
 
 private enum LiveKey: DependencyKey {
@@ -209,5 +231,14 @@ extension DependencyValues {
   fileprivate var numberClient: NumberClient {
     get { self[NumberClient.self] }
     set { self[NumberClient.self] = newValue }
+  }
+}
+
+struct ReportIssueTestValueClient: TestDependencyKey {
+  static var testValue: ReportIssueTestValueClient {
+    if shouldReportUnimplemented {
+      reportIssue("Override this dependency.")
+    }
+    return ReportIssueTestValueClient()
   }
 }

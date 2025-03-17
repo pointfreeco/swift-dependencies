@@ -250,3 +250,32 @@ extension TestDependencyKey {
   /// which will take precedence over this implementation.
   public static var previewValue: Value { Self.testValue }
 }
+
+extension TestDependencyKey {
+  /// Determines if it is appropriate to report an issue in an accessed `testValue`.
+  ///
+  /// When implementing the `testValue` requirement of ``TestDependencyKey`` you may want to report
+  /// an issue so that the user of the dependency is forced to override it in tests. However, one
+  /// cannot unconditionally report an issue because the getter of `testValue` is invoked when
+  /// setting.
+  ///
+  /// Check this value in order to determine if it is appropriate to report an issue or not:
+  ///
+  /// ```swift
+  /// private enum DefaultDatabaseKey: DependencyKey {
+  ///   static var testValue: any DatabaseWriter {
+  ///     if shouldReportUnimplemented {
+  ///       reportIssue("A blank, in-memory database is being used.")
+  ///     }
+  ///     return InMemoryDatabase()
+  ///   }
+  /// }
+  /// ```
+  public static var shouldReportUnimplemented: Bool {
+    #if DEBUG
+      return !DependencyValues.isSetting
+    #else
+      return false
+    #endif
+  }
+}

@@ -579,11 +579,7 @@ public final class CachedValues: @unchecked Sendable {
           }
           if !CachedValues.isAccessingCachedDependencies {
             value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
-              #if canImport(SwiftUI) && compiler(>=6)
-                return previewValues[key]
-              #else
-                return Key.previewValue
-              #endif
+              return Key.previewValue
             }
           } else {
             value = Key.previewValue

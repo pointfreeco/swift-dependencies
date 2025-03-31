@@ -118,15 +118,11 @@ and `UUID()`, and we'd have to wait for real world time to pass, making the test
 But, controllable dependencies aren't only useful for tests. They can also be used in Xcode
 previews. Suppose the feature above makes use of a clock to sleep for an amount of time before
 something happens in the view. If you don't want to literally wait for time to pass in order to see
-how the view changes, you can override the clock dependency to be an "immediate" clock using
-``prepareDependencies(_:)``:
+how the view changes, you can override the clock dependency to be an "immediate" clock using the
+``DeveloperToolsSupport/PreviewTrait/dependencies(_:)`` preview trait:
 
 ```swift
-#Preview {
-  let _ = prepareDependencies {
-    $0.continuousClock = .immediate
-  }
-
+#Preview(trait: .dependencies { $0.continuousClock = ImmediateClock() }) {
   // All access of '@Dependency(\.continuousClock)' in this preview will
   // use an immediate clock.
   FeatureView(model: FeatureModel())

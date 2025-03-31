@@ -306,3 +306,8 @@ func testFeature() {
 [unimplemented-docs]: https://pointfreeco.github.io/xctest-dynamic-overlay/main/documentation/xctestdynamicoverlay/unimplemented(_:fileid:line:)-5098a
 [issue-reporting-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay
 
+## Topics
+
+### Previews
+
+- ``DeveloperToolsSupport/PreviewTrait``

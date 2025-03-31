@@ -5,7 +5,7 @@
   extension PreviewTrait where T == Preview.ViewTraits {
     public static func dependency<Value>(
       _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
-      _ value: @escaping @Sendable () -> Value
+      _ value: @autoclosure @escaping @Sendable () -> Value
     ) -> PreviewTrait {
       .dependencies { $0[keyPath: keyPath] = value() }
     }

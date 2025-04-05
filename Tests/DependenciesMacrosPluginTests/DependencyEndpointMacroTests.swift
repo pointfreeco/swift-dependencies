@@ -24,10 +24,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: () -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -56,10 +52,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: () -> Bool {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -110,10 +102,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: () -> Bool {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -164,10 +152,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: (Int, Bool, String) -> Bool {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -197,10 +181,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: () throws -> Bool {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -230,10 +210,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       public struct ApiClient {
         public var apiRequest: @Sendable (ServerRoute.Api.Route) async throws -> (Data, URLResponse) {
-          @storageRestrictions(initializes: _apiRequest)
-          init(initialValue) {
-            _apiRequest = initialValue
-          }
           get {
             _apiRequest
           }
@@ -263,10 +239,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: () -> () {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -295,10 +267,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: () -> Int? {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -328,10 +296,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: () -> Optional<Int> {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -361,10 +325,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: @Sendable (Int) -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -393,10 +353,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       public struct Client {
         public var endpoint: @Sendable (String, _ id: Int, _ progress: Float) async -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -430,10 +386,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       public struct Client {
         public var endpoint: @MainActor @Sendable (_ id: Int) async -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -467,10 +419,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       public struct Client {
         public var endpoint: @Sendable (_ id: Int) async -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -504,10 +452,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: (_ id: Int) -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -540,10 +484,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: () -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -596,10 +536,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: (_ id: Int) -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -649,10 +585,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       #"""
       var `return`: () throws -> Int {
-          @storageRestrictions(initializes: _return)
-          init(initialValue) {
-              _return = initialValue
-          }
           get {
               _return
           }
@@ -678,10 +610,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       #"""
       var `return`: (_ id: Int) throws -> Int {
-          @storageRestrictions(initializes: _return)
-          init(initialValue) {
-              _return = initialValue
-          }
           get {
               _return
           }
@@ -737,10 +665,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Blah {
         public var doAThing: (_ value: Int) -> String {
-          @storageRestrictions(initializes: _doAThing)
-          init(initialValue) {
-            _doAThing = initialValue
-          }
           get {
             _doAThing
           }
@@ -776,10 +700,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Blah {
         public var doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String {
-          @storageRestrictions(initializes: _doAThing)
-          init(initialValue) {
-            _doAThing = initialValue
-          }
           get {
             _doAThing
           }
@@ -813,10 +733,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Foo {
         var bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void {
-          @storageRestrictions(initializes: _bar)
-          init(initialValue) {
-            _bar = initialValue
-          }
           get {
             _bar
           }
@@ -891,10 +807,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Blah {
         public var foo: () -> Void {
-          @storageRestrictions(initializes: _foo)
-          init(initialValue) {
-            _foo = initialValue
-          }
           get {
             _foo
           }
@@ -910,10 +822,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
           }()
         }
         public var bar: () -> String {
-          @storageRestrictions(initializes: _bar)
-          init(initialValue) {
-            _bar = initialValue
-          }
           get {
             _bar
           }
@@ -952,11 +860,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
           willSet {
             print("!")
           }
-          @storageRestrictions(initializes: _foo)
-          init(initialValue) {
-            _foo = initialValue
-          }
-
           get {
             _foo
           }
@@ -991,10 +894,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       package struct Client {
         package var endpoint: () -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -1023,10 +922,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       package struct Client {
         package var endpoint: (_ id: Int) -> Void {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }
@@ -1059,10 +954,6 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       #"""
       struct Client {
         var endpoint: () -> Void // This is a comment {
-          @storageRestrictions(initializes: _endpoint)
-          init(initialValue) {
-            _endpoint = initialValue
-          }
           get {
             _endpoint
           }

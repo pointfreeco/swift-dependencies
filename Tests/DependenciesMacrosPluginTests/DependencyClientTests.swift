@@ -19,16 +19,23 @@ final class DependencyClientTests: BaseTestCase {
     }
   }
 
-  func testSwiftBug() {
+  func testUnimplementedWithNonThrowingEndpoint() {
     let client = ClientWithNonThrowingEndpoint()
 
-    // NB: This should cause a test failure but currently does not due to a Swift compiler bug:
-    //     https://github.com/apple/swift/issues/71070
-    XCTAssertEqual(client.fetch(), 42)
+    XCTExpectFailure {
+      XCTAssertEqual(client.fetch(), 42)
+    } issueMatcher: {
+      $0.compactDescription == """
+        failed - Unimplemented: \'ClientWithNonThrowingEndpoint.fetch\'
+        """
+    }
 
     XCTExpectFailure {
       XCTAssertEqual(client.fetchWithUnimplemented(), 42)
     } issueMatcher: {
+      $0.compactDescription == """
+        failed - Unimplemented: \'ClientWithNonThrowingEndpoint.fetchWithUnimplemented\'
+        """ ||
       $0.compactDescription == """
         failed - Unimplemented …
 

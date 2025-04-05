@@ -32,12 +32,6 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
 
     return [
       """
-      @storageRestrictions(initializes: _\(raw: identifier))
-      init(initialValue) {
-      _\(raw: identifier) = initialValue
-      }
-      """,
-      """
       get {
       _\(raw: identifier)
       }

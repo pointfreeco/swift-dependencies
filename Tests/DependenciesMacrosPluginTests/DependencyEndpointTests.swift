@@ -26,10 +26,13 @@
           var endpoint: () -> Int = { 42 }
         }
         let client = Client()
-        // NB: This invocation of 'endpoint' *should* fail, but it does not due to a bug in the
-        //     Swift compiler: https://github.com/apple/swift/issues/71070
-        let output = client.endpoint()
-        XCTAssert(output == 42)
+        XCTExpectFailure {
+          _ = client.endpoint()
+        } issueMatcher: {
+          $0.compactDescription == """
+            failed - Unimplemented: 'Client.endpoint'
+            """
+        }
       }
     #endif
   }

@@ -232,25 +232,5 @@ dependency from the implementation (see
 <doc:LivePreviewTest#Separating-interface-and-implementation> for more information). But now there
 is no need to maintain that code as it is automatically provided for you by the macro.
 
-> Warning: Due to a [bug in the Swift compiler](https://github.com/apple/swift/issues/71070), 
-> endpoints that are not throwing will not emit a test failure when invoked. This applies to 
-> dependencies with endpoints like this:
->
-> ```swift
-> @DependencyClient
-> struct NumberFetcher {
->   var get: () async -> Int = { 42 }
-> }
-> ```
->
-> The workaround is to invoke `reportIssue` directly in the closure:
->
-> ```swift
-> @DependencyClient
-> struct NumberFetcher {
->   var get: () async -> Int = { reportIssue("\(Self.self).get"); return 42 }
-> }
-> ```
-
 [designing-deps]: https://www.pointfree.co/collections/dependencies
 [issue-reporting-gh]: http://github.com/pointfreeco/swift-issue-reporting

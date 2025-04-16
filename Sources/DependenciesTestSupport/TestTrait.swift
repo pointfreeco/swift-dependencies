@@ -123,7 +123,7 @@
       /// ```
       ///
       public static func dependencies(
-        _ updateValues: @escaping @Sendable (inout DependencyValues) -> Void
+        _ updateValues: @escaping @Sendable (inout DependencyValues) throws -> Void
       ) -> Self {
         Self(updateValues: updateValues)
       }

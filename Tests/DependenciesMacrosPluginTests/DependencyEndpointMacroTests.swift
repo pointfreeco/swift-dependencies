@@ -969,4 +969,181 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       """#
     }
   }
+
+  func testInitAccessor() {
+    assertMacro {
+    """
+    struct Setting<ValueType: Codable & Equatable & Sendable> {
+      public var value: () -> ValueType
+      @DependencyEndpoint(initAccessor: true)
+      public var set: (_ value: ValueType?) -> Void
+    }
+    """
+    } expansion: {
+      #"""
+      struct Setting<ValueType: Codable & Equatable & Sendable> {
+        public var value: () -> ValueType
+        public var set: (_ value: ValueType?) -> Void {
+          @storageRestrictions(initializes: _set)
+          init(initialValue) {
+            _set = initialValue
+          }
+          get {
+            _set
+          }
+          set {
+            _set = newValue
+          }
+        }
+
+        public func set(value p0: ValueType?) -> Void {
+          self.set(p0)
+        }
+
+        private var _set: (_ value: ValueType?) -> Void = { _ in
+          IssueReporting.reportIssue("Unimplemented: '\(Self.self).set'")
+        }
+      }
+      """#
+    }
+  }
+
+  func testInitAccessorMissingDefaultValue() {
+    assertMacro {
+    """
+    struct Setting<ValueType: Codable & Equatable & Sendable> {
+      public var value: () -> ValueType
+      @DependencyEndpoint(initAccessor: true)
+      public var set: (_ value: ValueType?) -> Int
+    }
+    """
+    } diagnostics: {
+      """
+      struct Setting<ValueType: Codable & Equatable & Sendable> {
+        public var value: () -> ValueType
+        @DependencyEndpoint(initAccessor: true)
+        public var set: (_ value: ValueType?) -> Int
+                   ┬────────────────────────────────
+                   ╰─ 🛑 Default value required for non-throwing closure 'set'
+
+      Defaults are required so that the macro can generate a default, "unimplemented" version of the dependency. The default value can be anything and does not need to signify a real value. For example, if the endpoint returns a boolean, you can return 'false', or if it returns an array, you can return '[]'.
+
+      See the documentation for @DependencyClient for more information: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependenciesmacros/dependencyclient()#Restrictions
+                      ✏️ Insert '= { _ in <#Int#> }'
+      }
+      """
+    } fixes: {
+      """
+      struct Setting<ValueType: Codable & Equatable & Sendable> {
+        public var value: () -> ValueType
+        @DependencyEndpoint(initAccessor: true)
+        public var set: (_ value: ValueType?) -> Int = { _ in <#Int#> }
+      }
+      """
+    } expansion: {
+      #"""
+      struct Setting<ValueType: Codable & Equatable & Sendable> {
+        public var value: () -> ValueType
+        public var set: (_ value: ValueType?) -> Int {
+          @storageRestrictions(initializes: _set)
+          init(initialValue) {
+            _set = initialValue
+          }
+          get {
+            _set
+          }
+          set {
+            _set = newValue
+          }
+        }
+
+        public func set(value p0: ValueType?) -> Int {
+          self.set(p0)
+        }
+
+        private var _set: (_ value: ValueType?) -> Int = { _ in
+          IssueReporting.reportIssue("Unimplemented: '\(Self.self).set'")
+          return <#Int#>
+        }
+      }
+      """#
+    }
+  }
+
+  func testInitAccessorWithDefaultValue() {
+    assertMacro {
+    """
+    struct Setting<ValueType: Codable & Equatable & Sendable> {
+      public var value: () -> ValueType
+      @DependencyEndpoint(initAccessor: true)
+      public var set: (_ value: ValueType?) -> Int = { _ in 42 }
+    }
+    """
+    } expansion: {
+      #"""
+      struct Setting<ValueType: Codable & Equatable & Sendable> {
+        public var value: () -> ValueType
+        public var set: (_ value: ValueType?) -> Int {
+          @storageRestrictions(initializes: _set)
+          init(initialValue) {
+            _set = initialValue
+          }
+          get {
+            _set
+          }
+          set {
+            _set = newValue
+          }
+        }
+
+        public func set(value p0: ValueType?) -> Int {
+          self.set(p0)
+        }
+
+        private var _set: (_ value: ValueType?) -> Int = { _ in
+          IssueReporting.reportIssue("Unimplemented: '\(Self.self).set'")
+          return 42
+        }
+      }
+      """#
+    }
+  }
+
+  func testMethodAndInitAccessor() {
+    assertMacro {
+    """
+    struct Setting<ValueType: Codable & Equatable & Sendable> {
+      public var value: () -> ValueType
+      @DependencyEndpoint(method: "setValue", initAccessor: true)
+      public var set: (_ value: ValueType?) -> Void
+    }
+    """
+    } expansion: {
+      #"""
+      struct Setting<ValueType: Codable & Equatable & Sendable> {
+        public var value: () -> ValueType
+        public var set: (_ value: ValueType?) -> Void {
+          @storageRestrictions(initializes: _set)
+          init(initialValue) {
+            _set = initialValue
+          }
+          get {
+            _set
+          }
+          set {
+            _set = newValue
+          }
+        }
+
+        public func setValue(value p0: ValueType?) -> Void {
+          self.set(p0)
+        }
+
+        private var _set: (_ value: ValueType?) -> Void = { _ in
+          IssueReporting.reportIssue("Unimplemented: '\(Self.self).set'")
+        }
+      }
+      """#
+    }
+  }
 }

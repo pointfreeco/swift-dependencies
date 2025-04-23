@@ -204,7 +204,7 @@ public macro DependencyClient() =
 /// ```
 @attached(accessor, names: named(init), named(get), named(set))
 @attached(peer, names: arbitrary)
-public macro DependencyEndpoint(method: String = "") =
+public macro DependencyEndpoint(method: String = "", initAccessor: Bool = false) =
   #externalMacro(
     module: "DependenciesMacrosPlugin", type: "DependencyEndpointMacro"
   )

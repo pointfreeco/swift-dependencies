@@ -233,7 +233,7 @@ public struct DependencyValues: Sendable {
     fileID fileID: StaticString = #fileID,
     filePath filePath: StaticString = #filePath,
     line line: UInt = #line,
-    column column: UInt = #line,
+    column column: UInt = #column,
     function function: StaticString = #function
   ) -> Key.Value {
     get {
@@ -496,7 +496,7 @@ public final class CachedValues: @unchecked Sendable {
     filePath: StaticString = #filePath,
     function: StaticString = #function,
     line: UInt = #line,
-    column: UInt = #line
+    column: UInt = #column
   ) -> Key.Value {
     lock.lock()
     defer { lock.unlock() }

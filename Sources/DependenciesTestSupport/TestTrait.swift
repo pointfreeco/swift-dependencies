@@ -221,7 +221,7 @@
 
       /// A trait that overrides a test's or suite's dependencies.
       public static func dependencies(
-        _ updateValues: @escaping @Sendable (inout DependencyValues) -> Void
+        _ updateValues: @escaping @Sendable (inout DependencyValues) throws -> Void
       ) -> Self {
         Self(updateValues)
       }

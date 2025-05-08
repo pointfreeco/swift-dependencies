@@ -77,7 +77,6 @@
   }
 #endif
 
-
 // MARK: - Deprecated after 0.4.2
 
 extension AsyncStream {

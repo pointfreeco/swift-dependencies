@@ -30,7 +30,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       return []
     }
 
-    return [
+    var syntax: [AccessorDeclSyntax] = [
       """
       get {
       _\(raw: identifier)
@@ -42,6 +42,17 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       }
       """,
     ]
+
+    if node.initAccessor {
+      syntax.insert("""
+        @storageRestrictions(initializes: _\(raw: identifier))
+        init(initialValue) {
+          _\(raw: identifier) = initialValue
+        }
+        """, at: 0)
+    }
+
+    return syntax
   }
 
   public static func expansion<D: DeclSyntaxProtocol, C: MacroExpansionContext>(
@@ -290,7 +301,6 @@ extension AttributeSyntax {
     get throws {
       guard
         let arguments = self.arguments?.as(LabeledExprListSyntax.self),
-        arguments.count == 1,
         let argument = arguments.first,
         argument.label?.text == "method"
       else { return nil }
@@ -336,6 +346,17 @@ extension AttributeSyntax {
 
       return .identifier(name)
     }
+  }
+
+  var initAccessor: Bool {
+    arguments?
+      .as(LabeledExprListSyntax.self)?
+      .first { expr in
+        expr.label?.tokenKind == .identifier("initAccessor")
+      }?
+      .expression.as(BooleanLiteralExprSyntax.self)?
+      .literal
+      .tokenKind == .keyword(.true)
   }
 }
 

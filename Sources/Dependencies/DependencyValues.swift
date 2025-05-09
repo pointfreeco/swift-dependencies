@@ -409,6 +409,24 @@ public struct DependencyValues: Sendable {
   public func resetCache() {
     cachedValues.resetCache()
   }
+  
+  // Allows you to reset a single dependency key
+  public static func reset<Value>(_ keyPath: KeyPath<DependencyValues, Value> & Sendable) {
+    reset(by: TypeIdentifier(Value.self))
+  }
+  
+  // Allows you to reset a single dependency key
+  public static func reset<Key: TestDependencyKey>(_ key: Key.Type) {
+    reset(by: TypeIdentifier(Key.self))
+  }
+  
+  private static func reset(by typeId: TypeIdentifier) {
+    let context =
+    _current.storage[ObjectIdentifier(DependencyContextKey.self)] as? DependencyContext
+      ?? defaultContext
+    let cachedKey = CachedValues.CacheKey(id: typeId, context: context)
+    _current.cachedValues.cached.removeValue(forKey: cachedKey)
+  }
 }
 
 struct CurrentDependency {

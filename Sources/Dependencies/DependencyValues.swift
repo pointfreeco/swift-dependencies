@@ -282,10 +282,12 @@ public struct DependencyValues: Sendable {
     }
     set {
       if DependencyValues.isPreparing {
+        #if canImport(SwiftUI)
         if context == .preview, Thread.isPreviewAppEntryPoint {
           reportIssue("Ignoring dependencies prepared in preview app entry point")
           return
         }
+        #endif
         cachedValues.lock.lock()
         defer { cachedValues.lock.unlock() }
         let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
@@ -574,9 +576,11 @@ public final class CachedValues: @unchecked Sendable {
         case .live:
           value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
         case .preview:
+          #if canImport(SwiftUI)
           if Thread.isPreviewAppEntryPoint {
             return Key.previewValue
           }
+          #endif
           if !CachedValues.isAccessingCachedDependencies {
             value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
               return Key.previewValue

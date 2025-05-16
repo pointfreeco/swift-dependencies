@@ -1,5 +1,6 @@
 import Foundation
 
+#if canImport(SwiftUI)
 extension Thread {
   static var isPreviewAppEntryPoint: Bool {
     guard ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
@@ -18,6 +19,7 @@ extension Thread {
     return isPreviewAppEntryPoint
   }
 }
+#endif
 
 extension String {
   fileprivate func containsSymbol(_ symbol: String) -> Bool {

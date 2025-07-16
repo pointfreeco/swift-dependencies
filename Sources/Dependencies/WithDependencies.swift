@@ -143,7 +143,7 @@ public func withDependencies<R>(
   #endif
 }
 
-#if swift(>=6)
+#if compiler(>=6)
   /// Updates the current dependencies for the duration of an asynchronous operation.
   ///
   /// Any mutations made to ``DependencyValues`` inside `updateValuesForOperation` will be visible
@@ -314,7 +314,7 @@ public func withDependencies<Model: AnyObject, R>(
   )
 }
 
-#if swift(>=6)
+#if compiler(>=6)
   /// Updates the current dependencies for the duration of an asynchronous operation by taking the
   /// dependencies tied to a given object.
   ///

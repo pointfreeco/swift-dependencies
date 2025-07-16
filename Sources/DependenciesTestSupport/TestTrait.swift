@@ -3,7 +3,7 @@
   import Dependencies
   import Testing
 
-  #if swift(>=6.1)
+  #if compiler(>=6.1)
     @_documentation(visibility: private)
     public struct _DependenciesTrait: TestScoping, TestTrait, SuiteTrait {
       let updateValues: @Sendable (inout DependencyValues) throws -> Void

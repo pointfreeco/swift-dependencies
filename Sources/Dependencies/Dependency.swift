@@ -1,4 +1,4 @@
-#if compiler(<6)
+#if swift(<6)
   /// A property wrapper for accessing dependencies.
   ///
   /// All dependencies are stored in ``DependencyValues`` and one uses this property wrapper to gain

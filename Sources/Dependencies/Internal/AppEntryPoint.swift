@@ -1,24 +1,24 @@
 import Foundation
 
 #if canImport(SwiftUI)
-extension Thread {
-  static var isPreviewAppEntryPoint: Bool {
-    guard ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
-    else { return false }
+  extension Thread {
+    static var isPreviewAppEntryPoint: Bool {
+      guard ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+      else { return false }
 
-    var isPreviewAppEntryPoint = false
-    for frame in callStackSymbols.reversed() {
-      if !isPreviewAppEntryPoint, frame.containsSymbol("$s7SwiftUI3AppPAAE4mainyyFZ") {
-        isPreviewAppEntryPoint = true
-      } else if isPreviewAppEntryPoint,
-        frame.containsSymbol("$s7SwiftUI6runAppys5NeverOxAA0D0RzlF")
-      {
-        return false
+      var isPreviewAppEntryPoint = false
+      for frame in callStackSymbols.reversed() {
+        if !isPreviewAppEntryPoint, frame.containsSymbol("$s7SwiftUI3AppPAAE4mainyyFZ") {
+          isPreviewAppEntryPoint = true
+        } else if isPreviewAppEntryPoint,
+          frame.containsSymbol("$s7SwiftUI6runAppys5NeverOxAA0D0RzlF")
+        {
+          return false
+        }
       }
+      return isPreviewAppEntryPoint
     }
-    return isPreviewAppEntryPoint
   }
-}
 #endif
 
 extension String {

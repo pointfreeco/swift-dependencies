@@ -285,10 +285,10 @@ public struct DependencyValues: Sendable {
     set {
       if DependencyValues.isPreparing {
         #if canImport(SwiftUI)
-        if context == .preview, Thread.isPreviewAppEntryPoint {
-          reportIssue("Ignoring dependencies prepared in preview app entry point")
-          return
-        }
+          if context == .preview, Thread.isPreviewAppEntryPoint {
+            reportIssue("Ignoring dependencies prepared in preview app entry point")
+            return
+          }
         #endif
         cachedValues.lock.lock()
         defer { cachedValues.lock.unlock() }
@@ -579,9 +579,9 @@ public final class CachedValues: @unchecked Sendable {
           value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
         case .preview:
           #if canImport(SwiftUI)
-          if Thread.isPreviewAppEntryPoint {
-            return Key.previewValue
-          }
+            if Thread.isPreviewAppEntryPoint {
+              return Key.previewValue
+            }
           #endif
           if !CachedValues.isAccessingCachedDependencies {
             value = CachedValues.$isAccessingCachedDependencies.withValue(true) {

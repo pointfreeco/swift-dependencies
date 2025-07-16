@@ -295,55 +295,23 @@ public struct DependencyValues: Sendable {
         let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
         guard !cachedValues.cached.keys.contains(cacheKey) else {
           if cachedValues.cached[cacheKey]?.preparationID != DependencyValues.preparationID {
-            reportIssue(
-              {
-                var dependencyDescription = ""
-                if let fileID = DependencyValues.currentDependency.fileID,
-                  let line = DependencyValues.currentDependency.line
-                {
-                  dependencyDescription.append(
-                    """
-                      Location:
-                        \(fileID):\(line)
+            reportDependencyIssue(
+              message: { argument, dependencyDescription in
+                """
+                @Dependency(\(argument)) has already been accessed or prepared.
 
-                    """
-                  )
-                }
-                dependencyDescription.append(
-                  Key.self == Key.Value.self
-                    ? """
-                      Dependency:
-                        \(typeName(Key.Value.self))
-                    """
-                    : """
-                      Key:
-                        \(typeName(Key.self))
-                      Value:
-                        \(typeName(Key.Value.self))
-                    """
-                )
-                var argument: String {
-                  "\(function)" == "subscript(key:)"
-                    ? "\(typeName(Key.self)).self"
-                    : "\\.\(function)"
-                }
-                return """
-                  @Dependency(\(argument)) has already been accessed or prepared.
+                \(dependencyDescription)
 
-                  \(dependencyDescription)
+                A global dependency can only be prepared a single time and cannot be accessed \
+                beforehand. Prepare dependencies as early as possible in the lifecycle of your \
+                application.
 
-                  A global dependency can only be prepared a single time and cannot be accessed \
-                  beforehand. Prepare dependencies as early as possible in the lifecycle of your \
-                  application.
-
-                  To temporarily override a dependency in your application, use 'withDependencies' \
-                  to do so in a well-defined scope.
-                  """
-              }(),
-              fileID: DependencyValues.currentDependency.fileID ?? fileID,
-              filePath: DependencyValues.currentDependency.filePath ?? filePath,
-              line: DependencyValues.currentDependency.line ?? line,
-              column: DependencyValues.currentDependency.column ?? column
+                To temporarily override a dependency in your application, use 'withDependencies' \
+                to do so in a well-defined scope.
+                """
+              },
+              for: Key.self,
+              fileID: fileID, filePath: filePath, function: function, line: line, column: column
             )
           } else {
             cachedValues.cached[cacheKey] = CachedValues.CachedValue(
@@ -461,6 +429,7 @@ private let defaultContext: DependencyContext = {
 @_spi(Internals)
 public final class CachedValues: @unchecked Sendable {
   @TaskLocal static var isAccessingCachedDependencies = false
+  @TaskLocal static var isResetting = false
 
   public struct CacheKey: Hashable, Sendable {
     let id: TypeIdentifier
@@ -490,7 +459,9 @@ public final class CachedValues: @unchecked Sendable {
   public func resetCache() {
     lock.lock()
     defer { lock.unlock() }
-    cached = [:]
+    Self.$isResetting.withValue(true) {
+        cached = [:]
+    }
   }
 
   func value<Key: TestDependencyKey>(
@@ -513,65 +484,54 @@ public final class CachedValues: @unchecked Sendable {
           !(cached[cacheKey] != nil && cached[cacheKey]?.preparationID != nil),
           !(key is any DependencyKey.Type)
         {
-          reportIssue(
-            {
-              var dependencyDescription = ""
-              if let fileID = DependencyValues.currentDependency.fileID,
-                let line = DependencyValues.currentDependency.line
-              {
-                dependencyDescription.append(
-                  """
-                    Location:
-                      \(fileID):\(line)
+          reportDependencyIssue(
+            message: { argument, dependencyDescription in
+              """
+              @Dependency(\(argument)) has no live implementation, but was accessed from a live \
+              context.
 
-                  """
-                )
-              }
-              dependencyDescription.append(
-                Key.self == Key.Value.self
-                  ? """
-                    Dependency:
-                      \(typeName(Key.Value.self))
-                  """
-                  : """
-                    Key:
-                      \(typeName(Key.self))
-                    Value:
-                      \(typeName(Key.Value.self))
-                  """
-              )
+              \(dependencyDescription)
 
-              var argument: String {
-                "\(function)" == "subscript(key:)"
-                  ? "\(typeName(Key.self)).self"
-                  : "\\.\(function)"
-              }
-              return """
-                @Dependency(\(argument)) has no live implementation, but was accessed from a live \
-                context.
+              To fix you can do one of two things:
 
-                \(dependencyDescription)
+              • Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
+              a live implementation of your dependency, and make sure that the conformance is \
+              linked with this current application.
 
-                To fix you can do one of two things:
-
-                • Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
-                a live implementation of your dependency, and make sure that the conformance is \
-                linked with this current application.
-
-                • Override the implementation of '\(typeName(Key.self))' using \
-                'withDependencies'. This is typically done at the entry point of your \
-                application, but can be done later too.
-                """
-            }(),
-            fileID: DependencyValues.currentDependency.fileID ?? fileID,
-            filePath: DependencyValues.currentDependency.filePath ?? filePath,
-            line: DependencyValues.currentDependency.line ?? line,
-            column: DependencyValues.currentDependency.column ?? column
+              • Override the implementation of '\(typeName(Key.self))' using \
+              'withDependencies'. This is typically done at the entry point of your \
+              application, but can be done later too.
+              """
+            },
+            for: Key.self,
+            fileID: fileID, filePath: filePath, function: function, line: line, column: column
           )
         }
       #endif
 
-      guard let base = cached[cacheKey]?.base, let value = base as? Key.Value
+      #if DEBUG
+      let isResetting = Self.isResetting
+      if isResetting {
+        reportDependencyIssue(
+          message: { argument, dependencyDescription in
+            """
+            @Dependency(\(argument)) was access during a cache reset.
+
+            \(dependencyDescription)
+
+            Accessing a dependency during a cache reset will always return a new and uncached \
+            instance of the dependency.
+            """
+          },
+          for: Key.self,
+          fileID: fileID, filePath: filePath, function: function, line: line, column: column
+        )
+      }
+      #else
+      let isResetting = false
+      #endif
+      
+      guard !isResetting, let base = cached[cacheKey]?.base, let value = base as? Key.Value
       else {
         let value: Key.Value?
         switch context {
@@ -608,16 +568,68 @@ public final class CachedValues: @unchecked Sendable {
         }
 
         let cacheableValue = value ?? Key.testValue
-        cached[cacheKey] = CachedValue(
-          base: cacheableValue,
-          preparationID: DependencyValues.preparationID
-        )
+        if !isResetting {
+          cached[cacheKey] = CachedValue(
+            base: cacheableValue,
+            preparationID: DependencyValues.preparationID
+          )
+        }
         return cacheableValue
       }
 
       return value
     }
   }
+}
+
+public func reportDependencyIssue<Key: TestDependencyKey>(
+  message: (_ argument: String, _ dependencyDescription: String) -> String,
+  for key: Key.Type,
+  fileID: StaticString,
+  filePath: StaticString,
+  function: StaticString,
+  line: UInt,
+  column: UInt
+) {
+  var dependencyDescription = ""
+  if let fileID = DependencyValues.currentDependency.fileID,
+    let line = DependencyValues.currentDependency.line
+  {
+    dependencyDescription.append(
+      """
+        Location:
+          \(fileID):\(line)
+
+      """
+    )
+  }
+  dependencyDescription.append(
+    Key.self == Key.Value.self
+      ? """
+        Dependency:
+          \(typeName(Key.Value.self))
+      """
+      : """
+        Key:
+          \(typeName(Key.self))
+        Value:
+          \(typeName(Key.Value.self))
+      """
+  )
+  
+  var argument: String {
+    "\(function)" == "subscript(key:)"
+      ? "\(typeName(Key.self)).self"
+      : "\\.\(function)"
+  }
+  
+  reportIssue(
+    message(argument, dependencyDescription),
+    fileID: DependencyValues.currentDependency.fileID ?? fileID,
+    filePath: DependencyValues.currentDependency.filePath ?? filePath,
+    line: DependencyValues.currentDependency.line ?? line,
+    column: DependencyValues.currentDependency.column ?? column
+  )
 }
 
 struct TypeIdentifier: Hashable {

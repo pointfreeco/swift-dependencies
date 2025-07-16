@@ -5,8 +5,10 @@ import IssueReporting
   import WinSDK
 #elseif canImport(Android)
   import Android
-#elseif os(Linux)
+#elseif canImport(Glibc)
   import Glibc
+#elseif canImport(Musl)
+  import Musl
 #endif
 // WASI does not support dynamic linking
 #if os(WASI)

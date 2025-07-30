@@ -299,7 +299,7 @@ public struct DependencyValues: Sendable {
                 {
                   var dependencyDescription = ""
                   if let fileID = DependencyValues.currentDependency.fileID,
-                     let line = DependencyValues.currentDependency.line
+                    let line = DependencyValues.currentDependency.line
                   {
                     dependencyDescription.append(
                       """
@@ -311,11 +311,11 @@ public struct DependencyValues: Sendable {
                   }
                   dependencyDescription.append(
                     Key.self == Key.Value.self
-                    ? """
+                      ? """
                         Dependency:
                           \(typeName(Key.Value.self))
                       """
-                    : """
+                      : """
                         Key:
                           \(typeName(Key.self))
                         Value:
@@ -324,8 +324,8 @@ public struct DependencyValues: Sendable {
                   )
                   var argument: String {
                     "\(function)" == "subscript(key:)"
-                    ? "\(typeName(Key.self)).self"
-                    : "\\.\(function)"
+                      ? "\(typeName(Key.self)).self"
+                      : "\\.\(function)"
                   }
                   return """
                     @Dependency(\(argument)) has already been accessed or prepared.

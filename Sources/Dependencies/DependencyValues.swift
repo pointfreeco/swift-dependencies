@@ -286,38 +286,6 @@ public struct DependencyValues: Sendable {
       if DependencyValues.isPreparing {
         #if canImport(SwiftUI)
           if context == .preview, Thread.isPreviewAppEntryPoint {
-            reportIssue(
-              """
-              Xcode Previews: Ignoring dependencies prepared in app entry point.
-
-              To silence this warning, use the dependency context to conditionally prepare them:
-
-                  import Dependencies
-                  import SwiftUI
-
-                  @main
-                  struct MyApp: App {
-                +   @Dependency(\\.context) var context
-                    init() {
-                +     // Don't prepare app dependencies in previews/tests.
-                +     guard context == .live else { return }
-                      prepareDependencies {
-                        // ...
-                      }
-                      // ...
-                    }
-
-                    var body: some Scene {
-                      WindowGroup {
-                +       // Don't load root view in previews/tests.
-                +       if context == .live {
-                          // ...
-                +       }
-                      }
-                    }
-                  }
-              """
-            )
             return
           }
         #endif

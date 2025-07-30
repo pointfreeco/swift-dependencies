@@ -6,7 +6,7 @@
   import Testing
 
   @Suite struct SwiftTestingTests {
-    #if swift(>=6.1)
+    #if compiler(>=6.1)
       @Test(.dependencies, .serialized, arguments: 1...5)
       func parameterizedCachePollution(_ argument: Int) {
         @Dependency(Client.self) var client

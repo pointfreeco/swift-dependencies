@@ -4,7 +4,7 @@
   import Testing
 
   @Suite struct PrepareDependenciesTests {
-    #if swift(>=6.1)
+    #if compiler(>=6.1)
       @Test(
         .serialized,
         .dependency(\.uuid, .incrementing),

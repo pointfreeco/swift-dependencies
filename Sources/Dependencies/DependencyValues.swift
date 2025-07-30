@@ -286,7 +286,6 @@ public struct DependencyValues: Sendable {
       if DependencyValues.isPreparing {
         #if canImport(SwiftUI)
           if context == .preview, Thread.isPreviewAppEntryPoint {
-            reportIssue("Ignoring dependencies prepared in preview app entry point")
             return
           }
         #endif
@@ -295,56 +294,58 @@ public struct DependencyValues: Sendable {
         let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
         guard !cachedValues.cached.keys.contains(cacheKey) else {
           if cachedValues.cached[cacheKey]?.preparationID != DependencyValues.preparationID {
-            reportIssue(
-              {
-                var dependencyDescription = ""
-                if let fileID = DependencyValues.currentDependency.fileID,
-                  let line = DependencyValues.currentDependency.line
+            if context != .preview {
+              reportIssue(
                 {
-                  dependencyDescription.append(
-                    """
-                      Location:
-                        \(fileID):\(line)
+                  var dependencyDescription = ""
+                  if let fileID = DependencyValues.currentDependency.fileID,
+                     let line = DependencyValues.currentDependency.line
+                  {
+                    dependencyDescription.append(
+                      """
+                        Location:
+                          \(fileID):\(line)
 
-                    """
-                  )
-                }
-                dependencyDescription.append(
-                  Key.self == Key.Value.self
+                      """
+                    )
+                  }
+                  dependencyDescription.append(
+                    Key.self == Key.Value.self
                     ? """
-                      Dependency:
-                        \(typeName(Key.Value.self))
-                    """
+                        Dependency:
+                          \(typeName(Key.Value.self))
+                      """
                     : """
-                      Key:
-                        \(typeName(Key.self))
-                      Value:
-                        \(typeName(Key.Value.self))
-                    """
-                )
-                var argument: String {
-                  "\(function)" == "subscript(key:)"
+                        Key:
+                          \(typeName(Key.self))
+                        Value:
+                          \(typeName(Key.Value.self))
+                      """
+                  )
+                  var argument: String {
+                    "\(function)" == "subscript(key:)"
                     ? "\(typeName(Key.self)).self"
                     : "\\.\(function)"
-                }
-                return """
-                  @Dependency(\(argument)) has already been accessed or prepared.
+                  }
+                  return """
+                    @Dependency(\(argument)) has already been accessed or prepared.
 
-                  \(dependencyDescription)
+                    \(dependencyDescription)
 
-                  A global dependency can only be prepared a single time and cannot be accessed \
-                  beforehand. Prepare dependencies as early as possible in the lifecycle of your \
-                  application.
+                    A global dependency can only be prepared a single time and cannot be accessed \
+                    beforehand. Prepare dependencies as early as possible in the lifecycle of your \
+                    application.
 
-                  To temporarily override a dependency in your application, use 'withDependencies' \
-                  to do so in a well-defined scope.
-                  """
-              }(),
-              fileID: DependencyValues.currentDependency.fileID ?? fileID,
-              filePath: DependencyValues.currentDependency.filePath ?? filePath,
-              line: DependencyValues.currentDependency.line ?? line,
-              column: DependencyValues.currentDependency.column ?? column
-            )
+                    To temporarily override a dependency in your application, use \
+                    'withDependencies' to do so in a well-defined scope.
+                    """
+                }(),
+                fileID: DependencyValues.currentDependency.fileID ?? fileID,
+                filePath: DependencyValues.currentDependency.filePath ?? filePath,
+                line: DependencyValues.currentDependency.line ?? line,
+                column: DependencyValues.currentDependency.column ?? column
+              )
+            }
           } else {
             cachedValues.cached[cacheKey] = CachedValues.CachedValue(
               base: newValue,

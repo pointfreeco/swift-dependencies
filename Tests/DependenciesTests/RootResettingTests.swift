@@ -1,4 +1,4 @@
-#if swift(>=6.1) && canImport(Testing)
+#if compiler(>=6.1) && canImport(Testing)
   import Dependencies
   import Foundation
   import Testing

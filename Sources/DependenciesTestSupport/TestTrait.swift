@@ -6,7 +6,7 @@
   #if compiler(>=6.1)
     @_documentation(visibility: private)
     public struct _DependenciesTrait: TestScoping, TestTrait, SuiteTrait {
-      let updateValues: @Sendable (inout DependencyValues) throws -> Void
+      let updateValues: @Sendable (inout DependencyValues) async throws -> Void
 
       @TaskLocal static var isRoot = true
 
@@ -20,7 +20,7 @@
           if Self.isRoot {
             $0 = DependencyValues()
           }
-          try updateValues(&$0)
+          try await updateValues(&$0)
         } operation: {
           try await Self.$isRoot.withValue(false) {
             try await function()
@@ -123,7 +123,7 @@
       /// ```
       ///
       public static func dependencies(
-        _ updateValues: @escaping @Sendable (inout DependencyValues) throws -> Void
+        _ updateValues: @escaping @Sendable (inout DependencyValues) async throws -> Void
       ) -> Self {
         Self(updateValues: updateValues)
       }

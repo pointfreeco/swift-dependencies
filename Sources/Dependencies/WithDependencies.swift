@@ -92,45 +92,6 @@ public func prepareDependencies<R>(
   }
 }
 
-#if compiler(>=6)
-  /// Prepares global dependencies for the lifetime of your application.
-  ///
-  /// An async version of ``prepareDependencies(_:)``.
-  ///
-  /// - Parameter updateValues: A closure for updating the current dependency values for the
-  ///   lifetime of your application.
-  public func prepareDependencies<R>(
-    isolation: isolated (any Actor)? = #isolation,
-    _ updateValues: (inout DependencyValues) async throws -> R
-  ) async rethrows -> R {
-    var dependencies = DependencyValues._current
-    return try await DependencyValues.$preparationID.withValue(UUID()) {
-      #if DEBUG
-        try await DependencyValues.$isSetting.withValue(true) {
-          try await updateValues(&dependencies)
-        }
-      #else
-        try await updateValues(&dependencies)
-      #endif
-    }
-  }
-#else
-  public func prepareDependencies<R>(
-    _ updateValues: (inout DependencyValues) async throws -> R
-  ) async rethrows -> R {
-    var dependencies = DependencyValues._current
-    return try await DependencyValues.$preparationID.withValue(UUID()) {
-      #if DEBUG
-        try await DependencyValues.$isSetting.withValue(true) {
-          try await updateValues(&dependencies)
-        }
-      #else
-        try await updateValues(&dependencies)
-      #endif
-    }
-  }
-#endif
-
 /// Updates the current dependencies for the duration of a synchronous operation.
 ///
 /// Any mutations made to ``DependencyValues`` inside `updateValuesForOperation` will be visible to

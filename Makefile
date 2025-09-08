@@ -31,7 +31,7 @@ test-linux:
 		--rm \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.10-focal \
+		swift:6.1-focal \
 		bash -c 'apt-get update && apt-get -y install make && make test-swift'
 
 build-for-static-stdlib:
@@ -61,12 +61,12 @@ build-for-static-stdlib-docker:
 	@docker run \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.9-focal \
+		swift:6.1-focal \
 		bash -c "swift build -c debug --static-swift-stdlib"
 	@docker run \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.9-focal \
+		swift:6.1-focal \
 		bash -c "swift build -c release --static-swift-stdlib"
 
 format:

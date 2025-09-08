@@ -30,6 +30,7 @@
 - ``locale``
 - ``mainQueue``
 - ``mainRunLoop``
+- ``notificationCenter``
 - ``openURL``
 - ``precondition``
 - ``suspendingClock``

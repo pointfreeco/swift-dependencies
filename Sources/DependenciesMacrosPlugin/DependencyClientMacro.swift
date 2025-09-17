@@ -73,10 +73,21 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     return attributes
   }
 
+  #if canImport(SwiftSyntax602)
+  #else
+    public static func expansion<D: DeclGroupSyntax, C: MacroExpansionContext>(
+      of node: AttributeSyntax,
+      providingMembersOf declaration: D,
+      in context: C
+    ) throws -> [DeclSyntax] {
+      try expansion(of: node, providingMembersOf: declaration, conformingTo: [], in: context)
+    }
+  #endif
+
   public static func expansion(
     of node: AttributeSyntax,
     providingMembersOf declaration: some DeclGroupSyntax,
-    conformingTo protocols: [TypeSyntax],
+    conformingTo _: [TypeSyntax],
     in context: some MacroExpansionContext
   ) throws -> [DeclSyntax] {
     guard let declaration = declaration.as(StructDeclSyntax.self)
@@ -117,7 +128,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         switch accessors {
         case .getter:
           continue
-        case let .accessors(accessors):
+        case .accessors(let accessors):
           if accessors.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
             continue
           }
@@ -296,7 +307,7 @@ extension VariableDeclSyntax {
   fileprivate func hasMacroAttached(_ macro: String) -> Bool {
     self.attributes.contains {
       guard
-        case let .attribute(attribute) = $0,
+        case .attribute(let attribute) = $0,
         let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
         [macro].qualified("DependenciesMacros").contains(attributeName)
       else { return false }

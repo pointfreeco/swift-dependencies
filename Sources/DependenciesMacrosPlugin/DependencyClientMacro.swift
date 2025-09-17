@@ -73,10 +73,11 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     return attributes
   }
 
-  public static func expansion<D: DeclGroupSyntax, C: MacroExpansionContext>(
+  public static func expansion(
     of node: AttributeSyntax,
-    providingMembersOf declaration: D,
-    in context: C
+    providingMembersOf declaration: some DeclGroupSyntax,
+    conformingTo protocols: [TypeSyntax],
+    in context: some MacroExpansionContext
   ) throws -> [DeclSyntax] {
     guard let declaration = declaration.as(StructDeclSyntax.self)
     else {

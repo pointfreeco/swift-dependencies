@@ -8,32 +8,32 @@ final class FireAndForgetTests: XCTestCase {
   #if !os(WASI)
     @MainActor
     func testTestContext() async throws {
-      let didExecute = ActorIsolated(false)
+      let didExecute = LockIsolated(false)
 
       await self.fireAndForget {
         try await Task.sleep(nanoseconds: 100_000_000)
-        await didExecute.setValue(true)
+        didExecute.setValue(true)
       }
 
-      let value = await didExecute.value
+      let value = didExecute.value
       XCTAssertEqual(value, true)
     }
 
     @MainActor
     func testTestContext_Cancellation() async throws {
-      let didExecute = ActorIsolated(false)
+      let didExecute = LockIsolated(false)
 
       let task = Task {
         await self.fireAndForget {
           try await Task.sleep(nanoseconds: 1_000_000_000)
-          await didExecute.setValue(true)
+          didExecute.setValue(true)
         }
       }
       try await Task.sleep(nanoseconds: 500_000_000)
       task.cancel()
       await task.value
 
-      let value = await didExecute.value
+      let value = didExecute.value
       XCTAssertEqual(value, true)
     }
 
@@ -42,18 +42,18 @@ final class FireAndForgetTests: XCTestCase {
       try await withDependencies {
         $0.context = .live
       } operation: {
-        let didExecute = ActorIsolated(false)
+        let didExecute = LockIsolated(false)
 
         await self.fireAndForget {
           try await Task.sleep(nanoseconds: 100_000_000)
-          await didExecute.setValue(true)
+          didExecute.setValue(true)
         }
 
-        var value = await didExecute.value
+        var value = didExecute.value
         XCTAssertEqual(value, false)
 
         try await Task.sleep(nanoseconds: 500_000_000)
-        value = await didExecute.value
+        value = didExecute.value
         XCTAssertEqual(value, true)
       }
     }
@@ -66,7 +66,7 @@ final class FireAndForgetTests: XCTestCase {
         $0.context = .live
         $0.date.now = Date(timeIntervalSince1970: 1_234_567_890)
       } operation: {
-        let date = ActorIsolated<Date?>(nil)
+        let date = LockIsolated<Date?>(nil)
 
         await self.fireAndForget(priority: .userInitiated) {
           @Dependency(\.date.now) var now: Date

@@ -953,7 +953,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     } expansion: {
       #"""
       struct Client {
-        var endpoint: () -> Void // This is a comment {
+        var endpoint: () -> Void { // This is a comment
           get {
             _endpoint
           }

@@ -105,13 +105,14 @@ extension AsyncThrowingStream where Failure == Error {
 
 // MARK: -
 
-@available(
-  *,
-   deprecated,
-   message: "Use the non-async version of 'withValue'."
-)
+@available(*, deprecated)
 @_documentation(visibility: private)
 extension ActorIsolated {
+  @available(
+    *,
+     deprecated,
+     message: "Use the non-async version of 'withValue'."
+  )
   public func withValue<T: Sendable>(
     _ operation: @Sendable (inout Value) async throws -> T
   ) async rethrows -> T where Value: Sendable {

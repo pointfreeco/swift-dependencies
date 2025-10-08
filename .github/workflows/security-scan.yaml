@@ -1,0 +1,25 @@
+name: Security scan
+
+on:
+  pull_request_target: {}
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+
+permissions:
+  pull-requests: write
+  contents: read
+  security-events: write
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - uses: open-turo/actions-security/static-analysis@v4
+        with:
+          semgrep-app-token: ${{ secrets.SEMGREP_APP_TOKEN }}

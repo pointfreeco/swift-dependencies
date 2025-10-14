@@ -1,4 +1,4 @@
-#if swift(<6)
+#if swift(>=6)
   /// A property wrapper for accessing dependencies.
   ///
   /// All dependencies are stored in ``DependencyValues`` and one uses this property wrapper to gain
@@ -66,38 +66,6 @@
   ///
   /// [tca]: https://github.com/pointfreeco/swift-composable-architecture
   @propertyWrapper
-  public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
-    let initialValues: DependencyValues
-    // NB: Key paths do not conform to sendable and are instead diagnosed at the time of forming the
-    //     literal.
-    private let keyPath: KeyPath<DependencyValues, Value>
-    private let filePath: StaticString
-    private let fileID: StaticString
-    private let line: UInt
-    private let column: UInt
-
-    public init(
-      _ keyPath: KeyPath<DependencyValues, Value>,
-      fileID: StaticString = #fileID,
-      filePath: StaticString = #filePath,
-      line: UInt = #line,
-      column: UInt = #column
-    ) {
-      self.initialValues = DependencyValues._current
-      self.keyPath = keyPath
-      self.filePath = filePath
-      self.fileID = fileID
-      self.line = line
-      self.column = column
-    }
-
-    /// The current value of the dependency property.
-    public var wrappedValue: Value {
-      _wrappedValue
-    }
-  }
-#else
-  @propertyWrapper
   public struct Dependency<Value>: Sendable, _HasInitialValues {
     let initialValues: DependencyValues
     private let keyPath: KeyPath<DependencyValues, Value> & Sendable
@@ -130,6 +98,38 @@
     ///   - column: The source `#column` associated with the dependency.
     public init(
       _ keyPath: KeyPath<DependencyValues, Value> & Sendable,
+      fileID: StaticString = #fileID,
+      filePath: StaticString = #filePath,
+      line: UInt = #line,
+      column: UInt = #column
+    ) {
+      self.initialValues = DependencyValues._current
+      self.keyPath = keyPath
+      self.filePath = filePath
+      self.fileID = fileID
+      self.line = line
+      self.column = column
+    }
+
+    /// The current value of the dependency property.
+    public var wrappedValue: Value {
+      _wrappedValue
+    }
+  }
+#else
+  @propertyWrapper
+  public struct Dependency<Value>: @unchecked Sendable, _HasInitialValues {
+    let initialValues: DependencyValues
+    // NB: Key paths do not conform to sendable and are instead diagnosed at the time of forming the
+    //     literal.
+    private let keyPath: KeyPath<DependencyValues, Value>
+    private let filePath: StaticString
+    private let fileID: StaticString
+    private let line: UInt
+    private let column: UInt
+
+    public init(
+      _ keyPath: KeyPath<DependencyValues, Value>,
       fileID: StaticString = #fileID,
       filePath: StaticString = #filePath,
       line: UInt = #line,

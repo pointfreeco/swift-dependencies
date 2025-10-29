@@ -124,7 +124,7 @@ public struct DependencyValues: Sendable {
   #if DEBUG
     @TaskLocal static var isSetting = false
   #endif
-  @TaskLocal static var preparationID: UUID?
+  @TaskLocal static var preparationID: Foundation.UUID?
   static var isPreparing: Bool {
     preparationID != nil
   }
@@ -482,7 +482,7 @@ public final class CachedValues: @unchecked Sendable {
 
   public struct CachedValue {
     let base: any Sendable
-    let preparationID: UUID?
+    let preparationID: Foundation.UUID?
   }
 
   public let lock = NSRecursiveLock()

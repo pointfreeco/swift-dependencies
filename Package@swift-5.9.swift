@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 5.9
 
 import CompilerPluginSupport
 import PackageDescription
@@ -19,10 +19,6 @@ let package = Package(
     .library(
       name: "DependenciesMacros",
       targets: ["DependenciesMacros"]
-    ),
-    .library(
-      name: "DependenciesTestSupport",
-      targets: ["DependenciesTestSupport"]
     ),
   ],
   dependencies: [
@@ -49,22 +45,14 @@ let package = Package(
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
-    .target(
-      name: "DependenciesTestSupport",
-      dependencies: [
-        "Dependencies",
-        .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
-        .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
-      ]
-    ),
     .testTarget(
       name: "DependenciesTests",
       dependencies: [
         "Dependencies",
-        "DependenciesTestSupport",
+        "DependenciesMacros",
+        .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
-      ],
-      exclude: ["Dependencies.xctestplan"]
+      ]
     ),
     .target(
       name: "DependenciesMacros",
@@ -81,8 +69,7 @@ let package = Package(
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ]
     ),
-  ],
-  swiftLanguageModes: [.v6]
+  ]
 )
 
 #if !os(macOS) && !os(WASI)
@@ -96,14 +83,13 @@ let package = Package(
 #endif
 
 #if !os(WASI)
-  package.dependencies.append(
+  package.dependencies.append(contentsOf: [
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0")
-  )
+  ])
   package.targets.append(contentsOf: [
     .testTarget(
       name: "DependenciesMacrosPluginTests",
       dependencies: [
-        "Dependencies",
         "DependenciesMacros",
         "DependenciesMacrosPlugin",
         .product(name: "MacroTesting", package: "swift-macro-testing"),
@@ -118,3 +104,10 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
   )
 #endif
+
+for target in package.targets {
+  target.swiftSettings = target.swiftSettings ?? []
+  target.swiftSettings?.append(contentsOf: [
+    .enableExperimentalFeature("StrictConcurrency")
+  ])
+}

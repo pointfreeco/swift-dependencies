@@ -48,11 +48,11 @@
       /// extension BaseSuite {
       ///   @Suite struct MyTests {
       ///     @Test func login() {
-      ///       // Dependencies accessed in here are independency from 'logout' tests.
+      ///       // Dependencies accessed in here are independent from 'logout' tests.
       ///     }
       ///
       ///     @Test func logout() {
-      ///       // Dependencies accessed in here are independency from 'login' tests.
+      ///       // Dependencies accessed in here are independent from 'login' tests.
       ///     }
       ///   }
       /// }

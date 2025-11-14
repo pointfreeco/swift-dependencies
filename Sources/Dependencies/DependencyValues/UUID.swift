@@ -113,8 +113,27 @@ public struct UUIDGenerator: Sendable {
 }
 
 extension UUID {
+  /// Initializes a UUID from an integer by converting it to hex and padding it with 0's.
+  ///
+  /// For example:
+  ///
+  /// ```swift
+  /// UUID(16) == UUID(uuidString: "00000000-0000-0000-0000000000F0")
+  /// ```
+  ///
+  /// If a negative number is passed to this function then it is inverted and the negative sign
+  /// is encoded into the 16th bit of the UUID:
+  ///
+  /// ```swift
+  /// UUID(-16) == UUID(uuidString: "00000000-0001-0000-0000000000F0")
+  ///                                            👆
+  /// ```
   public init(_ intValue: Int) {
-    self.init(uuidString: "00000000-0000-0000-0000-\(String(format: "%012x", intValue))")!
+    let isNegative = intValue < 0
+    let intValue = isNegative ? -intValue : intValue
+    var hexString = String(format: "%016llx", intValue)
+    hexString.insert("-", at: hexString.index(hexString.startIndex, offsetBy: 4))
+    self.init(uuidString: "00000000-0000-000\(isNegative ? "1" : "0")-\(hexString)")!
   }
 }
 

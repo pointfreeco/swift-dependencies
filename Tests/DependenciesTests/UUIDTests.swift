@@ -19,8 +19,8 @@ final class UUIDDependencyTests: XCTestCase {
     XCTAssertEqual(UUID(15), UUID(uuidString: "00000000-0000-0000-0000-00000000000F"))
     XCTAssertEqual(UUID(256), UUID(uuidString: "00000000-0000-0000-0000-000000000100"))
 
-    XCTAssertEqual(UUID(-1), UUID(uuidString: "00000000-0000-0001-FFFF-FFFFFFFFFFFF"))
     XCTAssertEqual(UUID(Int.max), UUID(uuidString: "00000000-0000-0000-7FFF-FFFFFFFFFFFF"))
-    XCTAssertEqual(UUID(-Int.max), UUID(uuidString: "00000000-0000-0001-8000-000000000001"))
+    XCTAssertEqual(UUID(-1), UUID(uuidString: "00000000-0000-0001-0000-000000000001"))
+    XCTAssertEqual(UUID(-Int.max), UUID(uuidString: "00000000-0000-0001-7FFF-FFFFFFFFFFFF"))
   }
 }

@@ -36,7 +36,7 @@ let package = Package(
     .target(
       name: "DependenciesTestObserver",
       dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
       ]
     ),
     .target(
@@ -108,7 +108,7 @@ let package = Package(
         "DependenciesMacrosPlugin",
         .product(name: "MacroTesting", package: "swift-macro-testing"),
       ]
-    ),
+    )
   ])
 #endif
 

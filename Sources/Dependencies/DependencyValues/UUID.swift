@@ -114,7 +114,9 @@ public struct UUIDGenerator: Sendable {
 
 extension UUID {
   public init(_ intValue: Int) {
-    self.init(uuidString: "00000000-0000-0000-0000-\(String(format: "%012x", intValue))")!
+    var hexString = String(format: "%016llx", intValue)
+    hexString.insert("-", at: hexString.index(hexString.startIndex, offsetBy: 4))
+    self.init(uuidString: "00000000-0000-000\(intValue < 0 ? "1" : "0")-\(hexString)")!
   }
 }
 

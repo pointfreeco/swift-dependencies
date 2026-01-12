@@ -1,4 +1,5 @@
 import Dependencies
+import Testing
 import XCTest
 
 final class AssertTests: XCTestCase {
@@ -38,4 +39,17 @@ final class AssertTests: XCTestCase {
       }
     }
   #endif
+}
+
+struct AssertTests_SwiftTesting {
+  @Dependency(\.assert) var assert
+
+  @Test func assertDependency() {
+    withKnownIssue {
+      assert(false)
+    }
+    withKnownIssue {
+      assert(false, "This shouldn't happen.")
+    }
+  }
 }

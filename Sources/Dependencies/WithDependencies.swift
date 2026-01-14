@@ -81,6 +81,11 @@ public func prepareDependencies<R>(
   _ updateValues: (inout DependencyValues) throws -> R
 ) rethrows -> R {
   var dependencies = DependencyValues._current
+  #if canImport(SwiftUI)
+    if Thread.isPreviewAppEntryPoint {
+      dependencies = DependencyValues()
+    }
+  #endif
   return try DependencyValues.$preparationID.withValue(UUID()) {
     #if DEBUG
       try DependencyValues.$isSetting.withValue(true) {

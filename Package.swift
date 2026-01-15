@@ -43,7 +43,7 @@ let package = Package(
       name: "Dependencies",
       dependencies: [
         .product(name: "Clocks", package: "swift-clocks"),
-        .product(name: "CombineSchedulers", package: "combine-schedulers"),
+        .product(name: "CombineSchedulers", package: "combine-schedulers", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .linux])),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),

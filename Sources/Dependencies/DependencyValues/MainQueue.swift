@@ -6,8 +6,9 @@
     ///
     /// Introduce controllable timing to your features by using the ``Dependency`` property wrapper
     /// with a key path to this property. The wrapped value is a Combine scheduler with the time
-    /// type and options of a dispatch queue. By default, `DispatchQueue.main` will be provided,
-    /// with the exception of XCTest cases, in which an "unimplemented" scheduler will be provided.
+    /// type and options of a dispatch queue. By default, a variant of `DispatchQueue.main` that
+    /// forwards dependencies will be provided, with the exception of XCTest cases, in which an
+    /// "unimplemented" scheduler will be provided.
     ///
     /// For example, you could introduce controllable timing to an observable object model that
     /// counts the number of seconds it's onscreen:
@@ -56,7 +57,7 @@
     }
 
     private enum MainQueueKey: DependencyKey {
-      static let liveValue = AnySchedulerOf<DispatchQueue>.main
+      static let liveValue = DispatchQueue.main.dependencies()
       static let testValue = AnySchedulerOf<DispatchQueue>
         .unimplemented(#"@Dependency(\.mainQueue)"#)
     }

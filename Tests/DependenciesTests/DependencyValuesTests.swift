@@ -293,6 +293,44 @@ final class DependencyValuesTests: XCTestCase {
       XCTAssertEqual(reuseClient.count(), 0)
     #endif
   }
+  
+  #if !os(Linux) && !os(WASI) && !os(Windows)
+    func testFullDependencyReset_KeyPathLiveContext() async {
+      await withDependencies {
+        $0.context = .live
+      } operation: {
+        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+        var value = await cachedDependency.increment()
+        XCTAssertEqual(value, 1)
+        value = await cachedDependency.increment()
+        XCTAssertEqual(value, 2)
+        value = await cachedDependency.increment()
+        XCTAssertEqual(value, 3)
+        DependencyValues.reset(\.cachedDependency)
+        value = await cachedDependency.increment()
+        XCTAssertEqual(value, 1)
+      }
+    }
+  #endif
+  
+  #if !os(Linux) && !os(WASI) && !os(Windows)
+    func testFullDependencyReset_ObjectKeyLiveContext() async {
+      await withDependencies {
+        $0.context = .live
+      } operation: {
+        @Dependency(\.cachedDependency) var cachedDependency: CachedDependency
+        var value = await cachedDependency.increment()
+        XCTAssertEqual(value, 1)
+        value = await cachedDependency.increment()
+        XCTAssertEqual(value, 2)
+        value = await cachedDependency.increment()
+        XCTAssertEqual(value, 3)
+        DependencyValues.reset(CachedDependency.self)
+        value = await cachedDependency.increment()
+        XCTAssertEqual(value, 1)
+      }
+    }
+  #endif
 
   func testBinding() {
     withDependencies {
@@ -938,7 +976,11 @@ extension DependencyValues {
   }
 }
 
-actor CachedDependency: TestDependencyKey {
+actor CachedDependency: DependencyKey {
+  static var liveValue: CachedDependency {
+    CachedDependency()
+  }
+  
   static var testValue: CachedDependency {
     CachedDependency()
   }

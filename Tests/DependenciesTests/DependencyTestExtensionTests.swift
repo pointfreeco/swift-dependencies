@@ -23,25 +23,25 @@
 
     @Suite struct FailedCast {
       @Test func key() async throws {
-//        let result = await #expect(processExitsWith: .failure) {
+        let result = await #expect(processExitsWith: .failure) {
           withDependencies {
             $0.client = LiveClient()
           } operation: {
             @Dependency(ClientKey.self, as: TestClient.self) var client
             _ = client.isLive()
           }
-//        }
+        }
       }
 
       @Test func keyPath() async throws {
-//        await #expect(processExitsWith: .failure) {
+        await #expect(processExitsWith: .failure) {
           withDependencies {
             $0.client = LiveClient()
           } operation: {
             @Dependency(\.client, as: TestClient.self) var client
             _ = client.isLive()
           }
-//        }
+        }
       }
     }
   }

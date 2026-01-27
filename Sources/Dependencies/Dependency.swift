@@ -225,15 +225,21 @@ extension Dependency {
   }
 }
 
-private struct HashableType<T>: Hashable, Sendable {
-  let fileID: StaticString
-  let filePath: StaticString
-  let line: UInt
-  let column: UInt
-  static func == (lhs: Self, rhs: Self) -> Bool {
+package struct HashableType<T>: Hashable, Sendable {
+  package let fileID: StaticString
+  package let filePath: StaticString
+  package let line: UInt
+  package let column: UInt
+  package init(fileID: StaticString, filePath: StaticString, line: UInt, column: UInt) {
+    self.fileID = fileID
+    self.filePath = filePath
+    self.line = line
+    self.column = column
+  }
+  package static func == (lhs: Self, rhs: Self) -> Bool {
     true
   }
-  func hash(into hasher: inout Hasher) {
+  package func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(T.self))
   }
 }

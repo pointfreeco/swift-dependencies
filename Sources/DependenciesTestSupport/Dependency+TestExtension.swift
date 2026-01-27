@@ -33,6 +33,7 @@ extension Dependency {
   ///   - filePath: The source `#filePath` associated with the dependency.
   ///   - line: The source `#line` associated with the dependency.
   ///   - column: The source `#column` associated with the dependency.
+  @available(macOS 13.3, iOS 16.4, watchOS 9.4, tvOS 16.4, *)
   public init<T>(
     _ keyPath: KeyPath<DependencyValues, T> & Sendable,
     as type: Value.Type,
@@ -112,15 +113,28 @@ extension Dependency {
 }
 
 extension DependencyValues {
+  @available(macOS 13.3, iOS 16.4, watchOS 9.4, tvOS 16.4, *)
   fileprivate subscript<Existential, Concrete>(
     keyPath: KeyPath<DependencyValues, Existential>,
-    as type: HashableType<Concrete>
+    as hashableType: HashableType<Concrete>
   ) -> Concrete {
-    guard let value = self[keyPath: keyPath] as? Concrete
+    let existential = self[keyPath: keyPath]
+    func open<T>(_ type: T) -> String {
+      "\(T.self)"
+    }
+    let actualConcreteType: String = _openExistential(existential as Any, do: open)
+    guard let value = existential as? Concrete
     else {
       fatalError(
         """
-        Could not cast \(Swift.type(of: self[keyPath: keyPath])) to \(Concrete.self).
+        Could not cast '\(actualConcreteType)' to '\(Concrete.self)'. Make sure to \
+        override the dependency in your test or suite traits:
+        
+          @Suite(
+            .dependencies {
+              $0.\(keyPath.debugDescription.dropFirst(18)) = \(Concrete.self)(…)
+            )
+          )
         """
       )
     }
@@ -129,7 +143,7 @@ extension DependencyValues {
 
   fileprivate subscript<Key: TestDependencyKey, Concrete>(
     key key: HashableType<Key>,
-    as type: HashableType<Concrete>
+    as _: HashableType<Concrete>
   ) -> Concrete {
     guard let value = self[Key.self] as? Concrete
     else {

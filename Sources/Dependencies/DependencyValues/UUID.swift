@@ -118,14 +118,14 @@ extension UUID {
   /// For example:
   ///
   /// ```swift
-  /// UUID(16) == UUID(uuidString: "00000000-0000-0000-0000000000F0")
+  /// UUID(16) == UUID(uuidString: "00000000-0000-0000-0000-000000000010")
   /// ```
   ///
   /// If a negative number is passed to this function then it is inverted and the negative sign
   /// is encoded into the 16th bit of the UUID:
   ///
   /// ```swift
-  /// UUID(-16) == UUID(uuidString: "00000000-0001-0000-0000000000F0")
+  /// UUID(-16) == UUID(uuidString: "00000000-0000-0001-0000-000000000010")
   ///                                            👆
   /// ```
   public init(_ intValue: Int) {

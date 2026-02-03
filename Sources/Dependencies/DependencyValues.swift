@@ -1,43 +1,12 @@
+//
+//  DependencyValues.swift
+//  Dependencies
+//
+//  Created by Robert Nash on 03/02/2026.
+//  Copyright © 2026 ABA Systems. All rights reserved.
+//
+
 import Foundation
-import IssueReporting
-
-#if os(Windows)
-  import WinSDK
-#elseif canImport(Android)
-  import Android
-#elseif canImport(Glibc)
-  import Glibc
-#elseif canImport(Musl)
-  import Musl
-#endif
-// WASI does not support dynamic linking
-#if os(WASI)
-  import XCTest
-#endif
-
-#if _runtime(_ObjC)
-  extension DispatchQueue {
-    fileprivate static func mainASAP(execute block: @escaping @Sendable () -> Void) {
-      if Thread.isMainThread {
-        return block()
-      } else {
-        return Self.main.async(execute: block)
-      }
-    }
-  }
-
-  final class TestObserver: NSObject {}
-#elseif os(WASI)
-  final class TestObserver: NSObject, XCTestObservation {
-    private let resetCache: @convention(c) () -> Void
-    internal init(_ resetCache: @convention(c) () -> Void) {
-      self.resetCache = resetCache
-    }
-    public func testCaseWillStart(_ testCase: XCTestCase) {
-      self.resetCache()
-    }
-  }
-#endif
 
 /// A collection of dependencies that is globally available.
 ///
@@ -45,335 +14,76 @@ import IssueReporting
 /// wrapper:
 ///
 /// ```swift
-/// @Dependency(\.date) var date
+/// @Dependency(\.apiClient) var apiClient
 /// // ...
-/// let now = date.now
+/// let user = try await apiClient.fetchUser(id: 42)
 /// ```
 ///
 /// To change a dependency for a well-defined scope you can use the
-/// ``withDependencies(_:operation:)-4uz6m`` method:
+/// ``withDependencies(_:operation:)-sync`` method:
 ///
 /// ```swift
-/// @Dependency(\.date) var date
-/// let now = date.now
-///
 /// withDependencies {
-///   $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
+///   $0.apiClient = .mock
 /// } operation: {
-///   @Dependency(\.date.now) var now: Date
-///   now.timeIntervalSinceReferenceDate  // 1234567890
+///   // Use mocked apiClient here
 /// }
 /// ```
-///
-/// The dependencies will be changed for the lifetime of the `operation` scope, which can be
-/// synchronous or asynchronous.
-///
-/// > Note: In general, the dependency remains changed only for the duration of the `operation`
-/// > scope, and in particular if you capture the dependency in an escaping closure its changed
-/// > value will not propagate. There are exceptions though, because the collection of dependencies
-/// > held inside ``DependencyValues`` is a `@TaskLocal`. This means if you escape the `operation`
-/// > closure with a `Task`, the dependency change will propagate:
-/// >
-/// > ```
-/// > withDependencies {
-/// >   $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
-/// > } operation: {
-/// >   @Dependency(\.date.now) var now: Date
-/// >   now.timeIntervalSinceReferenceDate  // 1234567890
-/// >   Task {
-/// >     now.timeIntervalSinceReferenceDate  // 1234567890
-/// >   }
-/// > }
-/// > ```
-/// >
-/// > Read the article <doc:Lifetimes> for more information.
 ///
 /// To register a dependency inside ``DependencyValues``, you first create a type to conform to the
-/// ``DependencyKey`` protocol in order to specify the ``DependencyKey/liveValue`` to use for the
-/// dependency when run in simulators and on devices. It can even be private:
+/// ``DependencyKey`` protocol:
 ///
 /// ```swift
-/// private enum MyValueKey: DependencyKey {
-///   static let liveValue = 42
+/// private enum APIClientKey: DependencyKey {
+///   static let liveValue = APIClient.live
 /// }
 /// ```
 ///
-/// And then extend ``DependencyValues`` with a computed property that uses the key to read and
-/// write to ``DependencyValues``:
+/// Then extend ``DependencyValues`` with a computed property:
 ///
 /// ```swift
 /// extension DependencyValues {
-///   var myValue: Int {
-///     get { self[MyValueKey.self] }
-///     set { self[MyValueKey.self] = newValue }
+///   var apiClient: APIClient {
+///     get { self[APIClientKey.self] }
+///     set { self[APIClientKey.self] = newValue }
 ///   }
 /// }
 /// ```
-///
-/// With those steps done you can access the dependency using the ``Dependency`` property wrapper:
-///
-/// ```swift
-/// @Dependency(\.myValue) var myValue
-/// myValue  // 42
-/// ```
-///
-/// Read the article <doc:RegisteringDependencies> for more information.
 public struct DependencyValues: Sendable {
   @TaskLocal public static var _current = Self()
-  @TaskLocal static var currentDependency = CurrentDependency()
-  #if DEBUG
-    @TaskLocal static var isSetting = false
-  #endif
-  @TaskLocal static var preparationID: Foundation.UUID?
-  static var isPreparing: Bool {
-    preparationID != nil
-  }
 
-  @_spi(Internals)
-  public var cachedValues = CachedValues()
+  var cachedValues = CachedValues()
   private var storage: [ObjectIdentifier: any Sendable] = [:]
 
   /// Creates a dependency values instance.
-  ///
-  /// You don't typically create an instance of ``DependencyValues`` directly. Doing so would
-  /// provide access only to default values. Instead, you rely on the dependency values' instance
-  /// that the library manages for you when you use the ``Dependency`` property wrapper.
-  public init() {
-    #if _runtime(_ObjC)
-      DispatchQueue.mainASAP {
-        guard
-          let XCTestObservation = objc_getProtocol("XCTestObservation"),
-          let XCTestObservationCenter = NSClassFromString("XCTestObservationCenter"),
-          let XCTestObservationCenter = XCTestObservationCenter as Any as? NSObjectProtocol,
-          let XCTestObservationCenterShared =
-            XCTestObservationCenter
-            .perform(Selector(("sharedTestObservationCenter")))?
-            .takeUnretainedValue()
-        else { return }
-        let testCaseWillStartBlock: @convention(block) (AnyObject) -> Void = { _ in
-          DependencyValues._current.cachedValues.resetCache()
-        }
-        let testCaseWillStartImp = imp_implementationWithBlock(testCaseWillStartBlock)
-        class_addMethod(
-          TestObserver.self,
-          Selector(("testCaseWillStart:")),
-          testCaseWillStartImp,
-          nil
-        )
-        class_addProtocol(TestObserver.self, XCTestObservation)
-        _ =
-          XCTestObservationCenterShared
-          .perform(Selector(("addTestObserver:")), with: TestObserver())
-      }
-    #elseif os(WASI)
-      if isTesting {
-        XCTestObservationCenter.shared.addTestObserver(
-          TestObserver {
-            DependencyValues._current.cachedValues.resetCache()
-          }
-        )
-      }
-    #else
-      typealias RegisterTestObserver = @convention(thin) (@convention(c) () -> Void) -> Void
-      var pRegisterTestObserver: RegisterTestObserver? = nil
+  public init() {}
 
-      #if os(Windows)
-        let hModule = LoadLibraryA("DependenciesTestObserver.dll")
-        if let hModule,
-          let pAddress = GetProcAddress(hModule, "$s24DependenciesTestObserver08registerbC0yyyyXCF")
-        {
-          pRegisterTestObserver = unsafeBitCast(pAddress, to: RegisterTestObserver.self)
-        }
-      #else
-        let hModule: UnsafeMutableRawPointer? = dlopen("libDependenciesTestObserver.so", RTLD_NOW)
-        if let hModule,
-          let pAddress = dlsym(hModule, "$s24DependenciesTestObserver08registerbC0yyyyXCF")
-        {
-          pRegisterTestObserver = unsafeBitCast(pAddress, to: RegisterTestObserver.self)
-        }
-      #endif
-      pRegisterTestObserver?({
-        DependencyValues._current.cachedValues.resetCache()
-      })
-    #endif
-  }
-
-  package init(context: DependencyContext) {
+  init(context: DependencyContext) {
     self.init()
     self.context = context
-  }
-
-  @_disfavoredOverload
-  public subscript<Key: TestDependencyKey>(type: Key.Type) -> Key.Value {
-    get { self[type] }
-    set { self[type] = newValue }
   }
 
   /// Accesses the dependency value associated with a custom key.
   ///
   /// This subscript is typically only used when adding a computed property to ``DependencyValues``
-  /// for registering custom dependencies:
-  ///
-  /// ```swift
-  /// private struct MyDependencyKey: DependencyKey {
-  ///   static let testValue = "Default value"
-  /// }
-  ///
-  /// extension DependencyValues {
-  ///   var myCustomValue: String {
-  ///     get { self[MyDependencyKey.self] }
-  ///     set { self[MyDependencyKey.self] = newValue }
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// You use custom dependency values the same way you use system-provided values, setting a value
-  /// with ``withDependencies(_:operation:)-4uz6m``, and reading values with the ``Dependency``
-  /// property wrapper.
-  public subscript<Key: TestDependencyKey>(
-    key: Key.Type,
-    fileID fileID: StaticString = #fileID,
-    filePath filePath: StaticString = #filePath,
-    line line: UInt = #line,
-    column column: UInt = #column,
-    function function: StaticString = #function
-  ) -> Key.Value {
+  /// for registering custom dependencies.
+  public subscript<Key: TestDependencyKey>(key: Key.Type) -> Key.Value {
     get {
       guard let base = self.storage[ObjectIdentifier(key)], let dependency = base as? Key.Value
       else {
-        let context =
-          self.storage[ObjectIdentifier(DependencyContextKey.self)] as? DependencyContext
-          ?? self.cachedValues.value(
-            for: DependencyContextKey.self,
-            context: defaultContext,
-            fileID: fileID,
-            filePath: filePath,
-            function: function,
-            line: line,
-            column: column
-          )
+        let context = self.storage[ObjectIdentifier(DependencyContextKey.self)] as? DependencyContext
+          ?? self.cachedValues.value(for: DependencyContextKey.self, context: defaultContext)
 
-        switch context {
-        case .live, .preview:
-          return self.cachedValues.value(
-            for: Key.self,
-            context: context,
-            fileID: fileID,
-            filePath: filePath,
-            function: function,
-            line: line,
-            column: column
-          )
-        case .test:
-          var currentDependency = Self.currentDependency
-          currentDependency.name = function
-          return Self.$currentDependency.withValue(currentDependency) {
-            self.cachedValues.value(
-              for: Key.self,
-              context: context,
-              fileID: fileID,
-              filePath: filePath,
-              function: function,
-              line: line,
-              column: column
-            )
-          }
-        }
+        return self.cachedValues.value(for: Key.self, context: context)
       }
       return dependency
     }
     set {
-      if DependencyValues.isPreparing {
-        cachedValues.lock.lock()
-        defer { cachedValues.lock.unlock() }
-        let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
-        guard !cachedValues.cached.keys.contains(cacheKey) else {
-          if cachedValues.cached[cacheKey]?.preparationID != DependencyValues.preparationID {
-            if context != .preview {
-              reportIssue(
-                {
-                  var dependencyDescription = ""
-                  if let fileID = DependencyValues.currentDependency.fileID,
-                    let line = DependencyValues.currentDependency.line
-                  {
-                    dependencyDescription.append(
-                      """
-                        Location:
-                          \(fileID):\(line)
-
-                      """
-                    )
-                  }
-                  dependencyDescription.append(
-                    Key.self == Key.Value.self
-                      ? """
-                        Dependency:
-                          \(typeName(Key.Value.self))
-                      """
-                      : """
-                        Key:
-                          \(typeName(Key.self))
-                        Value:
-                          \(typeName(Key.Value.self))
-                      """
-                  )
-                  var argument: String {
-                    "\(function)" == "subscript(key:)"
-                      ? "\(typeName(Key.self)).self"
-                      : "\\.\(function)"
-                  }
-                  return """
-                    @Dependency(\(argument)) has already been accessed or prepared.
-
-                    \(dependencyDescription)
-
-                    A global dependency can only be prepared a single time and cannot be accessed \
-                    beforehand. Prepare dependencies as early as possible in the lifecycle of your \
-                    application.
-
-                    To temporarily override a dependency in your application, use \
-                    'withDependencies' to do so in a well-defined scope.
-                    """
-                }(),
-                fileID: DependencyValues.currentDependency.fileID ?? fileID,
-                filePath: DependencyValues.currentDependency.filePath ?? filePath,
-                line: DependencyValues.currentDependency.line ?? line,
-                column: DependencyValues.currentDependency.column ?? column
-              )
-            }
-          } else {
-            cachedValues.cached[cacheKey] = CachedValues.CachedValue(
-              base: newValue,
-              preparationID: DependencyValues.preparationID
-            )
-          }
-          return
-        }
-        cachedValues.cached[cacheKey] = CachedValues.CachedValue(
-          base: newValue,
-          preparationID: DependencyValues.preparationID
-        )
-      } else {
-        self.storage[ObjectIdentifier(key)] = newValue
-      }
+      self.storage[ObjectIdentifier(key)] = newValue
     }
   }
 
   /// A collection of "live" dependencies.
-  ///
-  /// A useful starting point for working with live dependencies.
-  ///
-  /// For example, if you want to write a test that exercises your application's live dependencies
-  /// (rather than its test dependencies, which is the default), you can override the test's
-  /// dependencies with a live value:
-  ///
-  /// ```swift
-  /// func testLiveDependencies() {
-  ///   withDependencies { $0 = .live } operation: {
-  ///     // Make assertions using live dependencies...
-  ///   }
-  /// }
-  /// ```
   public static var live: Self {
     var values = Self()
     values.context = .live
@@ -399,91 +109,23 @@ public struct DependencyValues: Sendable {
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })
     return values
   }
-
-  @_spi(Beta)
-  @available(
-    *,
-    deprecated,
-    message: "'resetCache' is no longer necessary for most (unparameterized) '@Test' cases"
-  )
-  public func resetCache() {
-    cachedValues.resetCache()
-  }
 }
 
-struct CurrentDependency {
-  var name: StaticString?
-  var fileID: StaticString?
-  var filePath: StaticString?
-  var line: UInt?
-  var column: UInt?
-}
-
-private let defaultContext: DependencyContext = {
-  let environment = ProcessInfo.processInfo.environment
-  var inferredContext: DependencyContext {
-    if environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-      return .preview
-    } else if isTesting {
-      return .test
-    } else {
-      return .live
-    }
-  }
-
-  guard let value = environment["SWIFT_DEPENDENCIES_CONTEXT"]
-  else { return inferredContext }
-
-  switch value {
-  case "live":
-    return .live
-  case "preview":
-    return .preview
-  case "test":
-    return .test
-  default:
-    reportIssue(
-      """
-      An environment value for SWIFT_DEPENDENCIES_CONTEXT was provided but did not match "live",
-      "preview", or "test".
-
-          SWIFT_DEPENDENCIES_CONTEXT = \(value.debugDescription)
-      """
-    )
-    return inferredContext
-  }
-}()
-
-@_spi(Internals)
-public final class CachedValues: @unchecked Sendable {
-  @TaskLocal static var isAccessingCachedDependencies = false
-
-  public struct CacheKey: Hashable, Sendable {
-    let id: TypeIdentifier
+final class CachedValues: @unchecked Sendable {
+  struct CacheKey: Hashable, Sendable {
+    let id: ObjectIdentifier
     let context: DependencyContext
-    let testIdentifier: TestContext.Testing.Test.ID?
 
-    init(id: TypeIdentifier, context: DependencyContext) {
-      self.id = id
+    init<Key>(_ key: Key.Type, context: DependencyContext) {
+      self.id = ObjectIdentifier(key)
       self.context = context
-      switch TestContext.current {
-      case let .swiftTesting(.some(testing)):
-        self.testIdentifier = testing.test.id
-      default:
-        self.testIdentifier = nil
-      }
     }
   }
 
-  public struct CachedValue {
-    let base: any Sendable
-    let preparationID: Foundation.UUID?
-  }
+  private let lock = NSRecursiveLock()
+  private var cached: [CacheKey: any Sendable] = [:]
 
-  public let lock = NSRecursiveLock()
-  public var cached = [CacheKey: CachedValue]()
-
-  public func resetCache() {
+  func resetCache() {
     lock.lock()
     defer { lock.unlock() }
     cached = [:]
@@ -491,144 +133,64 @@ public final class CachedValues: @unchecked Sendable {
 
   func value<Key: TestDependencyKey>(
     for key: Key.Type,
-    context: DependencyContext,
-    fileID: StaticString = #fileID,
-    filePath: StaticString = #filePath,
-    function: StaticString = #function,
-    line: UInt = #line,
-    column: UInt = #column
+    context: DependencyContext
   ) -> Key.Value {
     lock.lock()
     defer { lock.unlock() }
 
-    return withIssueContext(fileID: fileID, filePath: filePath, line: line, column: column) {
-      let cacheKey = CacheKey(id: TypeIdentifier(key), context: context)
-      #if DEBUG
-        if context == .live,
-          !DependencyValues.isSetting,
-          !(cached[cacheKey] != nil && cached[cacheKey]?.preparationID != nil),
-          !(key is any DependencyKey.Type)
-        {
-          reportIssue(
-            {
-              var dependencyDescription = ""
-              if let fileID = DependencyValues.currentDependency.fileID,
-                let line = DependencyValues.currentDependency.line
-              {
-                dependencyDescription.append(
-                  """
-                    Location:
-                      \(fileID):\(line)
+    let cacheKey = CacheKey(key, context: context)
 
-                  """
-                )
-              }
-              dependencyDescription.append(
-                Key.self == Key.Value.self
-                  ? """
-                    Dependency:
-                      \(typeName(Key.Value.self))
-                  """
-                  : """
-                    Key:
-                      \(typeName(Key.self))
-                    Value:
-                      \(typeName(Key.Value.self))
-                  """
-              )
-
-              var argument: String {
-                "\(function)" == "subscript(key:)"
-                  ? "\(typeName(Key.self)).self"
-                  : "\\.\(function)"
-              }
-              return """
-                @Dependency(\(argument)) has no live implementation, but was accessed from a live \
-                context.
-
-                \(dependencyDescription)
-
-                To fix you can do one of two things:
-
-                • Conform '\(typeName(Key.self))' to the 'DependencyKey' protocol by providing \
-                a live implementation of your dependency, and make sure that the conformance is \
-                linked with this current application.
-
-                • Override the implementation of '\(typeName(Key.self))' using \
-                'withDependencies'. This is typically done at the entry point of your \
-                application, but can be done later too.
-                """
-            }(),
-            fileID: DependencyValues.currentDependency.fileID ?? fileID,
-            filePath: DependencyValues.currentDependency.filePath ?? filePath,
-            line: DependencyValues.currentDependency.line ?? line,
-            column: DependencyValues.currentDependency.column ?? column
-          )
-        }
-      #endif
-
-      guard let base = cached[cacheKey]?.base, let value = base as? Key.Value
-      else {
-        let value: Key.Value?
-        switch context {
-        case .live:
-          value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value
-        case .preview:
-          if !CachedValues.isAccessingCachedDependencies {
-            value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
-              return Key.previewValue
-            }
-          } else {
-            value = Key.previewValue
-          }
-        case .test:
-          #if compiler(<6.1)
-            if !CachedValues.isAccessingCachedDependencies,
-              case let .swiftTesting(.some(testing)) = TestContext.current,
-              let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
-            {
-              value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
-                testValues[key]
-              }
-            } else {
-              value = Key.testValue
-            }
-          #else
-            value = Key.testValue
-          #endif
-        }
-
-        let cacheableValue = value ?? Key.testValue
-        cached[cacheKey] = CachedValue(
-          base: cacheableValue,
-          preparationID: DependencyValues.preparationID
-        )
-        return cacheableValue
+    guard let base = cached[cacheKey], let value = base as? Key.Value else {
+      let value: Key.Value
+      switch context {
+      case .live:
+        value = (key as? any DependencyKey.Type)?.liveValue as? Key.Value ?? Key.testValue
+      case .preview:
+        value = Key.previewValue
+      case .test:
+        value = Key.testValue
       }
 
+      cached[cacheKey] = value
       return value
     }
+
+    return value
   }
 }
 
-struct TypeIdentifier: Hashable {
-  let id: ObjectIdentifier
-  #if DEBUG
-    let base: Any.Type
-  #endif
+// MARK: - Context
 
-  init<T>(_ type: T.Type) {
-    self.id = ObjectIdentifier(type)
-    #if DEBUG
-      self.base = type
-    #endif
-  }
-
-  static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.id == rhs.id
-  }
-
-  func hash(into hasher: inout Hasher) {
-    hasher.combine(id)
+extension DependencyValues {
+  /// The current dependency context.
+  public var context: DependencyContext {
+    get { self[DependencyContextKey.self] }
+    set { self[DependencyContextKey.self] = newValue }
   }
 }
+
+enum DependencyContextKey: DependencyKey {
+  static let liveValue = DependencyContext.live
+  static let previewValue = DependencyContext.preview
+  static let testValue = DependencyContext.test
+}
+
+// MARK: - Context Detection
+
+private let defaultContext: DependencyContext = {
+  let environment = ProcessInfo.processInfo.environment
+
+  if environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+    return .preview
+  } else if isTesting {
+    return .test
+  } else {
+    return .live
+  }
+}()
+
+private let isTesting: Bool = {
+  NSClassFromString("XCTestCase") != nil
+    || NSClassFromString("XCTest.XCTestCase") != nil
+    || ProcessInfo.processInfo.environment["XCTestSessionIdentifier"] != nil
+}()

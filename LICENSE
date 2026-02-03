@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2022 Point-Free, Inc.
+Copyright (c) 2026 ABA Systems
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+ACKNOWLEDGMENT
+
+This library's API design and architecture are inspired by Point-Free's
+swift-dependencies library (https://github.com/pointfreeco/swift-dependencies),
+but this is a complete reimplementation written from scratch. No code from the
+original library was copied. This is a minimal, dependency-free implementation
+of the core dependency injection concepts.

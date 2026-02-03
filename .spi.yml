@@ -1,7 +1,0 @@
-version: 1
-builder:
-  configs:
-  - documentation_targets:
-    - Dependencies
-    - DependenciesMacros
-    - DependenciesTestSupport

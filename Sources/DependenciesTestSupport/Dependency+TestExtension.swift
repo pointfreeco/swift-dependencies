@@ -33,7 +33,6 @@ extension Dependency {
   ///   - filePath: The source `#filePath` associated with the dependency.
   ///   - line: The source `#line` associated with the dependency.
   ///   - column: The source `#column` associated with the dependency.
-  @available(macOS 13.3, iOS 16.4, watchOS 9.4, tvOS 16.4, *)
   public init<T>(
     _ keyPath: KeyPath<DependencyValues, T> & Sendable,
     as type: Value.Type,
@@ -113,27 +112,29 @@ extension Dependency {
 }
 
 extension DependencyValues {
-  @available(macOS 13.3, iOS 16.4, watchOS 9.4, tvOS 16.4, *)
   fileprivate subscript<Existential, Concrete>(
     keyPath: KeyPath<DependencyValues, Existential>,
     as hashableType: HashableType<Concrete>
   ) -> Concrete {
     let existential = self[keyPath: keyPath]
-    func open<T>(_ type: T) -> String {
-      "\(T.self)"
-    }
-    let actualConcreteType: String = _openExistential(existential as Any, do: open)
     guard let value = existential as? Concrete
     else {
+      var propertyDescription: String {
+        if #available(macOS 13.3, iOS 16.4, watchOS 9.4, tvOS 16.4, *) {
+          String(keyPath.debugDescription.dropFirst(18))
+        } else {
+          "/* property name */"
+        }
+      }
       fatalError(
         """
-        Could not cast '\(actualConcreteType)' to '\(Concrete.self)'. Make sure to \
+        Could not cast '\(type(of: existential as Any))' to '\(Concrete.self)'. Make sure to \
         override the dependency in your test or suite traits:
         
           @Suite(
             .dependencies {
-              $0.\(keyPath.debugDescription.dropFirst(18)) = \(Concrete.self)(…)
-            )
+              $0.\(propertyDescription) = \(Concrete.self)(/* ... */)
+            }
           )
         """
       )
@@ -145,11 +146,19 @@ extension DependencyValues {
     key key: HashableType<Key>,
     as _: HashableType<Concrete>
   ) -> Concrete {
-    guard let value = self[Key.self] as? Concrete
+    let existential = self[Key.self]
+    guard let value = existential as? Concrete
     else {
       fatalError(
         """
-        Could not cast \(Swift.type(of: self[Key.self])) to \(Concrete.self).
+        Could not cast '\(type(of: existential as Any))' to '\(Concrete.self)'. Make sure to \
+        override the dependency in your test or suite traits:
+
+          @Suite(
+            .dependencies {
+              $0.[\(Key.self).self] = \(Concrete.self)(/* ... */)
+            }
+          )
         """
       )
     }

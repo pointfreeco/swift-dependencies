@@ -7,7 +7,7 @@ extension DependencyValues {
 
 private enum DefaultIsolationKey: DependencyKey {
   public static var liveValue: (any Actor)? { nil }
-  public static var testValue: (any Actor)? { DefaultIsolation() }
+  public static var testValue: (any Actor)? { TestIsolation() }
 }
 
-private actor DefaultIsolation {}
+private actor TestIsolation {}

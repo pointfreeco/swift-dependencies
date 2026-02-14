@@ -1,3 +1,7 @@
+#if canImport(SwiftUI)
+  import SwiftUI
+#endif
+
 /// A property wrapper for accessing dependencies.
 ///
 /// All dependencies are stored in ``DependencyValues`` and one uses this property wrapper to gain
@@ -66,8 +70,12 @@
 /// [tca]: https://github.com/pointfreeco/swift-composable-architecture
 @propertyWrapper
 public struct Dependency<Value>: _HasInitialValues {
-  let initialValues: DependencyValues
-  var installValues: DependencyValues?
+  let initialValues: DependencyValues = DependencyValues._current
+  private var installValues: DependencyValues?
+  #if canImport(SwiftUI)
+    @Environment(\.dependencies) private var environmentValues
+  #endif
+
   private let keyPath: SendableKeyPath<DependencyValues, Value>
   private let filePath: StaticString
   private let fileID: StaticString
@@ -103,7 +111,6 @@ public struct Dependency<Value>: _HasInitialValues {
     line: UInt = #line,
     column: UInt = #column
   ) {
-    self.initialValues = DependencyValues._current
     self.keyPath = keyPath
     self.filePath = filePath
     self.fileID = fileID
@@ -165,24 +172,32 @@ public struct Dependency<Value>: _HasInitialValues {
 
   /// The current value of the dependency property.
   public var wrappedValue: Value {
-    #if DEBUG
-      var currentDependency = DependencyValues.currentDependency
-      currentDependency.fileID = self.fileID
-      currentDependency.filePath = self.filePath
-      currentDependency.line = self.line
-      currentDependency.column = self.column
-      return DependencyValues.$currentDependency.withValue(currentDependency) {
-        let dependencies = self.initialValues.merging(DependencyValues._current)
-        return DependencyValues.$_current.withValue(dependencies) {
-          DependencyValues._current[keyPath: self.keyPath]
+    guard let installValues else {
+      #if DEBUG
+        var currentDependency = DependencyValues.currentDependency
+        currentDependency.fileID = fileID
+        currentDependency.filePath = filePath
+        currentDependency.line = line
+        currentDependency.column = column
+        return DependencyValues.$currentDependency.withValue(currentDependency) {
+          let dependencies = initialValues.merging(DependencyValues._current)
+          return DependencyValues.$_current.withValue(dependencies) {
+            DependencyValues._current[keyPath: keyPath]
+          }
         }
-      }
-    #else
-      let dependencies = self.initialValues.merging(DependencyValues._current)
-      return DependencyValues.$_current.withValue(dependencies) {
-        DependencyValues._current[keyPath: self.keyPath]
-      }
-    #endif
+      #else
+        let dependencies = initialValues.merging(DependencyValues._current)
+        return DependencyValues.$_current.withValue(dependencies) {
+          DependencyValues._current[keyPath: keyPath]
+        }
+      #endif
+    }
+    return initialValues.merging(installValues)[keyPath: keyPath]
+  }
+
+  @_spi(DependencyInstallation)
+  public mutating func install(_ values: DependencyValues) {
+    installValues = values
   }
 }
 
@@ -190,6 +205,106 @@ public struct Dependency<Value>: _HasInitialValues {
   extension Dependency: Sendable {}
 #else
   extension Dependency: @unchecked Sendable {}
+#endif
+
+#if canImport(SwiftUI)
+  extension Dependency: DynamicProperty {
+    public mutating func update() {
+      install(environmentValues)
+    }
+  }
+
+  extension EnvironmentValues {
+    public var dependencies: DependencyValues {
+      get { self[DependencyValuesKey.self] }
+      set { self[DependencyValuesKey.self] = newValue }
+    }
+  }
+
+  @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
+  extension Scene {
+    /// Threads a dependency through a SwiftUI view hierarchy.
+    ///
+    /// - Parameters:
+    ///   - keyPath: A key path that indicates the property of the ``DependencyValues`` structure to
+    ///     update.
+    ///   - value: The new value to set for the item specified by `keyPath`.
+    /// - Returns: A view that has the given value set in its environment.
+    public func dependency<V>(
+      _ keyPath: WritableKeyPath<DependencyValues, V>,
+      _ value: V
+    ) -> some Scene {
+      environment((\.dependencies as WritableKeyPath).appending(path: keyPath), value)
+    }
+
+    /// Threads a dependency through a SwiftUI view hierarchy.
+    ///
+    /// - Parameters:
+    ///   - value: The value to set for this object's type in the environment.
+    ///   - fileID: The source `#fileID` associated with the dependency.
+    ///   - filePath: The source `#filePath` associated with the dependency.
+    ///   - line: The source `#line` associated with the dependency.
+    ///   - column: The source `#column` associated with the dependency.
+    /// - Returns: A view that has the given value set in its environment.
+    public func dependency<V: DependencyKey<V>>(
+      _ value: V,
+      fileID: StaticString = #fileID,
+      filePath: StaticString = #filePath,
+      line: UInt = #line,
+      column: UInt = #column
+    ) -> some Scene {
+      environment(
+        \.dependencies[
+          key: HashableType<V>(fileID: fileID, filePath: filePath, line: line, column: column)
+        ],
+         value
+      )
+    }
+  }
+
+  extension View {
+    /// Threads a dependency through a SwiftUI view hierarchy.
+    ///
+    /// - Parameters:
+    ///   - keyPath: A key path that indicates the property of the ``DependencyValues`` structure to
+    ///     update.
+    ///   - value: The new value to set for the item specified by `keyPath`.
+    /// - Returns: A view that has the given value set in its environment.
+    public func dependency<V>(
+      _ keyPath: WritableKeyPath<DependencyValues, V>,
+      _ value: V
+    ) -> some View {
+      environment((\.dependencies as WritableKeyPath).appending(path: keyPath), value)
+    }
+
+    /// Threads a dependency through a SwiftUI view hierarchy.
+    ///
+    /// - Parameters:
+    ///   - value: The value to set for this object's type in the environment.
+    ///   - fileID: The source `#fileID` associated with the dependency.
+    ///   - filePath: The source `#filePath` associated with the dependency.
+    ///   - line: The source `#line` associated with the dependency.
+    ///   - column: The source `#column` associated with the dependency.
+    /// - Returns: A view that has the given value set in its environment.
+    public func dependency<V: DependencyKey<V>>(
+      _ value: V,
+      fileID: StaticString = #fileID,
+      filePath: StaticString = #filePath,
+      line: UInt = #line,
+      column: UInt = #column
+    ) -> some View {
+      environment(
+        \.dependencies[
+          key: HashableType<V>(fileID: fileID, filePath: filePath, line: line, column: column)
+        ],
+        value
+      )
+    }
+  }
+
+  private enum DependencyValuesKey: EnvironmentKey {
+    static var defaultValue: DependencyValues { DependencyValues._current }
+  }
 #endif
 
 package struct HashableType<T>: Hashable, Sendable {

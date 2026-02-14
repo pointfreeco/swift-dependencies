@@ -31,5 +31,27 @@
         try await Task.sleep(for: .milliseconds(1))
       }
     }
+
+    @Test(
+      .dependencies {
+        $0[TearDownDependency.self] = TearDownDependency()
+      } tearDown: {
+        $0[TearDownDependency.self].tearDown()
+      }
+    ) func tearDown() {
+    }
   }
+
+final class TearDownDependency: @unchecked Sendable, TestDependencyKey {
+  var didExplicitlyTearDown = false
+  func tearDown() {
+    didExplicitlyTearDown = true
+  }
+  deinit {
+    #expect(didExplicitlyTearDown, "Did not explicitly tear down.")
+  }
+  static var testValue: TearDownDependency {
+    TearDownDependency()
+  }
+}
 #endif

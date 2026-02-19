@@ -1,4 +1,4 @@
-#if compiler(>=6.1) && canImport(Testing)
+#if canImport(Testing)
   import Dependencies
   import Foundation
   import Testing

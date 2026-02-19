@@ -437,8 +437,7 @@ final class DependencyValuesTests: XCTestCase {
       self.wait(for: [expectation], timeout: 1)
     }
 
-    // TODO: Remove this condition when Linux CI is updated to a more recent Swift 6.
-    #if !os(Linux) || compiler(<6)
+    #if !os(Linux)
       @MainActor
       func testEscapingInFeatureModel_InstanceVariablePropagated() async {
         let expectation = self.expectation(description: "escape")

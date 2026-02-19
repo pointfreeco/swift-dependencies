@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '6.0'
+          - '6.1'
     name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}

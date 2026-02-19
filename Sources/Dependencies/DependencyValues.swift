@@ -598,20 +598,7 @@ public final class CachedValues: @unchecked Sendable {
             value = Key.previewValue
           }
         case .test:
-          #if compiler(<6.1)
-            if !CachedValues.isAccessingCachedDependencies,
-              case .swiftTesting(.some(let testing)) = TestContext.current,
-              let testValues = testValuesByTestID.withValue({ $0[testing.test.id.rawValue] })
-            {
-              value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
-                testValues[key]
-              }
-            } else {
-              value = Key.testValue
-            }
-          #else
-            value = Key.testValue
-          #endif
+          value = Key.testValue
         }
 
         let cacheableValue = value ?? Key.testValue

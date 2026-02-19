@@ -128,9 +128,7 @@ public func withDependencies<R>(
       return try DependencyValues.$_current.withValue(dependencies) {
         try DependencyValues.$isSetting.withValue(false) {
           let result = try operation()
-          if R.self is AnyClass {
-            dependencyObjects.store(result as AnyObject)
-          }
+          storeDependenciesIfNeeded(result)
           return result
         }
       }
@@ -140,101 +138,60 @@ public func withDependencies<R>(
     try updateValuesForOperation(&dependencies)
     return try DependencyValues.$_current.withValue(dependencies) {
       let result = try operation()
-      if R.self is AnyClass {
-        dependencyObjects.store(result as AnyObject)
-      }
+      storeDependenciesIfNeeded(result)
       return result
     }
   #endif
 }
 
-#if compiler(>=6)
-  /// Updates the current dependencies for the duration of an asynchronous operation.
-  ///
-  /// Any mutations made to ``DependencyValues`` inside `updateValuesForOperation` will be visible
-  /// to everything executed in the operation. For example, if you wanted to force the
-  /// ``DependencyValues/date`` dependency to be a particular date, you can do:
-  ///
-  /// ```swift
-  /// await withDependencies {
-  ///   $0.date.now = Date(timeIntervalSince1970: 1234567890)
-  /// } operation: {
-  ///   // References to date in here are pinned to 1234567890.
-  /// }
-  /// ```
-  ///
-  /// - Parameters:
-  ///   - isolation: The isolation associated with the operation.
-  ///   - updateValuesForOperation: A closure for updating the current dependency values for the
-  ///     duration of the operation.
-  ///   - operation: An operation to perform wherein dependencies have been overridden.
-  /// - Returns: The result returned from `operation`.
-  @discardableResult
-  public func withDependencies<R>(
-    isolation: isolated (any Actor)? = #isolation,
-    _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
-    operation: () async throws -> R
-  ) async rethrows -> R {
-    #if DEBUG
-      try await DependencyValues.$isSetting.withValue(true) {
-        var dependencies = DependencyValues._current
-        try await updateValuesForOperation(&dependencies)
-        return try await DependencyValues.$_current.withValue(dependencies) {
-          try await DependencyValues.$isSetting.withValue(false) {
-            let result = try await operation()
-            if R.self is AnyClass {
-              dependencyObjects.store(result as AnyObject)
-            }
-            return result
-          }
-        }
-      }
-    #else
+/// Updates the current dependencies for the duration of an asynchronous operation.
+///
+/// Any mutations made to ``DependencyValues`` inside `updateValuesForOperation` will be visible
+/// to everything executed in the operation. For example, if you wanted to force the
+/// ``DependencyValues/date`` dependency to be a particular date, you can do:
+///
+/// ```swift
+/// await withDependencies {
+///   $0.date.now = Date(timeIntervalSince1970: 1234567890)
+/// } operation: {
+///   // References to date in here are pinned to 1234567890.
+/// }
+/// ```
+///
+/// - Parameters:
+///   - isolation: The isolation associated with the operation.
+///   - updateValuesForOperation: A closure for updating the current dependency values for the
+///     duration of the operation.
+///   - operation: An operation to perform wherein dependencies have been overridden.
+/// - Returns: The result returned from `operation`.
+@discardableResult
+public func withDependencies<R>(
+  isolation: isolated (any Actor)? = #isolation,
+  _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
+  operation: () async throws -> R
+) async rethrows -> R {
+  #if DEBUG
+    try await DependencyValues.$isSetting.withValue(true) {
       var dependencies = DependencyValues._current
       try await updateValuesForOperation(&dependencies)
       return try await DependencyValues.$_current.withValue(dependencies) {
-        let result = try await operation()
-        if R.self is AnyClass {
-          dependencyObjects.store(result as AnyObject)
-        }
-        return result
-      }
-    #endif
-  }
-#else
-  @_unsafeInheritExecutor
-  @discardableResult
-  public func withDependencies<R>(
-    _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
-    operation: () async throws -> R
-  ) async rethrows -> R {
-    #if DEBUG
-      try await DependencyValues.$isSetting.withValue(true) {
-        var dependencies = DependencyValues._current
-        try await updateValuesForOperation(&dependencies)
-        return try await DependencyValues.$_current.withValue(dependencies) {
-          try await DependencyValues.$isSetting.withValue(false) {
-            let result = try await operation()
-            if R.self is AnyClass {
-              dependencyObjects.store(result as AnyObject)
-            }
-            return result
-          }
+        try await DependencyValues.$isSetting.withValue(false) {
+          let result = try await operation()
+          storeDependenciesIfNeeded(result)
+          return result
         }
       }
-    #else
-      var dependencies = DependencyValues._current
-      try await updateValuesForOperation(&dependencies)
-      return try await DependencyValues.$_current.withValue(dependencies) {
-        let result = try await operation()
-        if R.self is AnyClass {
-          dependencyObjects.store(result as AnyObject)
-        }
-        return result
-      }
-    #endif
-  }
-#endif
+    }
+  #else
+    var dependencies = DependencyValues._current
+    try await updateValuesForOperation(&dependencies)
+    return try await DependencyValues.$_current.withValue(dependencies) {
+      let result = try await operation()
+      storeDependenciesIfNeeded(result)
+      return result
+    }
+  #endif
+}
 
 /// Updates the current dependencies for the duration of a synchronous operation by taking the
 /// dependencies tied to a given object.
@@ -260,19 +217,14 @@ public func withDependencies<Model: AnyObject, R>(
   line: UInt = #line,
   column: UInt = #column
 ) rethrows -> R {
-  guard let values = dependencyObjects.values(from: model)
+  guard let values = dependencyValues(
+    from: model,
+    fileID: fileID,
+    filePath: filePath,
+    line: line,
+    column: column
+  )
   else {
-    reportIssue(
-      """
-      You are trying to propagate dependencies to a child model from a model with no dependencies. \
-      To fix this, the given '\(Model.self)' must be returned from another 'withDependencies' \
-      closure, or the class must hold at least one '@Dependency' property.
-      """,
-      fileID: fileID,
-      filePath: filePath,
-      line: line,
-      column: column
-    )
     return try operation()
   }
   return try withDependencies {
@@ -280,9 +232,7 @@ public func withDependencies<Model: AnyObject, R>(
     try updateValuesForOperation(&$0)
   } operation: {
     let result = try operation()
-    if R.self is AnyClass {
-      dependencyObjects.store(result as AnyObject)
-    }
+    storeDependenciesIfNeeded(result)
     return result
   }
 }
@@ -319,155 +269,87 @@ public func withDependencies<Model: AnyObject, R>(
   )
 }
 
-#if compiler(>=6)
-  /// Updates the current dependencies for the duration of an asynchronous operation by taking the
-  /// dependencies tied to a given object.
-  ///
-  /// - Parameters:
-  ///   - model: An object with dependencies. The given model should have at least one `@Dependency`
-  ///     property, or should have been initialized and returned from a `withDependencies`
-  ///       operation.
-  ///   - isolation: The isolation associated with the operation.
-  ///   - updateValuesForOperation: A closure for updating the current dependency values for the
-  ///     duration of the operation.
-  ///   - operation: The operation to run with the updated dependencies.
-  ///   - fileID: The source `#fileID` associated with the operation.
-  ///   - filePath: The source `#filePath` associated with the operation.
-  ///   - line: The source `#line` associated with the operation.
-  ///   - column: The source `#column` associated with the operation.
-  /// - Returns: The result returned from `operation`.
-  @discardableResult
-  public func withDependencies<Model: AnyObject, R>(
-    from model: Model,
-    isolation: (any Actor)? = #isolation,
-    _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
-    operation: () async throws -> R,
-    fileID: StaticString = #fileID,
-    filePath: StaticString = #filePath,
-    line: UInt = #line,
-    column: UInt = #column
-  ) async rethrows -> R {
-    guard let values = dependencyObjects.values(from: model)
-    else {
-      reportIssue(
-        """
-        You are trying to propagate dependencies to a child model from a model with no \
-        dependencies. To fix this, the given '\(Model.self)' must be returned from another \
-        'withDependencies' closure, or the class must hold at least one '@Dependency' property.
-        """,
-        fileID: fileID,
-        filePath: filePath,
-        line: line,
-        column: column
-      )
-      return try await operation()
-    }
-    return try await withDependencies {
-      $0 = values.merging(DependencyValues._current)
-      try await updateValuesForOperation(&$0)
-    } operation: {
-      let result = try await operation()
-      if R.self is AnyClass {
-        dependencyObjects.store(result as AnyObject)
-      }
-      return result
-    }
+/// Updates the current dependencies for the duration of an asynchronous operation by taking the
+/// dependencies tied to a given object.
+///
+/// - Parameters:
+///   - model: An object with dependencies. The given model should have at least one `@Dependency`
+///     property, or should have been initialized and returned from a `withDependencies`
+///       operation.
+///   - isolation: The isolation associated with the operation.
+///   - updateValuesForOperation: A closure for updating the current dependency values for the
+///     duration of the operation.
+///   - operation: The operation to run with the updated dependencies.
+///   - fileID: The source `#fileID` associated with the operation.
+///   - filePath: The source `#filePath` associated with the operation.
+///   - line: The source `#line` associated with the operation.
+///   - column: The source `#column` associated with the operation.
+/// - Returns: The result returned from `operation`.
+@discardableResult
+public func withDependencies<Model: AnyObject, R>(
+  from model: Model,
+  isolation: (any Actor)? = #isolation,
+  _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
+  operation: () async throws -> R,
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  line: UInt = #line,
+  column: UInt = #column
+) async rethrows -> R {
+  guard let values = dependencyValues(
+    from: model,
+    fileID: fileID,
+    filePath: filePath,
+    line: line,
+    column: column
+  )
+  else {
+    return try await operation()
   }
+  return try await withDependencies {
+    $0 = values.merging(DependencyValues._current)
+    try await updateValuesForOperation(&$0)
+  } operation: {
+    let result = try await operation()
+    storeDependenciesIfNeeded(result)
+    return result
+  }
+}
 
-  /// Updates the current dependencies for the duration of an asynchronous operation by taking the
-  /// dependencies tied to a given object.
-  ///
-  /// - Parameters:
-  ///   - model: An object with dependencies. The given model should have at least one `@Dependency`
-  ///     property, or should have been initialized and returned from a `withDependencies`
-  ///     operation.
-  ///   - isolation: The isolation associated with the operation.
-  ///   - operation: The operation to run with the updated dependencies.
-  ///   - fileID: The source `#fileID` associated with the operation.
-  ///   - filePath: The source `#filePath` associated with the operation.
-  ///   - line: The source `#line` associated with the operation.
-  ///   - column: The source `#column` associated with the operation.
-  /// - Returns: The result returned from `operation`.
-  @discardableResult
-  public func withDependencies<Model: AnyObject, R>(
-    from model: Model,
-    isolation: (any Actor)? = #isolation,
-    operation: () async throws -> R,
-    fileID: StaticString = #fileID,
-    filePath: StaticString = #filePath,
-    line: UInt = #line,
-    column: UInt = #column
-  ) async rethrows -> R {
-    try await withDependencies(
-      from: model,
-      { _ in },
-      operation: operation,
-      fileID: fileID,
-      filePath: filePath,
-      line: line,
-      column: column
-    )
-  }
-#else
-  @_unsafeInheritExecutor
-  @discardableResult
-  public func withDependencies<Model: AnyObject, R>(
-    from model: Model,
-    _ updateValuesForOperation: (inout DependencyValues) async throws -> Void,
-    operation: () async throws -> R,
-    fileID: StaticString = #fileID,
-    filePath: StaticString = #filePath,
-    line: UInt = #line,
-    column: UInt = #column
-  ) async rethrows -> R {
-    guard let values = dependencyObjects.values(from: model)
-    else {
-      reportIssue(
-        """
-        You are trying to propagate dependencies to a child model from a model with no \
-        dependencies. To fix this, the given '\(Model.self)' must be returned from another \
-        'withDependencies' closure, or the class must hold at least one '@Dependency' property.
-        """,
-        fileID: fileID,
-        filePath: filePath,
-        line: line,
-        column: column
-      )
-      return try await operation()
-    }
-    return try await withDependencies {
-      $0 = values.merging(DependencyValues._current)
-      try await updateValuesForOperation(&$0)
-    } operation: {
-      let result = try await operation()
-      if R.self is AnyClass {
-        dependencyObjects.store(result as AnyObject)
-      }
-      return result
-    }
-  }
-
-  @_unsafeInheritExecutor
-  @discardableResult
-  public func withDependencies<Model: AnyObject, R>(
-    from model: Model,
-    operation: () async throws -> R,
-    fileID: StaticString = #fileID,
-    filePath: StaticString = #filePath,
-    line: UInt = #line,
-    column: UInt = #column
-  ) async rethrows -> R {
-    try await withDependencies(
-      from: model,
-      { _ in },
-      operation: operation,
-      fileID: fileID,
-      filePath: filePath,
-      line: line,
-      column: column
-    )
-  }
-#endif
+/// Updates the current dependencies for the duration of an asynchronous operation by taking the
+/// dependencies tied to a given object.
+///
+/// - Parameters:
+///   - model: An object with dependencies. The given model should have at least one `@Dependency`
+///     property, or should have been initialized and returned from a `withDependencies`
+///     operation.
+///   - isolation: The isolation associated with the operation.
+///   - operation: The operation to run with the updated dependencies.
+///   - fileID: The source `#fileID` associated with the operation.
+///   - filePath: The source `#filePath` associated with the operation.
+///   - line: The source `#line` associated with the operation.
+///   - column: The source `#column` associated with the operation.
+/// - Returns: The result returned from `operation`.
+@discardableResult
+public func withDependencies<Model: AnyObject, R>(
+  from model: Model,
+  isolation: (any Actor)? = #isolation,
+  operation: () async throws -> R,
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  line: UInt = #line,
+  column: UInt = #column
+) async rethrows -> R {
+  try await withDependencies(
+    from: model,
+    { _ in },
+    operation: operation,
+    fileID: fileID,
+    filePath: filePath,
+    line: line,
+    column: column
+  )
+}
 
 /// Propagates the current dependencies to an escaping context.
 ///
@@ -571,6 +453,37 @@ extension DependencyValues {
 }
 
 private let dependencyObjects = DependencyObjects()
+
+private func storeDependenciesIfNeeded<R>(_ result: R) {
+  if R.self is AnyClass {
+    dependencyObjects.store(result as AnyObject)
+  }
+}
+
+private func dependencyValues<Model: AnyObject>(
+  from model: Model,
+  fileID: StaticString,
+  filePath: StaticString,
+  line: UInt,
+  column: UInt
+) -> DependencyValues? {
+  guard let values = dependencyObjects.values(from: model)
+  else {
+    reportIssue(
+      """
+      You are trying to propagate dependencies to a child model from a model with no dependencies. \
+      To fix this, the given '\(Model.self)' must be returned from another 'withDependencies' \
+      closure, or the class must hold at least one '@Dependency' property.
+      """,
+      fileID: fileID,
+      filePath: filePath,
+      line: line,
+      column: column
+    )
+    return nil
+  }
+  return values
+}
 
 private final class DependencyObjects: Sendable {
   private let storage = LockIsolated<[ObjectIdentifier: DependencyObject]>([:])

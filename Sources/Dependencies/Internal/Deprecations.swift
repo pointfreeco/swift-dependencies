@@ -4,7 +4,7 @@
 
 // MARK: - Deprecated after 1.9.2
 
-#if canImport(SwiftUI) && compiler(>=6)
+#if canImport(SwiftUI)
   @available(iOS 18, macOS 15, tvOS 18, watchOS 11, visionOS 2, *)
   extension PreviewTrait where T == Preview.ViewTraits {
     @available(

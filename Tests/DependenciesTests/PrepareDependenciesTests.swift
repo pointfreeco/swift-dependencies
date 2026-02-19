@@ -4,33 +4,15 @@
   import Testing
 
   @Suite struct PrepareDependenciesTests {
-    #if compiler(>=6.1)
-      @Test(
-        .serialized,
-        .dependency(\.uuid, .incrementing),
-        arguments: [1, 2, 3]
-      )
-      func uuid(value: Int) {
-        @Dependency(\.uuid) var uuid
-        #expect(uuid() == UUID(0))
-      }
-    #else
-      @Test(
-        .serialized,
-        .dependency(\.uuid, .incrementing),
-        arguments: [1, 2, 3]
-      )
-      func uuid(value: Int) {
-        @Dependency(\.uuid) var uuid
-        if value == 1 {
-          #expect(uuid() == UUID(0))
-        } else {
-          withKnownIssue {
-            #expect(uuid() == UUID(0))
-          }
-        }
-      }
-    #endif
+    @Test(
+      .serialized,
+      .dependency(\.uuid, .incrementing),
+      arguments: [1, 2, 3]
+    )
+    func uuid(value: Int) {
+      @Dependency(\.uuid) var uuid
+      #expect(uuid() == UUID(0))
+    }
 
     @Test func isolation1() {
       prepareDependencies {

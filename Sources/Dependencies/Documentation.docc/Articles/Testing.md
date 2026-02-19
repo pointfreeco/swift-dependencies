@@ -315,30 +315,4 @@ class Model {
 You will not be able to override this dependency in the normal fashion. In general there is no need
 to ever have a static dependency, and so you should avoid this pattern.
 
-### Parameterized and repeated @Test runs
-
-> Important: If targeting Swift 6.1+ (Xcode 16.3+), then this gotcha does not apply and can be
-> ignored.
-
-The library comes with support for Swift's new native Testing framework. However, as there are still
-still features missing from the Testing framework that XCTest has, there may be some additional
-steps you must take.
-
-If you are are writing a _parameterized_ test using the `@Test` macro, you will need to surround the
-entire body of your test in [`withDependencies`](<doc:withDependencies(_:operation:)>) that
-resets the entire set of values to guarantee that a fresh set of dependencies is used per parameter:
-
-```swift
-@Test(arguments: [1, 2, 3])
-func feature(_ number: Int) {
-  withDependencies {
-    $0 = DependencyValues()
-  } operation: {
-    // All test code in here...
-  }
-}
-```
-
-This will guarantee that dependency state does not bleed over to each parameter of the test.
-
 [issue-reporting-gh]: http://github.com/pointfreeco/swift-issue-reporting

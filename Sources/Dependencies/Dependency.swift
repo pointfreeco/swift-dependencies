@@ -69,14 +69,14 @@
 ///
 /// [tca]: https://github.com/pointfreeco/swift-composable-architecture
 @propertyWrapper
-public struct Dependency<Value>: _HasInitialValues {
+public struct Dependency<Value>: _HasInitialValues, Sendable {
   let initialValues: DependencyValues = DependencyValues._current
   private var installValues: DependencyValues?
   #if canImport(SwiftUI)
     @Environment(\.dependencies) private var environmentValues
   #endif
 
-  private let keyPath: SendableKeyPath<DependencyValues, Value>
+  private let keyPath: KeyPath<DependencyValues, Value> & Sendable
   private let filePath: StaticString
   private let fileID: StaticString
   private let line: UInt
@@ -200,12 +200,6 @@ public struct Dependency<Value>: _HasInitialValues {
     installValues = values
   }
 }
-
-#if compiler(>=6)
-  extension Dependency: Sendable {}
-#else
-  extension Dependency: @unchecked Sendable {}
-#endif
 
 #if canImport(SwiftUI)
   extension Dependency: DynamicProperty {

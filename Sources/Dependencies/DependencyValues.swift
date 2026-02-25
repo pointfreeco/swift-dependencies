@@ -408,7 +408,8 @@ public struct DependencyValues: Sendable {
     return values
   }
 
-  func merging(_ other: Self) -> Self {
+  @_spi(DependencyMerging)
+  public func merging(_ other: Self) -> Self {
     var values = self
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })
     return values

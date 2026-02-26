@@ -280,7 +280,7 @@ public struct DependencyValues: Sendable {
               )
             }
           #else
-            self.cachedValues.value(
+            return self.cachedValues.value(
               for: Key.self,
               context: context,
               fileID: fileID,

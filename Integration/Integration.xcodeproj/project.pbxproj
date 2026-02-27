@@ -12,6 +12,7 @@
 		CAF21DD729B66D7600368A47 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CAF21DD629B66D7600368A47 /* Preview Assets.xcassets */; };
 		CAF21DEB29B66D7700368A47 /* IntegrationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF21DEA29B66D7700368A47 /* IntegrationUITests.swift */; };
 		CAF21DFC29B66DAB00368A47 /* Dependencies in Frameworks */ = {isa = PBXBuildFile; productRef = CAF21DFB29B66DAB00368A47 /* Dependencies */; };
+		CAF21DFD29B66DAB00368A47 /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = CAF21DFE29B66DAB00368A47 /* DependenciesMacros */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CAF21DFC29B66DAB00368A47 /* Dependencies in Frameworks */,
+				CAF21DFD29B66DAB00368A47 /* DependenciesMacros in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,6 +126,7 @@
 			name = Integration;
 			packageProductDependencies = (
 				CAF21DFB29B66DAB00368A47 /* Dependencies */,
+				CAF21DFE29B66DAB00368A47 /* DependenciesMacros */,
 			);
 			productName = Integration;
 			productReference = CAF21DCC29B66D7500368A47 /* Integration.app */;
@@ -476,6 +479,10 @@
 		CAF21DFB29B66DAB00368A47 /* Dependencies */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Dependencies;
+		};
+		CAF21DFE29B66DAB00368A47 /* DependenciesMacros */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DependenciesMacros;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

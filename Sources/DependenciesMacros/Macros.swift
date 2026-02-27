@@ -193,6 +193,99 @@ public macro DependencyEndpoint(method: String = "") =
 public macro DependencyEndpointIgnored() =
   #externalMacro(module: "DependenciesMacrosPlugin", type: "DependencyEndpointIgnoredMacro")
 
+/// Mode argument for ``DependencyEntry(_:)``.
+///
+/// - ``live``: Used in the **implementation module** to declare `liveValue`.
+/// - ``test``: Used in the **interface module** to declare a safe `testValue` default.
+public enum DependencyEntryMode {
+  /// Implementation module — generates a `DependencyKey`-conforming key with `liveValue`.
+  case live
+  /// Interface module — generates a `TestDependencyKey`-conforming key with `testValue` only.
+  /// The implementation module extends `__Key_<name>` with `DependencyKey` to provide `liveValue`.
+  case test
+}
+
+/// Reduces boilerplate when registering a dependency in ``DependencyValues``.
+///
+/// Apply this macro to a `var` declaration inside an `extension DependencyValues` block.
+/// It generates a **public** key type and `get`/`set` accessors.
+///
+/// ## `.live` — implementation module
+///
+/// ```swift
+/// // Implementation module
+/// extension DependencyValues {
+///   @DependencyEntry(.live) var router: MyRouter = MyRouter()
+/// }
+/// ```
+///
+/// Expands to:
+///
+/// ```swift
+/// extension DependencyValues {
+///   var router: MyRouter {
+///     get { self[__Key_router.self] }
+///     set { self[__Key_router.self] = newValue }
+///   }
+///
+///   public enum __Key_router: DependencyKey {
+///     public typealias Value = MyRouter
+///     public static let liveValue: Value = MyRouter()
+///   }
+/// }
+/// ```
+///
+/// The key is `public`, so a separate test-support module can retroactively provide `testValue`.
+/// Note: the key is a nested type of `DependencyValues`, so use the fully qualified name:
+///
+/// ```swift
+/// // Test-support module
+/// extension DependencyValues.__Key_router: TestDependencyKey {
+///   static let testValue: MyRouter = .unimplemented
+/// }
+/// ```
+///
+/// ## `.test` — interface module
+///
+/// ```swift
+/// // Interface module
+/// extension DependencyValues {
+///   @DependencyEntry(.test) var router: MyRouter = .unimplemented
+/// }
+/// ```
+///
+/// Expands to:
+///
+/// ```swift
+/// extension DependencyValues {
+///   var router: MyRouter {
+///     get { self[__Key_router.self] }
+///     set { self[__Key_router.self] = newValue }
+///   }
+///
+///   public enum __Key_router: TestDependencyKey {
+///     public typealias Value = MyRouter
+///     public static let testValue: Value = .unimplemented
+///   }
+/// }
+/// ```
+///
+/// The implementation module then extends the public key with `DependencyKey` to supply `liveValue`.
+/// Note: the key is a nested type of `DependencyValues`, so use the fully qualified name:
+///
+/// ```swift
+/// // Implementation module
+/// extension DependencyValues.__Key_router: DependencyKey {
+///   static let liveValue: MyRouter = MyRouter(api: RealAPI())
+/// }
+/// ```
+@attached(accessor, names: named(get), named(set))
+@attached(peer, names: prefixed(__Key_))
+public macro DependencyEntry(_ mode: DependencyEntryMode) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin", type: "DependencyEntryMacro"
+  )
+
 /// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
 public struct Unimplemented: Error {
   let endpoint: String

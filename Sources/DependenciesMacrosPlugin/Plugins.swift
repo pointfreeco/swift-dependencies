@@ -7,5 +7,6 @@ struct MacrosPlugin: CompilerPlugin {
     DependencyClientMacro.self,
     DependencyEndpointMacro.self,
     DependencyEndpointIgnoredMacro.self,
+    DependencyEntryMacro.self,
   ]
 }

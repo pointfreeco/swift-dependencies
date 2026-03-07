@@ -27,10 +27,14 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.2"),
+    .package(
+      url: "https://github.com/pointfreeco/swift-snapshot-testing",
+      branch: "swift-syntax-604"
+    ),
     .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.4"),
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.4.0"),
-    .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"603.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..."604.0.0-latest"),
   ],
   targets: [
     .target(
@@ -97,7 +101,10 @@ let package = Package(
 
 #if !os(WASI)
   package.dependencies.append(
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0")
+    .package(
+      url: "https://github.com/pointfreeco/swift-macro-testing",
+      branch: "swift-syntax-604"
+    ),
   )
   package.targets.append(contentsOf: [
     .testTarget(

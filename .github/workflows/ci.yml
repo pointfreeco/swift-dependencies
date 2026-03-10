@@ -52,6 +52,8 @@ jobs:
   wasm:
     name: WebAssembly Swift SDK
     uses: apple/swift-nio/.github/workflows/wasm_swift_sdk.yml@main
+    with:
+      additional_command_arguments: "--target Dependencies --target DependenciesMacros"
 
   # windows:
   #   name: Windows

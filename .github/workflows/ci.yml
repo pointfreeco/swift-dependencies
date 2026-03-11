@@ -64,10 +64,10 @@ jobs:
         swift: ['6.2']
     steps:
       - uses: actions/checkout@v4
-      - name: Test Swift Package on Android
+      - name: Build Swift Package on Android
         uses: skiptools/swift-android-action@v2
         with:
-          # disable combine traits on Androi
+          # disable combine traits on Android as it wasn't building yet
           swift-build-flags: "--disable-default-traits"
           swift-version: ${{ matrix.swift }}
           swift-configuration: ${{ matrix.config }}

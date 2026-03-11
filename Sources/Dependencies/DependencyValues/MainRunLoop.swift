@@ -1,5 +1,9 @@
 #if Combine
   import Foundation
+  // combine schedulers can be built w/ and w/o OpenCombine support.
+  #if canImport(OpenCombineShim)
+  import OpenCombineShim
+  #endif
 
   extension DependencyValues {
     /// The "main" run loop.

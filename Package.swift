@@ -25,7 +25,7 @@ let package = Package(
       targets: ["DependenciesTestSupport"]
     ),
   ],
-    traits: [
+  traits: [
     .default(enabledTraits: ["Combine"]),
     .init(
       name: "Combine",
@@ -119,7 +119,8 @@ let package = Package(
         "DependenciesMacros",
         "DependenciesMacrosPlugin",
         .product(name: "MacroTesting", package: "swift-macro-testing"),
-      ]
+      ],
+      exclude: ["DependenciesMacros.xctestplan"],
     )
   ])
 #endif

@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '6.0'
+          - '6.2'
     name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
@@ -72,6 +72,7 @@ jobs:
           swift-version: ${{ matrix.swift }}
           swift-configuration: ${{ matrix.config }}
           run-tests: false
+          build-tests: false
 
   # windows:
   #   name: Windows

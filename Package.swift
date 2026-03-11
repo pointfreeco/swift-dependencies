@@ -119,6 +119,7 @@ let package = Package(
         "DependenciesMacros",
         "DependenciesMacrosPlugin",
         .product(name: "MacroTesting", package: "swift-macro-testing"),
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ],
       exclude: ["DependenciesMacros.xctestplan"],
     )

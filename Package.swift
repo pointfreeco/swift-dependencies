@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 
 import CompilerPluginSupport
 import PackageDescription
@@ -25,6 +25,14 @@ let package = Package(
       targets: ["DependenciesTestSupport"]
     ),
   ],
+    traits: [
+    .default(enabledTraits: ["Combine"]),
+    .init(
+      name: "Combine",
+      description: "Enables Combine scheduler dependencies (mainQueue, mainRunLoop)",
+      enabledTraits: []
+    ),
+  ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.2"),
     .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.4"),
@@ -43,7 +51,11 @@ let package = Package(
       name: "Dependencies",
       dependencies: [
         .product(name: "Clocks", package: "swift-clocks"),
-        .product(name: "CombineSchedulers", package: "combine-schedulers"),
+        .product(
+          name: "CombineSchedulers",
+          package: "combine-schedulers",
+          condition: .when(traits: ["Combine"])
+        ),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),

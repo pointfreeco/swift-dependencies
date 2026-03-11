@@ -1,4 +1,4 @@
-#if canImport(Combine)
+#if Combine
   import Foundation
 
   extension DependencyValues {

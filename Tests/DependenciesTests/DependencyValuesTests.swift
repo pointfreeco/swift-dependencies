@@ -1,3 +1,4 @@
+@_spi(DependencyMerging) import Dependencies
 import Dependencies
 import XCTest
 
@@ -119,6 +120,15 @@ final class DependencyValuesTests: XCTestCase {
       XCTAssertEqual(date, someDate)
       XCTAssertNotEqual(DependencyValues._current.date.now, someDate)
     }
+  }
+
+  func testMergingCopyOfCurrentPreservesOverrides() {
+    let base = DependencyValues._current
+    var child = base
+    child.probe = true
+
+    XCTAssertTrue(child.probe)
+    XCTAssertTrue(base.merging(child).probe)
   }
 
   func testSetDependencyAcrossMultipleLines() {
@@ -988,6 +998,18 @@ extension DependencyValues {
     get { self[ChildDependencyLateBinding.self] }
     set { self[ChildDependencyLateBinding.self] = newValue }
   }
+}
+
+extension DependencyValues {
+  fileprivate var probe: Bool {
+    get { self[ProbeKey.self] }
+    set { self[ProbeKey.self] = newValue }
+  }
+}
+
+private enum ProbeKey: DependencyKey {
+  static let liveValue = false
+  static let testValue = false
 }
 
 extension DependencyValues {

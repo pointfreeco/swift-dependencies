@@ -410,7 +410,6 @@ public struct DependencyValues: Sendable {
 
   @_spi(DependencyMerging)
   public func merging(_ other: Self) -> Self {
-    guard cachedValues !== other.cachedValues else { return self }
     var values = self
     values.storage.merge(other.storage, uniquingKeysWith: { $1 })
     return values

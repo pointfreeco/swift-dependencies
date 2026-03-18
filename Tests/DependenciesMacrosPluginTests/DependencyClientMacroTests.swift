@@ -1060,6 +1060,191 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
+  func testIfConfig_unconditionalAndIOS() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var fetch: () -> Void
+        #if os(iOS)
+        var fetchiOS: () -> Void
+        #endif
+      }
+      """
+    } expansion: {
+      #"""
+      struct Client {
+        @DependencyEndpoint
+        var fetch: () -> Void
+        #if os(iOS)
+        var fetchiOS: () -> Void
+        #endif
+
+        init(
+          fetch: @escaping () -> Void
+        ) {
+          self.fetch = fetch
+          #if os(iOS)
+          self.fetchiOS = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).fetchiOS'")
+          }
+          #endif
+        }
+
+        #if os(iOS)
+        init(
+          fetch: @escaping () -> Void,
+          fetchiOS: @escaping () -> Void
+        ) {
+          self.fetch = fetch
+          self.fetchiOS = fetchiOS
+        }
+        #endif
+
+        init() {
+          #if os(iOS)
+          self.fetchiOS = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).fetchiOS'")
+          }
+          #endif
+        }
+      }
+      """#
+    }
+  }
+
+  func testIfConfig_iOSAndTvOS() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        #if os(iOS)
+        var fetchData: () -> Void
+        #endif
+        #if os(tvOS)
+        var fetchTvOSData: () -> Void
+        #endif
+      }
+      """
+    } expansion: {
+      #"""
+      struct Client {
+        #if os(iOS)
+        var fetchData: () -> Void
+        #endif
+        #if os(tvOS)
+        var fetchTvOSData: () -> Void
+        #endif
+
+        #if os(iOS)
+        init(
+          fetchData: @escaping () -> Void
+        ) {
+          self.fetchData = fetchData
+          #if os(tvOS)
+          self.fetchTvOSData = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).fetchTvOSData'")
+          }
+          #endif
+        }
+        #endif
+
+        #if os(tvOS)
+        init(
+          fetchTvOSData: @escaping () -> Void
+        ) {
+          self.fetchTvOSData = fetchTvOSData
+          #if os(iOS)
+          self.fetchData = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).fetchData'")
+          }
+          #endif
+        }
+        #endif
+
+        init() {
+          #if os(iOS)
+          self.fetchData = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).fetchData'")
+          }
+          #endif
+          #if os(tvOS)
+          self.fetchTvOSData = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).fetchTvOSData'")
+          }
+          #endif
+        }
+      }
+      """#
+    }
+  }
+
+  func testIfConfig_notTvOSAndIOS() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        #if !os(tvOS)
+        var notTvOS: () -> Void
+        #endif
+        #if os(iOS)
+        var iOSOnly: () -> Void
+        #endif
+      }
+      """
+    } expansion: {
+      #"""
+      struct Client {
+        #if !os(tvOS)
+        var notTvOS: () -> Void
+        #endif
+        #if os(iOS)
+        var iOSOnly: () -> Void
+        #endif
+
+        #if !os(tvOS)
+        init(
+          notTvOS: @escaping () -> Void
+        ) {
+          self.notTvOS = notTvOS
+          #if os(iOS)
+          self.iOSOnly = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).iOSOnly'")
+          }
+          #endif
+        }
+        #endif
+
+        #if os(iOS)
+        init(
+          iOSOnly: @escaping () -> Void
+        ) {
+          self.iOSOnly = iOSOnly
+          #if !os(tvOS)
+          self.notTvOS = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).notTvOS'")
+          }
+          #endif
+        }
+        #endif
+
+        init() {
+          #if !os(tvOS)
+          self.notTvOS = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).notTvOS'")
+          }
+          #endif
+          #if os(iOS)
+          self.iOSOnly = {
+            IssueReporting.reportIssue("Unimplemented: '\(Self.self).iOSOnly'")
+          }
+          #endif
+        }
+      }
+      """#
+    }
+  }
+
   func testComments() {
     assertMacro {
       """

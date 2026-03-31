@@ -1,3 +1,4 @@
+#if Foundation
 import Foundation
 
 extension DependencyValues {
@@ -43,3 +44,4 @@ extension DependencyValues {
     #endif
   }
 }
+#endif

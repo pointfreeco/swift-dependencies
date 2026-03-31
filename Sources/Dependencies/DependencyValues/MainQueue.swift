@@ -1,3 +1,4 @@
+#if CombineSchedulers
 #if canImport(Combine)
   import Foundation
 
@@ -61,4 +62,5 @@
         .unimplemented(#"@Dependency(\.mainQueue)"#)
     }
   }
+#endif
 #endif

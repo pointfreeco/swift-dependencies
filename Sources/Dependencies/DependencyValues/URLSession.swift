@@ -1,3 +1,4 @@
+#if Foundation
 #if !os(WASI)
   import Foundation
 
@@ -112,4 +113,5 @@
       reportIssue(#"Unimplemented: @Dependency(\.urlSession)"#)
     }
   }
+#endif
 #endif

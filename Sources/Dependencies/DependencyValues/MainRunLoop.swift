@@ -1,3 +1,4 @@
+#if CombineSchedulers
 #if canImport(Combine)
   import Foundation
 
@@ -60,4 +61,5 @@
       static let testValue = AnySchedulerOf<RunLoop>.unimplemented(#"@Dependency(\.mainRunLoop)"#)
     }
   }
+#endif
 #endif

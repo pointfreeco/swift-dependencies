@@ -1,3 +1,4 @@
+#if Foundation
 import Foundation
 
 extension DependencyValues {
@@ -147,3 +148,4 @@ private struct IncrementingUUIDGenerator: Sendable {
     }
   }
 }
+#endif

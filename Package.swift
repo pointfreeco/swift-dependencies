@@ -60,11 +60,7 @@ let package = Package(
           package: "combine-schedulers",
           condition: .when(traits: ["CombineSchedulers"])
         ),
-        .product(
-          name: "ConcurrencyExtras",
-          package: "swift-concurrency-extras",
-          condition: .when(traits: ["Foundation"])
-        ),
+        .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]

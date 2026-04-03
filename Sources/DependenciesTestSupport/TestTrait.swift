@@ -7,6 +7,7 @@
     @_documentation(visibility: private)
     public struct _DependenciesTrait: TestScoping, TestTrait, SuiteTrait {
       let updateValues: @Sendable (inout DependencyValues) async throws -> Void
+      var tearDown: @Sendable (DependencyValues) async throws -> Void = { _ in }
 
       @TaskLocal static var isRoot = true
 
@@ -24,6 +25,7 @@
         } operation: {
           try await Self.$isRoot.withValue(false) {
             try await function()
+            try await tearDown(DependencyValues._current)
           }
         }
       }
@@ -122,10 +124,26 @@
       /// }
       /// ```
       ///
+      /// An additional trailing closure can be provided that is executed after the test finishes
+      /// allow cleanup, such as closing resources:
+      ///
+      /// ```swift
+      /// @Test(
+      ///   .dependencies {
+      ///     $0.defaultDatabase = Database()
+      ///   } tearDown: {
+      ///     $0.defaultDatabase.close()
+      ///   }
+      /// )
+      /// func feature() {
+      ///   // ...
+      /// }
+      /// ```
       public static func dependencies(
-        _ updateValues: @escaping @Sendable (inout DependencyValues) async throws -> Void
+        _ updateValues: @escaping @Sendable (inout DependencyValues) async throws -> Void,
+        tearDown: @escaping @Sendable (DependencyValues) async throws -> Void = { _ in }
       ) -> Self {
-        Self(updateValues: updateValues)
+        Self(updateValues: updateValues, tearDown: tearDown)
       }
     }
   #else

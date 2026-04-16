@@ -1,3 +1,4 @@
+#if Foundation
 import Foundation
 
 extension DependencyValues {
@@ -73,3 +74,4 @@ public struct DateGenerator: Sendable {
     self.generate()
   }
 }
+#endif

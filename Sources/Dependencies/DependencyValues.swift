@@ -415,6 +415,17 @@ public struct DependencyValues: Sendable {
     return values
   }
 
+  @_spi(DependencyModifying)
+  public mutating func modify<R>(_ body: (inout Self) throws -> R) rethrows -> R {
+    #if DEBUG
+      try DependencyValues.$isSetting.withValue(true) {
+        try body(&self)
+      }
+    #else
+      try body(&self)
+    #endif
+  }
+
   @_spi(Beta)
   @available(
     *,

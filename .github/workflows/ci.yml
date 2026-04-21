@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '6.2'
+          - '6.3'
     name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
@@ -61,7 +61,7 @@ jobs:
     strategy:
       matrix:
         config: ['debug']
-        swift: ['6.2']
+        swift: ['6.3']
     steps:
       - uses: actions/checkout@v4
       - name: Build Swift Package on Android

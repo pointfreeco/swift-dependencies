@@ -1,4 +1,4 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.3
 
 import CompilerPluginSupport
 import PackageDescription
@@ -26,12 +26,12 @@ let package = Package(
     ),
   ],
   traits: [
-    .default(enabledTraits: ["Combine"]),
-    .init(
-      name: "Combine",
-      description: "Enables Combine scheduler dependencies (mainQueue, mainRunLoop)",
-      enabledTraits: []
-    ),
+    "Clocks",
+    "CombineSchedulers",
+    "Foundation",
+    .default(enabledTraits: [
+      "Clocks", "CombineSchedulers", "Foundation"
+    ])
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.2"),
@@ -50,11 +50,15 @@ let package = Package(
     .target(
       name: "Dependencies",
       dependencies: [
-        .product(name: "Clocks", package: "swift-clocks"),
+        .product(
+          name: "Clocks",
+          package: "swift-clocks",
+          condition: .when(traits: ["Clocks"])
+        ),
         .product(
           name: "CombineSchedulers",
           package: "combine-schedulers",
-          condition: .when(traits: ["Combine"])
+          condition: .when(traits: ["CombineSchedulers"])
         ),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
@@ -119,9 +123,7 @@ let package = Package(
         "DependenciesMacros",
         "DependenciesMacrosPlugin",
         .product(name: "MacroTesting", package: "swift-macro-testing"),
-        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-      ],
-      exclude: ["DependenciesMacros.xctestplan"],
+      ]
     )
   ])
 #endif

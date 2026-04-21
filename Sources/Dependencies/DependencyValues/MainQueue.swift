@@ -1,9 +1,6 @@
-#if Combine
+#if CombineSchedulers
+#if canImport(Combine) || canImport(OpenCombineShim)
   import Foundation
-  // combine schedulers can be built w/ and w/o OpenCombine support.
-  #if canImport(OpenCombineShim)
-  import OpenCombineShim
-  #endif
 
   extension DependencyValues {
     /// The "main" queue.
@@ -65,4 +62,5 @@
         .unimplemented(#"@Dependency(\.mainQueue)"#)
     }
   }
+#endif
 #endif

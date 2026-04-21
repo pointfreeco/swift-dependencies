@@ -1,3 +1,4 @@
+#if Clocks
 #if (canImport(RegexBuilder) || !os(macOS) && !targetEnvironment(macCatalyst))
   @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
   extension DependencyValues {
@@ -77,4 +78,5 @@
       static let testValue: any Clock<Duration> = UnimplementedClock(.suspending)
     }
   }
+#endif
 #endif

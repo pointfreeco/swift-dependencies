@@ -1,3 +1,4 @@
+#if Foundation
 #if canImport(Foundation) && !os(WASI)
   import Foundation
 
@@ -28,4 +29,5 @@
       static var testValue: NotificationCenter { NotificationCenter() }
     }
   }
+#endif
 #endif

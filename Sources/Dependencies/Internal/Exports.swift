@@ -1,6 +1,8 @@
+#if Clocks
 @_exported import Clocks
-#if Combine
-  @_exported import CombineSchedulers
+#endif
+#if CombineSchedulers
+@_exported import CombineSchedulers
 #endif
 @_exported import ConcurrencyExtras
 @_exported import IssueReporting

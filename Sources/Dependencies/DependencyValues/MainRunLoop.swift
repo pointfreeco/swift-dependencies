@@ -1,9 +1,6 @@
-#if Combine
+#if CombineSchedulers
+#if canImport(Combine) || canImport(OpenCombineShim)
   import Foundation
-  // combine schedulers can be built w/ and w/o OpenCombine support.
-  #if canImport(OpenCombineShim)
-  import OpenCombineShim
-  #endif
 
   extension DependencyValues {
     /// The "main" run loop.
@@ -64,4 +61,5 @@
       static let testValue = AnySchedulerOf<RunLoop>.unimplemented(#"@Dependency(\.mainRunLoop)"#)
     }
   }
+#endif
 #endif

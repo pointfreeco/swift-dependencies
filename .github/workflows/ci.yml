@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '6.0'
+          - '6.3'
     name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
@@ -49,19 +49,31 @@ jobs:
       - name: Run tests (release)
         run: swift test -c release --parallel
 
-  # wasm:
-  #   name: Wasm
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: bytecodealliance/actions/wasmtime/setup@v1
-  #     - uses: swiftwasm/setup-swiftwasm@v1
-  #       with:
-  #         swift-version: "wasm-5.9.2-RELEASE"
-  #     - name: Build tests
-  #       run: swift build --triple wasm32-unknown-wasi --build-tests
-  #     - name: Run tests
-  #       run: wasmtime .build/debug/swift-dependenciesPackageTests.wasm
+  wasm:
+    name: WebAssembly Swift SDK
+    uses: apple/swift-nio/.github/workflows/wasm_swift_sdk.yml@main
+    with:
+      additional_command_arguments: "--target Dependencies --target DependenciesMacros"
+      nightly_next_enabled: false
+
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config: ['debug']
+        swift: ['6.3']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Swift Package on Android
+        uses: skiptools/swift-android-action@v2
+        with:
+          # disable combine traits on Android as it wasn't building yet
+          swift-build-flags: "--disable-default-traits"
+          swift-version: ${{ matrix.swift }}
+          swift-configuration: ${{ matrix.config }}
+          run-tests: false
+          build-tests: false
 
   # windows:
   #   name: Windows

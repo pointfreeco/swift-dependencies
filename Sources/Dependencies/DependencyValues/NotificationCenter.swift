@@ -1,5 +1,5 @@
 #if Foundation
-#if canImport(Foundation)
+#if canImport(Foundation) && !os(WASI)
   import Foundation
 
   extension DependencyValues {

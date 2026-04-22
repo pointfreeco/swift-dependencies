@@ -1,5 +1,5 @@
 #if CombineSchedulers
-#if canImport(Combine)
+#if canImport(Combine) || canImport(OpenCombineShim)
   import Foundation
 
   extension DependencyValues {

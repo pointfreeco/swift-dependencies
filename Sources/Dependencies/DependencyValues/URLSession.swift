@@ -1,4 +1,10 @@
-#if Foundation
+// `&& !os(Android)`: even though Foundation is in scope and `canImport(FoundationNetworking)`
+// is true on the Swift Android SDK, the `UnimplementedURLProtocol: URLProtocol` subclass
+// below registers `URLProtocol` class metadata at module init time, pulling
+// `libFoundationNetworking.so` (~16 MB) into a consumer's bridge `.so` DT_NEEDED list.
+// Excluding the whole file on Android drops that linker reference. Consumers that need
+// `\.urlSession` on Android can reintroduce it downstream behind their own gate.
+#if Foundation && !os(Android)
 #if !os(WASI)
   import Foundation
 

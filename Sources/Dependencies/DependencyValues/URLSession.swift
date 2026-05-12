@@ -1,4 +1,4 @@
-#if Foundation
+#if FoundationNetworking
 #if !os(WASI)
   import Foundation
 

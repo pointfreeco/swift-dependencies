@@ -29,8 +29,9 @@ let package = Package(
     "Clocks",
     "CombineSchedulers",
     "Foundation",
+    "FoundationNetworking",
     .default(enabledTraits: [
-      "Clocks", "CombineSchedulers", "Foundation"
+      "Clocks", "CombineSchedulers", "Foundation", "FoundationNetworking"
     ])
   ],
   dependencies: [

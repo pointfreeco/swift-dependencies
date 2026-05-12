@@ -1,10 +1,13 @@
-// `&& !os(Android)`: even though Foundation is in scope and `canImport(FoundationNetworking)`
-// is true on the Swift Android SDK, the `UnimplementedURLProtocol: URLProtocol` subclass
-// below registers `URLProtocol` class metadata at module init time, pulling
-// `libFoundationNetworking.so` (~16 MB) into a consumer's bridge `.so` DT_NEEDED list.
-// Excluding the whole file on Android drops that linker reference. Consumers that need
-// `\.urlSession` on Android can reintroduce it downstream behind their own gate.
-#if Foundation && !os(Android)
+// Gated on the `FoundationNetworking` package trait (default on) OR Apple platforms.
+// The `UnimplementedURLProtocol: URLProtocol` subclass below registers `URLProtocol`
+// class metadata at module init time. On split-Foundation platforms (Linux, Android,
+// swift-corelibs-foundation) that pulls `libFoundationNetworking.so` (~16 MB) into a
+// consumer's binary `DT_NEEDED` list. Apple platforms always include the value (the
+// trait is a no-op on Darwin since `URLSession` lives in `Foundation` proper there).
+// Split-Foundation consumers that don't need `\.urlSession` can opt out by declaring
+// `traits: ["Clocks", "CombineSchedulers", "Foundation"]` on their `.package(...)`
+// (omitting `FoundationNetworking`).
+#if FoundationNetworking || canImport(Darwin)
 #if !os(WASI)
   import Foundation
 

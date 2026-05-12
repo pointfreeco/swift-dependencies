@@ -1,24 +1,6 @@
 {
-  "originHash" : "75661e9e3dee40577fba00f8f61561572c0ac1f4400311ded56f6ff5a9cdd53d",
+  "originHash" : "7f50c868512ea503c6f01eedfe44fa715482091f4425ceb4b41313dd601bb522",
   "pins" : [
-    {
-      "identity" : "combine-schedulers",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/combine-schedulers",
-      "state" : {
-        "revision" : "5928286acce13def418ec36d05a001a9641086f2",
-        "version" : "1.0.3"
-      }
-    },
-    {
-      "identity" : "swift-clocks",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/swift-clocks",
-      "state" : {
-        "revision" : "cc46202b53476d64e824e0b6612da09d84ffde8e",
-        "version" : "1.0.6"
-      }
-    },
     {
       "identity" : "swift-concurrency-extras",
       "kind" : "remoteSourceControl",

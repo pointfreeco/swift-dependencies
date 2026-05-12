@@ -1,4 +1,4 @@
-#if FoundationNetworking || canImport(Darwin)
+#if FoundationNetworking
 #if !os(WASI)
   import Foundation
 

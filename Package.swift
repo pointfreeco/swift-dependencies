@@ -29,12 +29,6 @@ let package = Package(
     "Clocks",
     "CombineSchedulers",
     "Foundation",
-    // Gates the `\.urlSession` dependency value (defined in
-    // `DependencyValues/URLSession.swift`). When disabled, the `UnimplementedURLProtocol:
-    // URLProtocol` subclass inside that file is excluded from the build, so consumers
-    // cross-compiling against the Swift Android SDK no longer pull
-    // `libFoundationNetworking.so` (~16 MB) into their bridge's `DT_NEEDED`. Default on
-    // for backward compatibility — explicit opt-out via `traits:` on `.package(...)`.
     "FoundationNetworking",
     .default(enabledTraits: [
       "Clocks", "CombineSchedulers", "Foundation", "FoundationNetworking"

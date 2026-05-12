@@ -31,7 +31,7 @@ test-linux:
 		--rm \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:6.1-focal \
+		swift:6.3-noble \
 		bash -c 'apt-get update && apt-get -y install make && make test-swift'
 
 build-for-static-stdlib:

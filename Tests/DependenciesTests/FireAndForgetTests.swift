@@ -1,3 +1,4 @@
+import ConcurrencyExtras
 import Dependencies
 import XCTest
 
@@ -70,13 +71,13 @@ final class FireAndForgetTests: XCTestCase {
 
         await self.fireAndForget(priority: .userInitiated) {
           @Dependency(\.date.now) var now: Date
-          await date.setValue(now)
+          date.setValue(now)
         }
 
-        while await date.value == nil {
+        while date.value == nil {
           await Task.yield()
         }
-        let value = await date.value
+        let value = date.value
         XCTAssertEqual(value, Date(timeIntervalSince1970: 1_234_567_890))
       }
     }

@@ -1,5 +1,7 @@
 #if compiler(>=6.1) && canImport(Testing)
+  import ConcurrencyExtras
   import Dependencies
+  import DependenciesTestSupport
   import Foundation
   import Testing
 

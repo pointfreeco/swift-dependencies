@@ -1,6 +1,8 @@
 #if CombineSchedulers
+  public import CombineSchedulers
+
   #if canImport(Combine) || canImport(OpenCombineShim)
-    import Foundation
+    public import Foundation
 
     #if canImport(Combine)
       import Combine

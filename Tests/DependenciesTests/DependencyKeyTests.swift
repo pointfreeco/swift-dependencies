@@ -1,4 +1,5 @@
 import Dependencies
+import IssueReporting
 import XCTest
 
 final class DependencyKeyTests: XCTestCase {

@@ -1,9 +1,11 @@
-#if Clocks
-@_exported import Clocks
+#if !EXCLUDE_EXPORTS
+  #if Clocks
+    @_exported import Clocks
+  #endif
+  #if CombineSchedulers
+    @_exported import CombineSchedulers
+  #endif
+  @_exported import ConcurrencyExtras
+  @_exported import IssueReporting
+  @_exported import XCTestDynamicOverlay
 #endif
-#if CombineSchedulers
-@_exported import CombineSchedulers
-#endif
-@_exported import ConcurrencyExtras
-@_exported import IssueReporting
-@_exported import XCTestDynamicOverlay

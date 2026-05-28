@@ -1,5 +1,5 @@
 #if canImport(SwiftUI)
-  import SwiftUI
+  public import SwiftUI
 #endif
 
 /// A property wrapper for accessing dependencies.
@@ -76,7 +76,7 @@ public struct Dependency<Value>: _HasInitialValues {
     @Environment(\.dependencies) private var environmentValues
   #endif
 
-  private let keyPath: SendableKeyPath<DependencyValues, Value>
+  private let keyPath: any SendableKeyPath<DependencyValues, Value>
   private let filePath: StaticString
   private let fileID: StaticString
   private let line: UInt
@@ -105,7 +105,7 @@ public struct Dependency<Value>: _HasInitialValues {
   ///   - line: The source `#line` associated with the dependency.
   ///   - column: The source `#column` associated with the dependency.
   public init(
-    _ keyPath: KeyPath<DependencyValues, Value> & Sendable,
+    _ keyPath: any KeyPath<DependencyValues, Value> & Sendable,
     fileID: StaticString = #fileID,
     filePath: StaticString = #filePath,
     line: UInt = #line,

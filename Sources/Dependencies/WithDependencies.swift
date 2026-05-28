@@ -1,4 +1,6 @@
+import ConcurrencyExtras
 import Foundation
+import IssueReporting
 
 /// Prepares global dependencies for the lifetime of your application.
 ///
@@ -597,7 +599,7 @@ private final class DependencyObjects: Sendable {
   func values(from object: AnyObject) -> DependencyValues? {
     Mirror(reflecting: object).children
       .lazy
-      .compactMap({ $1 as? _HasInitialValues })
+      .compactMap({ $1 as? any _HasInitialValues })
       .first?
       .initialValues
       ?? self.storage.withValue({ [id = ObjectIdentifier(object)] in

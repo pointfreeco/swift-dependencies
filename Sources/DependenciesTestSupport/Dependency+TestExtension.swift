@@ -1,4 +1,4 @@
-import Dependencies
+public import Dependencies
 
 extension Dependency {
   /// Creates a dependency property to read the specified key path and cast to a concrete type.
@@ -34,7 +34,7 @@ extension Dependency {
   ///   - line: The source `#line` associated with the dependency.
   ///   - column: The source `#column` associated with the dependency.
   public init<T>(
-    _ keyPath: KeyPath<DependencyValues, T> & Sendable,
+    _ keyPath: any KeyPath<DependencyValues, T> & Sendable,
     as type: Value.Type,
     fileID: StaticString = #fileID,
     filePath: StaticString = #filePath,

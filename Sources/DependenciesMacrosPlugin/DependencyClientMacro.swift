@@ -1,8 +1,8 @@
 import SwiftDiagnostics
 import SwiftOperators
-import SwiftSyntax
+public import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftSyntaxMacros
+public import SwiftSyntaxMacros
 
 #if !canImport(SwiftSyntax600)
   import SwiftSyntaxMacroExpansion

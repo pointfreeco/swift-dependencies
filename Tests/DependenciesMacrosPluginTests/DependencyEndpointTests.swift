@@ -1,6 +1,7 @@
 #if canImport(DependenciesMacros)
   import Dependencies
   import DependenciesMacros
+  import IssueReporting
   import XCTest
 
   final class DependencyEndpointTests: XCTestCase {

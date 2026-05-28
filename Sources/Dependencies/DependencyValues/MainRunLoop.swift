@@ -7,7 +7,7 @@
     #if canImport(Combine)
       import Combine
     #else
-      import OpenCombineShim
+      public import OpenCombineShim
     #endif
 
     extension DependencyValues {

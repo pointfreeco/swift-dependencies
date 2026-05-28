@@ -1,7 +1,7 @@
 #if canImport(Testing) && compiler(>=6)
   import ConcurrencyExtras
-  import Dependencies
-  import Testing
+public import Dependencies
+public import Testing
 
   #if compiler(>=6.1)
     @_documentation(visibility: private)
@@ -11,10 +11,10 @@
       @TaskLocal static var isRoot = true
 
       public var isRecursive: Bool { true }
-      public func provideScope(
+      @concurrent public func provideScope(
         for test: Test,
         testCase: Test.Case?,
-        performing function: @Sendable () async throws -> Void
+        performing function: @concurrent @Sendable () async throws -> Void
       ) async throws {
         try await withDependencies {
           if Self.isRoot {

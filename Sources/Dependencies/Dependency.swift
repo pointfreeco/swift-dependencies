@@ -1,5 +1,5 @@
 #if canImport(SwiftUI)
-  import SwiftUI
+public import SwiftUI
 #endif
 
 /// A property wrapper for accessing dependencies.

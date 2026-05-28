@@ -1,5 +1,5 @@
 #if Foundation
-import Foundation
+public import Foundation
 
 extension DependencyValues {
   /// A dependency that returns the current date.

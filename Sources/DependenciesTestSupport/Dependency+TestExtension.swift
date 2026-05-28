@@ -1,4 +1,4 @@
-import Dependencies
+public import Dependencies
 
 extension Dependency {
   /// Creates a dependency property to read the specified key path and cast to a concrete type.

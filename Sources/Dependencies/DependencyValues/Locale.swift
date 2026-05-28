@@ -1,5 +1,5 @@
 #if Foundation
-import Foundation
+public import Foundation
 
 extension DependencyValues {
   /// The current locale that features should use.

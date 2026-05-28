@@ -1,5 +1,5 @@
 #if canImport(SwiftUI)
-  import SwiftUI
+public import SwiftUI
 #endif
 
 // MARK: - Deprecated after 1.9.2

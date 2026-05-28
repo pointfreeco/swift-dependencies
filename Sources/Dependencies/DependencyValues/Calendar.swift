@@ -1,5 +1,5 @@
 #if Foundation
-import Foundation
+public import Foundation
 
 extension DependencyValues {
   /// The current calendar that features should use when handling dates.

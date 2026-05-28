@@ -1,5 +1,5 @@
 #if canImport(SwiftUI)
-  import SwiftUI
+public import SwiftUI
 
   extension DependencyValues {
     /// A dependency that opens a URL.

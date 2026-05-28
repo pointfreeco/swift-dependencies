@@ -22,6 +22,7 @@ let package = Package(
     ),
     .library(
       name: "DependenciesTestSupport",
+      type: .dynamic,
       targets: ["DependenciesTestSupport"]
     ),
   ],

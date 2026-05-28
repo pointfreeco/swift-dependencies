@@ -1,6 +1,6 @@
 #if Foundation
 #if canImport(Foundation)
-  import Foundation
+  public import Foundation
 
   extension DependencyValues {
     /// The notification center that features should use.

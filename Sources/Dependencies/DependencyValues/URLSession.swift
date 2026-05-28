@@ -1,9 +1,9 @@
 #if Foundation
 #if !os(WASI)
-  import Foundation
+public import Foundation
 
   #if canImport(FoundationNetworking)
-    import FoundationNetworking
+public import FoundationNetworking
   #endif
 
   extension DependencyValues {

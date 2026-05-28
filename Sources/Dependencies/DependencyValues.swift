@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 import IssueReporting
 
 #if os(Windows)

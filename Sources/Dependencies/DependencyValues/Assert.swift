@@ -1,3 +1,5 @@
+import IssueReporting
+
 extension DependencyValues {
   /// A dependency for handling assertions.
   ///

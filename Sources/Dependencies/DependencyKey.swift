@@ -1,3 +1,5 @@
+import IssueReporting
+
 /// A key for accessing dependencies.
 ///
 /// Types conform to this protocol to extend ``DependencyValues`` with custom dependencies. It is

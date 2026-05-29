@@ -1,5 +1,6 @@
 import DependenciesMacrosPlugin
 import MacroTesting
+import SnapshotTesting
 import XCTest
 
 final class DependencyEndpointMacroTests: BaseTestCase {

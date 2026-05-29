@@ -1,9 +1,9 @@
-#if FoundationNetworking
-#if !os(WASI)
-  import Foundation
+#if FoundationNetworking && !os(WASI)
+  public import Foundation
+  import IssueReporting
 
   #if canImport(FoundationNetworking)
-    import FoundationNetworking
+    public import FoundationNetworking
   #endif
 
   extension DependencyValues {
@@ -28,9 +28,9 @@
     /// ### API client dependencies
     ///
     /// While it is possible to use this dependency value from more complex dependencies, like API
-    /// clients, we generally advise against _designing_ a dependency around a URL session. Mocking
-    /// a URL session's responses is a complex process that requires a lot of work that can be
-    /// avoided.
+    /// clients, we generally advise against _designing_ a dependency around a URL session.
+    /// Mocking a URL session's responses is a complex process that requires a lot of work that
+    /// can be avoided.
     ///
     /// For example, instead of defining your dependency in a way that holds directly onto a URL
     /// session in order to invoke it from a concrete implementation:
@@ -59,8 +59,8 @@
     /// }
     /// ```
     ///
-    /// Then, you can extend this type with a live implementation that uses a URL session under the
-    /// hood:
+    /// Then, you can extend this type with a live implementation that uses a URL session under
+    /// the hood:
     ///
     /// ```swift
     /// extension APIClient: DependencyKey {
@@ -113,5 +113,4 @@
       reportIssue(#"Unimplemented: @Dependency(\.urlSession)"#)
     }
   }
-#endif
 #endif

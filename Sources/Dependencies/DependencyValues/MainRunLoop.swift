@@ -1,11 +1,13 @@
 #if CombineSchedulers
+  public import CombineSchedulers
+
   #if canImport(Combine) || canImport(OpenCombineShim)
-    import Foundation
+    public import Foundation
 
     #if canImport(Combine)
       import Combine
     #else
-      import OpenCombineShim
+      public import OpenCombineShim
     #endif
 
     extension DependencyValues {

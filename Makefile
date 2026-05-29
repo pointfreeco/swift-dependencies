@@ -23,8 +23,8 @@ build-all-platforms:
 	done;
 
 test-swift:
-	swift test
-	swift test -c release
+	swift test -Xswiftc -D -Xswiftc EXCLUDE_EXPORTS
+	swift test -c release -Xswiftc -D -Xswiftc EXCLUDE_EXPORTS
 
 test-linux:
 	docker run \

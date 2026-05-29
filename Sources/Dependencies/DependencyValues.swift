@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 import IssueReporting
 
 #if os(Windows)
@@ -144,7 +144,7 @@ public struct DependencyValues: Sendable {
         guard
           let XCTestObservation = objc_getProtocol("XCTestObservation"),
           let XCTestObservationCenter = NSClassFromString("XCTestObservationCenter"),
-          let XCTestObservationCenter = XCTestObservationCenter as Any as? NSObjectProtocol,
+          let XCTestObservationCenter = XCTestObservationCenter as Any as? any NSObjectProtocol,
           let XCTestObservationCenterShared =
             XCTestObservationCenter
             .perform(Selector(("sharedTestObservationCenter")))?

@@ -1,5 +1,6 @@
 #if compiler(>=6.2) && canImport(Testing)
   import Dependencies
+  import DependenciesTestSupport
   import Foundation
   import Testing
 
@@ -14,7 +15,7 @@
         @Dependency(ClientKey.self, as: TestClient.self) var client
         #expect(!client.isLive())
       }
-      
+
       @Test func keyPath() {
         @Dependency(\.client, as: TestClient.self) var client
         #expect(!client.isLive())

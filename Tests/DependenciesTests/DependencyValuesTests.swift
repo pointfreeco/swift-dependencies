@@ -1,4 +1,6 @@
+import ConcurrencyExtras
 import Dependencies
+import IssueReporting
 import XCTest
 
 final class DependencyValuesTests: XCTestCase {
@@ -480,10 +482,10 @@ final class DependencyValuesTests: XCTestCase {
         }
       }
 
-      let model = await withDependencies {
+      let model = withDependencies {
         $0.fullDependency.value = 42
       } operation: {
-        await FeatureModel()
+        FeatureModel()
       }
 
       await model.doSomething(expectation: expectation)
@@ -510,7 +512,7 @@ final class DependencyValuesTests: XCTestCase {
         }
       }
 
-      let model = await FeatureModel()
+      let model = FeatureModel()
 
       await withDependencies {
         $0.fullDependency.value = 42
@@ -543,7 +545,7 @@ final class DependencyValuesTests: XCTestCase {
         }
       }
 
-      let model = await FeatureModel()
+      let model = FeatureModel()
 
       await withDependencies {
         $0.fullDependency.value = 42
@@ -570,7 +572,7 @@ final class DependencyValuesTests: XCTestCase {
         }
       }
 
-      let model = await FeatureModel()
+      let model = FeatureModel()
 
       await withDependencies {
         $0.fullDependency.value = 42

@@ -1,4 +1,6 @@
 #if canImport(SwiftUI)
+  public import Foundation
+  import IssueReporting
   import SwiftUI
 
   extension DependencyValues {

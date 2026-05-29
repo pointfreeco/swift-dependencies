@@ -1,5 +1,7 @@
+public import ConcurrencyExtras
+
 #if canImport(SwiftUI)
-  import SwiftUI
+  public import SwiftUI
 #endif
 
 // MARK: - Deprecated after 1.9.2
@@ -14,7 +16,7 @@
         """
     )
     public static func dependency<Value>(
-      _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
+      _ keyPath: any WritableKeyPath<DependencyValues, Value> & Sendable,
       _ value: @autoclosure @escaping @Sendable () throws -> Value
     ) -> PreviewTrait {
       .dependencies { $0[keyPath: keyPath] = try value() }
@@ -91,7 +93,7 @@ extension AsyncStream {
   }
 }
 
-extension AsyncThrowingStream where Failure == Error {
+extension AsyncThrowingStream where Failure == any Error {
   @available(*, deprecated, renamed: "makeStream(of:throwing:bufferingPolicy:)")
   @_documentation(visibility: private)
   public static func streamWithContinuation(
@@ -152,7 +154,7 @@ extension AsyncStream where Element: Sendable {
   }
 }
 
-extension AsyncThrowingStream where Element: Sendable, Failure == Error {
+extension AsyncThrowingStream where Element: Sendable, Failure == any Error {
   @available(
     *,
     deprecated,

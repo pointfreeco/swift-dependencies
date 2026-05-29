@@ -1,7 +1,7 @@
 #if canImport(Testing) && compiler(>=6)
   import ConcurrencyExtras
-  import Dependencies
-  import Testing
+  public import Dependencies
+  public import Testing
 
   #if compiler(>=6.1)
     @_documentation(visibility: private)
@@ -14,7 +14,7 @@
       public func provideScope(
         for test: Test,
         testCase: Test.Case?,
-        performing function: @Sendable () async throws -> Void
+        performing function: @concurrent () async throws -> Void
       ) async throws {
         try await withDependencies {
           if Self.isRoot {
@@ -77,7 +77,7 @@
       ///   - keyPath: A key path to a dependency value.
       ///   - value: A dependency value to override for the test.
       public static func dependency<Value>(
-        _ keyPath: WritableKeyPath<DependencyValues, Value> & Sendable,
+        _ keyPath: any WritableKeyPath<DependencyValues, Value> & Sendable,
         _ value: @autoclosure @escaping @Sendable () throws -> Value
       ) -> Self {
         Self {

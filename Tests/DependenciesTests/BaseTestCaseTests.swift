@@ -2,6 +2,9 @@ import Dependencies
 import XCTest
 
 final class BaseTestCaseTests: DerivedBaseTestCase {
+  #if compiler(>=6.2)
+    @concurrent
+  #endif
   override func setUp() async throws {
     try await super.setUp()
     XCTAssertEqual(DependencyValues._current.context, .test)
@@ -32,6 +35,9 @@ final class BaseTestCaseTests: DerivedBaseTestCase {
 }
 
 class DerivedBaseTestCase: BaseTestCase {
+  #if compiler(>=6.2)
+    @concurrent
+  #endif
   override func setUp() async throws {
     try await super.setUp()
     XCTAssertEqual(DependencyValues._current.context, .test)
@@ -49,6 +55,9 @@ class DerivedBaseTestCase: BaseTestCase {
 }
 
 class BaseTestCase: XCTestCase {
+  #if compiler(>=6.2)
+    @concurrent
+  #endif
   override func setUp() async throws {
     try await super.setUp()
     XCTAssertEqual(DependencyValues._current.context, .test)

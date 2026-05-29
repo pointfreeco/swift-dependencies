@@ -2,7 +2,10 @@ import Dependencies
 import XCTest
 
 final class BaseTestCaseTests: DerivedBaseTestCase {
-  @concurrent override func setUp() async throws {
+  #if compiler(>=6.2)
+    @concurrent
+  #endif
+  override func setUp() async throws {
     try await super.setUp()
     XCTAssertEqual(DependencyValues._current.context, .test)
     XCTAssertEqual(DependencyValues._current.uuid(), .deadbeef)
@@ -32,7 +35,10 @@ final class BaseTestCaseTests: DerivedBaseTestCase {
 }
 
 class DerivedBaseTestCase: BaseTestCase {
-  @concurrent override func setUp() async throws {
+  #if compiler(>=6.2)
+    @concurrent
+  #endif
+  override func setUp() async throws {
     try await super.setUp()
     XCTAssertEqual(DependencyValues._current.context, .test)
     XCTAssertEqual(DependencyValues._current.uuid(), .deadbeef)
@@ -49,7 +55,10 @@ class DerivedBaseTestCase: BaseTestCase {
 }
 
 class BaseTestCase: XCTestCase {
-  @concurrent override func setUp() async throws {
+  #if compiler(>=6.2)
+    @concurrent
+  #endif
+  override func setUp() async throws {
     try await super.setUp()
     XCTAssertEqual(DependencyValues._current.context, .test)
     XCTAssertEqual(DependencyValues._current.uuid(), .deadbeef)

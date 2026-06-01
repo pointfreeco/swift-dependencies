@@ -141,4 +141,4 @@ can do. You can learn more in depth about <doc:WhatAreDependencies> as well as
 there are more advanced topics to explore, such as <doc:DesigningDependencies>,
 <doc:OverridingDependencies>, <doc:Lifetimes> and <doc:SingleEntryPointSystems>.
 
-[immediate-clock-docs]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/immediateclock
+[immediate-clock-docs]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/immediateclock

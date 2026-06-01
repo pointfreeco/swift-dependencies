@@ -303,7 +303,7 @@ func testFeature() {
 }
 ```
 
-[unimplemented-docs]: https://pointfreeco.github.io/xctest-dynamic-overlay/main/documentation/xctestdynamicoverlay/unimplemented(_:fileid:line:)-5098a
+[unimplemented-docs]: https://swiftpackageindex.com/pointfreeco/swift-issue-reporting/main/documentation/issuereporting/unimplemented(_:fileid:filepath:function:line:column:)
 [issue-reporting-gh]: http://github.com/pointfreeco/xctest-dynamic-overlay
 
 ## Topics

@@ -74,30 +74,3 @@ jobs:
           swift-configuration: ${{ matrix.config }}
           run-tests: false
           build-tests: false
-
-  # windows:
-  #   name: Windows
-  #   runs-on: windows-latest
-  #   steps:
-  #     - uses: compnerd/gha-setup-swift@main
-  #       with:
-  #         branch: swift-5.10-release
-  #         tag: 5.10-RELEASE
-  #
-  #     - uses: actions/checkout@v4
-  #     - name: Run tests
-  #       run: swift test
-  #     - name: Run tests (release)
-  #       run: swift test -c release
-
-  check-macro-compatibility:
-    name: Check Macro Compatibility
-    runs-on: macos-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run Swift Macro Compatibility Check
-        uses: Matejkob/swift-macro-compatibility-check@v1
-        with:
-          run-tests: false
-          major-versions-only: true

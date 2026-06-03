@@ -124,21 +124,25 @@ That is all it takes to start using controllable dependencies in your features. 
 bit of upfront work done you can start to take advantage of the library's powers.
 
 For example, you can easily control these dependencies in tests. If you want to test the logic
-inside the `addButtonTapped` method, you can use the [`withDependencies`][withdependencies-docs]
-function to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
+inside the `addButtonTapped` method, you can use the `.dependencies` test trait
+to override any dependencies for the scope of one single test. It's as easy as 1-2-3:
 
 ```swift
-@Test
-func add() async throws {
-  let model = withDependencies {
-    // 1️⃣ Override any dependencies that your feature uses.
+import Dependencies
+import DependenciesTestSupport
+import Testing
+
+@Test(
+  // 1️⃣ Override any dependencies that your feature uses.
+  .dependencies {
     $0.clock = .immediate
     $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
     $0.uuid = .incrementing
-  } operation: {
-    // 2️⃣ Construct the feature's model
-    FeatureModel()
   }
+)
+func add() async throws {
+  // 2️⃣ Construct the feature's model
+  let model = FeatureModel()
   // 3️⃣ The model now executes in a controlled environment of dependencies,
   //    and so we can make assertions against its behavior.
   try await model.addButtonTapped()

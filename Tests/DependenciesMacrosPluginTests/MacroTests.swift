@@ -32,3 +32,10 @@ extension DependencyValues {
   @DependencyEntry(liveValue: EntryValue.live)
   fileprivate var entryWithTypeAnnotation: EntryValue = .test
 }
+struct TestDependencyEntries {
+  @Dependency(\.entryTestValueOnly) fileprivate var entryTestValueOnly
+  @Dependency(\.entryLiveAndTestValue) fileprivate var entryLiveAndTestValue
+  @Dependency(\.entryAllValues) fileprivate var entryAllValues
+  @Dependency(\.entryPreviewAndTestValue) fileprivate var entryPreviewAndTestValue
+  @Dependency(\.entryWithTypeAnnotation) fileprivate var entryWithTypeAnnotation
+}

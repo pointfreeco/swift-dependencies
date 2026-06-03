@@ -28,10 +28,10 @@
       ///
       /// See ``suspendingClock`` to override a feature's `SuspendingClock`, instead.
       ///
-      /// [immediate-clock]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/immediateclock/
-      /// [test-clock]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/testclock/
+      /// [immediate-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/immediateclock
+      /// [test-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/testclock
       /// [swift-clocks]: https://github.com/pointfreeco/swift-clocks
-      /// [unimplemented-clock]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/unimplementedclock/
+      /// [unimplemented-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/unimplementedclock
       public var continuousClock: any Clock<Duration> {
         get { self[ContinuousClockKey.self] }
         set { self[ContinuousClockKey.self] = newValue }
@@ -61,10 +61,10 @@
       ///
       /// See ``continuousClock`` to override a feature's `ContinuousClock`, instead.
       ///
-      /// [immediate-clock]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/immediateclock/
-      /// [test-clock]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/testclock/
+      /// [immediate-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/immediateclock
+      /// [test-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/testclock
       /// [swift-clocks]: https://github.com/pointfreeco/swift-clocks
-      /// [unimplemented-clock]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/unimplementedclock/
+      /// [unimplemented-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/unimplementedclock
       public var suspendingClock: any Clock<Duration> {
         get { self[SuspendingClockKey.self] }
         set { self[SuspendingClockKey.self] = newValue }

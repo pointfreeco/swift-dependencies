@@ -316,4 +316,4 @@ This library is released under the MIT license. See [LICENSE](LICENSE) for detai
 [swiftui-nav-gh]: http://github.com/pointfreeco/swiftui-navigation
 [dep-values-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/dependencyvalues#dependency-values
 [withdependencies-docs]: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies/withdependencies(isolation:_:operation:)
-[immediate-clock-docs]: https://pointfreeco.github.io/swift-clocks/main/documentation/clocks/immediateclock
+[immediate-clock-docs]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/immediateclock

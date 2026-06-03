@@ -5,7 +5,7 @@ contact_links:
     url: https://github.com/pointfreeco/swift-dependencies/discussions
     about: Dependencies Q&A, ideas, and more
   - name: Documentation
-    url: https://pointfreeco.github.io/swift-dependencies/main/documentation/dependencies/
+    url: https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies
     about: Read documentation for Dependencies
   - name: Videos
     url: https://www.pointfree.co/collections/composable-architecture/reducer-protocol/ep205-reducer-protocol-dependencies-part-1

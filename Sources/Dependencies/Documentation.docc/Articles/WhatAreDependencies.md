@@ -115,18 +115,21 @@ This will cause the message to appear immediately. No need to wait 10 seconds.
 > Tip: We have a [series of episodes][clocks-collection] discussing the `Clock` protocol in depth
 and showing how it can be used to control time-based asynchrony.
 
-Further, in tests you can also override the clock dependency to use an immediate clock, also using
-the ``withDependencies(_:operation:)-4uz6m`` helper:
+Further, in tests you can also override the clock dependency to use an immediate clock, using
+the `.dependencies` test trait:
 
 ```swift
-@Test
-func message() async {
-  let model = withDependencies {
-    $0.continuousClock = .immediate
-  } operation: {
-    FeatureModel()
-  }
+import Dependencies
+import DependenciesTestSupport
+import Testing
 
+@Test(
+  .dependencies {
+    $0.continuousClock = .immediate
+  }
+)
+func message() async {
+  let model = FeatureModel()
   #expect(model.message == nil)
   await model.onAppear()
   #expect(model.message == "Welcome!")

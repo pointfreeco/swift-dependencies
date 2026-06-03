@@ -33,17 +33,19 @@ Then, all 3 dependencies can easily be overridden with deterministic versions wh
 feature:
 
 ```swift
-@MainActor
-@Test
-func todos() async {
-  let model = withDependencies {
+import Dependencies
+import DependenciesTestSupport
+import Testing
+
+@Test(
+  .dependencies {
     $0.continuousClock = .immediate
     $0.date.now = Date(timeIntervalSinceReferenceDate: 1234567890)
     $0.uuid = .incrementing
-  } operation: {
-    TodosModel()
   }
-
+)
+func todos() async {
+  let model = TodosModel()
   // Invoke methods on `model` and make assertions...
 }
 ```

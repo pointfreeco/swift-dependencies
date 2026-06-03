@@ -193,6 +193,54 @@ public macro DependencyEndpoint(method: String = "") =
 public macro DependencyEndpointIgnored() =
   #externalMacro(module: "DependenciesMacrosPlugin", type: "DependencyEndpointIgnoredMacro")
 
+/// Creates a dependency values entry.
+///
+/// Use this macro to register a custom dependency on ``DependencyValues`` without having to declare
+/// a separate ``TestDependencyKey`` or ``DependencyKey`` conformance:
+///
+/// ```swift
+/// extension DependencyValues {
+///   @DependencyEntry var apiClient: any APIClient = MockAPIClient()
+/// }
+/// ```
+///
+/// The macro will synthesize a private key type behind the scenes and generate the property's
+/// `get`/`set` accessors with the following rules:
+///
+///   * The value provided to the `@DependencyEntry` is used as the ``TestDependencyKey/testValue``
+///     in the ``TestDependencyKey`` conformance.
+///   * If the `liveValue` argument is provided to `@DependencyEntry`, then the synthesized key
+///     type will conform to ``DependencyKey`` and provide the specified
+///     ``DependencyKey/liveValue``:
+///
+///     ```swift
+///     extension DependencyValues {
+///       @DependencyEntry(liveValue: LiveAPIClient())
+///       var apiClient: any APIClient = MockAPIClient()
+///     }
+///     ```
+///
+/// If you want to separate the live implementation from the interface of your dependency, you will
+/// need to leave off the `liveValue` argument and instead provide the `liveValue` in your main
+/// app target, as described in <doc:LivePreviewTest:Separating-interface-and-implementation>.
+///
+/// - Parameters:
+///   - liveValue: A live value.
+///   - previewValue: A preview value.
+@attached(accessor, names: named(get), named(set))
+@attached(peer, names: prefixed(__Key_))
+public macro DependencyEntry<LiveValue, PreviewValue>(
+  liveValue: LiveValue = (),
+  previewValue: PreviewValue = ()
+) = #externalMacro(module: "DependenciesMacrosPlugin", type: "DependencyEntryMacro")
+
+@attached(accessor, names: named(get))
+public macro _DependencyEntryDefaultValue() =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryDefaultValueMacro"
+  )
+
 /// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
 public struct Unimplemented: Error {
   let endpoint: String

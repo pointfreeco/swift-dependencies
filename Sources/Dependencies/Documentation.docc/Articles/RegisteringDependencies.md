@@ -10,6 +10,45 @@ when you want to register your own dependencies with the library so that you can
 ``Dependency`` property wrapper. There are a couple ways to achieve this, and the process is quite
 similar to registering a value with [the environment][environment-values-docs] in SwiftUI.
 
+## The @DependencyEntry macro
+
+This simplest way to register a dependency is using the `@DependencyEntry` macro. Simply extend
+the ``DependencyValues`` type and apply the macro on a mutable property with a default value:
+
+```swift
+import Dependencies
+import DependenciesMacros
+
+extension DependencyValues {
+  @DependencyEntry
+  var apiClient: any APIClient = MockAPIClient()
+}
+```
+
+This will create a private inner type that conforms to the ``TestDependencyKey`` protocol and 
+provides a ``TestDependencyKey/testValue`` of `MockAPIClient`.
+
+If it is appropriate to also define the ``DependencyKey/liveValue`` in the same module as the 
+``TestDependencyKey/testValue`` then you can do so by providing a `liveValue` argument:
+
+```swift
+import Dependencies
+import DependenciesMacros
+
+extension DependencyValues {
+  @DependencyEntry(liveValue: LiveAPIClient())
+  var apiClient: any APIClient = MockAPIClient()
+}
+```
+
+However, if the live implementation of the dependency is only appropriate to define at the entry
+point of the app, or if you need to keep the live implementation separate from the dependency 
+interface, you will not provide this argument. And instead you will employ the techniques in 
+<doc:LivePreviewTest#Separating-interface-and-implementation>.
+
+## Manual conformance to DependencyKey
+
+You can also conform to ``TestDependencyKey`` and ``DependencyKey`` directly. 
 First you create a ``DependencyKey`` protocol conformance. The minimum implementation you must
 provide is a ``DependencyKey/liveValue``, which is the value used when running the app in a
 simulator or on device, and so it's appropriate for it to actually make network requests to an

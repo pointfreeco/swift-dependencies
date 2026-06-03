@@ -207,17 +207,18 @@ public macro DependencyEndpointIgnored() =
 /// The macro will synthesize a private key type behind the scenes and generate the property's
 /// `get`/`set` accessors with the following rules:
 ///
-/// * The value provided to the `@DependencyEntry` is used as the ``TestDependencyKey/testValue``
-/// in the ``TestDependencyKey`` conformance.
-/// * If the `liveValue` argument is provided to `@DependencyEntry`, then the synthesized key
-/// type will conform to ``DependencyKey`` and provide the specified ``DependencyKey/liveValue``:
+///   * The value provided to the `@DependencyEntry` is used as the ``TestDependencyKey/testValue``
+///     in the ``TestDependencyKey`` conformance.
+///   * If the `liveValue` argument is provided to `@DependencyEntry`, then the synthesized key
+///     type will conform to ``DependencyKey`` and provide the specified
+///     ``DependencyKey/liveValue``:
 ///
-///   ```swift
-///   extension DependencyValues {
-///     @DependencyEntry(liveValue: LiveAPIClient())
-///     var apiClient: any APIClient = MockAPIClient()
-///   }
-///   ```
+///     ```swift
+///     extension DependencyValues {
+///       @DependencyEntry(liveValue: LiveAPIClient())
+///       var apiClient: any APIClient = MockAPIClient()
+///     }
+///     ```
 ///
 /// If you want to separate the live implementation from the interface of your dependency, you will
 /// need to leave off the `liveValue` argument and instead provide the `liveValue` in your main

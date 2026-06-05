@@ -33,7 +33,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        private enum __Key_client: Dependencies.DependencyKey {
+        private nonisolated enum __Key_client: Dependencies.DependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue static var liveValue = Client.live
           @DependenciesMacros._DependencyEntryDefaultValue static var testValue = Client.test
         }
@@ -62,7 +62,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        private enum __Key_client: Dependencies.DependencyKey {
+        private nonisolated enum __Key_client: Dependencies.DependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue static var liveValue = Client.live
           @DependenciesMacros._DependencyEntryDefaultValue static var previewValue = Client.preview
           @DependenciesMacros._DependencyEntryDefaultValue static var testValue = Client.test
@@ -92,7 +92,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        private enum __Key_client: Dependencies.TestDependencyKey {
+        private nonisolated enum __Key_client: Dependencies.TestDependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue static var previewValue = Client.preview
           @DependenciesMacros._DependencyEntryDefaultValue static var testValue = Client.test
         }
@@ -121,7 +121,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        private enum __Key_client: Dependencies.TestDependencyKey {
+        private nonisolated enum __Key_client: Dependencies.TestDependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue static var testValue = Client.test
         }
       }
@@ -149,7 +149,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        private enum __Key_client: Dependencies.DependencyKey {
+        private nonisolated enum __Key_client: Dependencies.DependencyKey {
           typealias Value = Client
           static var liveValue: Value {
             Client.live
@@ -242,7 +242,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        private enum __Key_client: Dependencies.DependencyKey {
+        private nonisolated enum __Key_client: Dependencies.DependencyKey {
           typealias Value = Client
           static var liveValue: Value {
             Client.live

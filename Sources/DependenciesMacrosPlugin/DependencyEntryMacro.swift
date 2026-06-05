@@ -125,7 +125,7 @@ extension DependencyEntryMacro: PeerMacro {
 
     let body = members.joined(separator: "\n")
     let keyDecl: DeclSyntax = """
-      private enum \(keyName): Dependencies.\(raw: conformance) {
+      private nonisolated enum \(keyName): Dependencies.\(raw: conformance) {
       \(raw: body)
       }
       """

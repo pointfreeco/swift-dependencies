@@ -103,9 +103,139 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
       return []
     }
     var properties: [Property] = []
+    var conditionalGroups: [ConditionalGroup] = []
     var hasEndpoints = false
     var accesses: Set<Access> = Access(modifiers: declaration.modifiers).map { [$0] } ?? []
     for member in declaration.memberBlock.members {
+      if let ifConfig = member.decl.as(IfConfigDeclSyntax.self) {
+        for clause in ifConfig.clauses {
+          guard
+            let condition = clause.condition,
+            let elements = clause.elements?.as(MemberBlockItemListSyntax.self)
+          else { continue }
+          let conditionKey = condition.trimmedDescription
+          let groupIdx: Int
+          if let idx = conditionalGroups.firstIndex(where: { $0.conditionKey == conditionKey }) {
+            groupIdx = idx
+          } else {
+            conditionalGroups.append(ConditionalGroup(conditionKey: conditionKey, properties: []))
+            groupIdx = conditionalGroups.count - 1
+          }
+          for item in elements {
+            guard
+              var property = item.decl.as(VariableDeclSyntax.self),
+              !property.isStatic
+            else { continue }
+            let isEndpoint =
+              property.hasDependencyEndpointMacroAttached
+              || property.bindingSpecifier.tokenKind != .keyword(.let) && property.isClosure
+            let propertyAccess = Access(modifiers: property.modifiers)
+            guard
+              var binding = property.bindings.first,
+              let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
+            else { continue }
+            if property.bindingSpecifier.tokenKind == .keyword(.let), binding.initializer != nil {
+              continue
+            }
+            if let accessors = binding.accessorBlock?.accessors {
+              switch accessors {
+              case .getter:
+                continue
+              case .accessors(let accessors):
+                if accessors.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
+                  continue
+                }
+              @unknown default: continue
+              }
+            }
+            if propertyAccess == .private, binding.initializer != nil { continue }
+            accesses.insert(propertyAccess ?? .internal)
+            if property.isIgnored { continue }
+            guard let type = binding.typeAnnotation?.type ?? binding.initializer?.value.literalType
+            else {
+              context.diagnose(
+                Diagnostic(
+                  node: binding,
+                  message: MacroExpansionErrorMessage(
+                    """
+                    '@DependencyClient' requires '\(identifier)' to have a type annotation in order \
+                    to generate a memberwise initializer
+                    """
+                  ),
+                  fixIt: FixIt(
+                    message: MacroExpansionFixItMessage("Insert ': <#Type#>'"),
+                    changes: [
+                      .replace(
+                        oldNode: Syntax(binding),
+                        newNode: Syntax(
+                          binding
+                            .with(\.pattern.trailingTrivia, "")
+                            .with(
+                              \.typeAnnotation,
+                              TypeAnnotationSyntax(
+                                colon: .colonToken(trailingTrivia: .space),
+                                type: IdentifierTypeSyntax(name: "<#Type#>"),
+                                trailingTrivia: .space
+                              )
+                            )
+                        )
+                      )
+                    ]
+                  )
+                )
+              )
+              continue
+            }
+            if var attributedTypeSyntax = type.as(AttributedTypeSyntax.self),
+              attributedTypeSyntax.baseType.is(FunctionTypeSyntax.self)
+            {
+              attributedTypeSyntax.attributes.append(
+                .attribute("@escaping").with(\.trailingTrivia, .space)
+              )
+              binding.typeAnnotation?.type = TypeSyntax(attributedTypeSyntax)
+            } else if let typeSyntax = type.as(FunctionTypeSyntax.self) {
+              #if canImport(SwiftSyntax600)
+                binding.typeAnnotation?.type = TypeSyntax(
+                  AttributedTypeSyntax(
+                    specifiers: [],
+                    attributes: [.attribute("@escaping").with(\.trailingTrivia, .space)],
+                    baseType: typeSyntax
+                  )
+                )
+              #else
+                binding.typeAnnotation?.type = TypeSyntax(
+                  AttributedTypeSyntax(
+                    attributes: [.attribute("@escaping").with(\.trailingTrivia, .space)],
+                    baseType: typeSyntax
+                  )
+                )
+              #endif
+            } else if binding.typeAnnotation == nil {
+              binding.pattern.trailingTrivia = ""
+              binding.typeAnnotation = TypeAnnotationSyntax(
+                colon: .colonToken(trailingTrivia: .space),
+                type: type.with(\.trailingTrivia, .space)
+              )
+            }
+            if isEndpoint {
+              binding.accessorBlock = nil
+              binding.initializer = nil
+            } else if binding.initializer == nil, type.is(OptionalTypeSyntax.self) {
+              binding.typeAnnotation?.trailingTrivia = .space
+              binding.initializer = InitializerClauseSyntax(
+                equal: .equalToken(trailingTrivia: .space),
+                value: NilLiteralExprSyntax()
+              )
+            }
+            property.bindings[property.bindings.startIndex] = binding
+            conditionalGroups[groupIdx].properties.append(
+              Property(declaration: property, identifier: identifier, isEndpoint: isEndpoint)
+            )
+            hasEndpoints = hasEndpoints || isEndpoint
+          }
+        }
+        continue
+      }
       guard
         var property = member.decl.as(VariableDeclSyntax.self),
         !property.isStatic
@@ -230,18 +360,81 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     }
     guard hasEndpoints else { return [] }
     let access = accesses.min().flatMap { $0.token?.with(\.trailingTrivia, .space) }
-    // TODO: Don't define initializers if any single endpoint is invalid
-    return [properties, properties.filter { !$0.isEndpoint }].map {
-      $0.isEmpty
-        ? "\(access)init() {}"
-        : """
-        \(access)init(
-        \(raw: $0.map { $0.declaration.bindings.trimmedDescription }.joined(separator: ",\n"))
-        ) {
-        \(raw: $0.map { "self.\($0.identifier) = \($0.identifier)" }.joined(separator: "\n"))
-        }
-        """
+
+    // Generate an unimplemented default closure string for a conditional endpoint property,
+    // for use in init bodies to satisfy Swift's initialization requirements.
+    func unimplementedAssignment(for property: Property) -> String? {
+      // Synthesize a @DependencyEndpoint attribute and delegate to its peer expansion
+      // so the unimplemented closure stays in sync with @DependencyEndpoint's behavior.
+      let attribute: AttributeSyntax = "@DependencyEndpoint"
+      guard let peers = try? DependencyEndpointMacro.expansion(
+        of: attribute,
+        providingPeersOf: DeclSyntax(property.declaration),
+        in: context
+      ),
+        !peers.isEmpty,
+        let privateVar = peers.last?.as(VariableDeclSyntax.self),
+        let closureExpr = privateVar.bindings.first?.initializer?.value
+      else { return nil }
+      return "self.\(property.identifier) = \(closureExpr.trimmedDescription)"
     }
+
+    // Extra body lines that conditionally initialize endpoints from groups not in current init params.
+    func conditionalDefaultLines(excludingGroupKey: String? = nil) -> [String] {
+      conditionalGroups.flatMap { group -> [String] in
+        guard group.conditionKey != excludingGroupKey else { return [] }
+        let assignments = group.properties.filter(\.isEndpoint).compactMap {
+          unimplementedAssignment(for: $0)
+        }
+        guard !assignments.isEmpty else { return [] }
+        return ["#if \(group.conditionKey)"] + assignments + ["#endif"]
+      }
+    }
+
+    // TODO: Don't define initializers if any single endpoint is invalid
+    func makeInit(_ props: [Property], excludingGroupKey: String? = nil) -> DeclSyntax {
+      let extraLines = conditionalDefaultLines(excludingGroupKey: excludingGroupKey)
+      let allBodyLines =
+        props.map { "self.\($0.identifier) = \($0.identifier)" } + extraLines
+      if props.isEmpty && extraLines.isEmpty {
+        return "\(access)init() {}"
+      } else if props.isEmpty {
+        return """
+          \(access)init() {
+          \(raw: allBodyLines.joined(separator: "\n"))
+          }
+          """
+      } else {
+        return """
+          \(access)init(
+          \(raw: props.map { $0.declaration.bindings.trimmedDescription }.joined(separator: ",\n"))
+          ) {
+          \(raw: allBodyLines.joined(separator: "\n"))
+          }
+          """
+      }
+    }
+
+    var result: [DeclSyntax] = []
+    // Unconditional full init (only if there are unconditional endpoints)
+    if properties.contains(where: \.isEndpoint) {
+      result.append(makeInit(properties))
+    }
+    // #if-wrapped init per conditional group
+    for group in conditionalGroups where group.properties.contains(where: \.isEndpoint) {
+      let allProps = properties + group.properties
+      let initDecl = makeInit(allProps, excludingGroupKey: group.conditionKey)
+      result.append(
+        """
+        #if \(raw: group.conditionKey)
+        \(initDecl)
+        #endif
+        """
+      )
+    }
+    // No-endpoint init (always generated)
+    result.append(makeInit(properties.filter { !$0.isEndpoint }))
+    return result
   }
 }
 
@@ -291,6 +484,11 @@ private struct Property {
   var declaration: VariableDeclSyntax
   var identifier: String
   var isEndpoint: Bool
+}
+
+private struct ConditionalGroup {
+  var conditionKey: String
+  var properties: [Property]
 }
 
 extension VariableDeclSyntax {

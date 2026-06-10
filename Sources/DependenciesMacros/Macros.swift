@@ -236,6 +236,16 @@ public macro DependencyEndpointIgnored() =
 /// need to leave off the `liveValue` argument and instead provide the `liveValue` in your main
 /// app target, as described in <doc:LivePreviewTest:Separating-interface-and-implementation>.
 ///
+/// If you do not want to specify a `testValue`, then you can leave off the default value of the property as long as you supply
+/// either a `liveValue` or `previewValue`:
+///
+/// ```swift
+/// extension DependencyValues {
+///   @DependencyEntry(liveValue: LiveAPIClient())
+///   var apiClient: any APIClient
+/// }
+/// ```
+///
 /// - Parameters:
 ///   - keyName: An optional public key type name.
 ///   - liveValue: A live value.

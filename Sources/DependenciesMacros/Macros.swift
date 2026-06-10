@@ -204,7 +204,7 @@ public macro DependencyEndpointIgnored() =
 /// }
 /// ```
 ///
-/// The macro will synthesize a private key type behind the scenes and generate the property's
+/// The macro will synthesize a dependency key type behind the scenes and generate the property's
 /// `get`/`set` accessors with the following rules:
 ///
 ///   * The value provided to the `@DependencyEntry` is used as the ``TestDependencyKey/testValue``
@@ -219,17 +219,38 @@ public macro DependencyEndpointIgnored() =
 ///       var apiClient: any APIClient = MockAPIClient()
 ///     }
 ///     ```
+///   * If a string is supplied as the first argument, then the synthesized key type is made public
+///     and uses that exact name:
+///
+///     ```swift
+///     extension DependencyValues {
+///       @DependencyEntry("APIClientKey")
+///       public var apiClient: any APIClient = MockAPIClient()
+///     }
+///     ```
+///   * If no explicit key name is supplied and the dependency entry itself is `public`, then the
+///     synthesized key type is made public and named after the property with `Key` appended. For
+///     example, `apiClient` becomes `ApiClientKey`.
 ///
 /// If you want to separate the live implementation from the interface of your dependency, you will
 /// need to leave off the `liveValue` argument and instead provide the `liveValue` in your main
 /// app target, as described in <doc:LivePreviewTest:Separating-interface-and-implementation>.
 ///
 /// - Parameters:
+///   - keyName: An optional public key type name.
 ///   - liveValue: A live value.
 ///   - previewValue: A preview value.
 @attached(accessor, names: named(get), named(set))
-@attached(peer, names: prefixed(__Key_))
+@attached(peer, names: arbitrary)
 public macro DependencyEntry<LiveValue, PreviewValue>(
+  liveValue: LiveValue = (),
+  previewValue: PreviewValue = ()
+) = #externalMacro(module: "DependenciesMacrosPlugin", type: "DependencyEntryMacro")
+
+@attached(accessor, names: named(get), named(set))
+@attached(peer, names: arbitrary)
+public macro DependencyEntry<LiveValue, PreviewValue>(
+  _ keyName: String,
   liveValue: LiveValue = (),
   previewValue: PreviewValue = ()
 ) = #externalMacro(module: "DependenciesMacrosPlugin", type: "DependencyEntryMacro")

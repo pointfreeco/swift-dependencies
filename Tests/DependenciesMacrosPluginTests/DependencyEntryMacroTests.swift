@@ -252,4 +252,62 @@ final class DependencyEntryMacroTests: BaseTestCase {
       """
     }
   }
+
+  func testPublicKeyName() {
+    assertMacro {
+      """
+      extension DependencyValues {
+        @DependencyEntry("APIClientKey", liveValue: Client.live)
+        public var client = Client.test
+      }
+      """
+    } expansion: {
+      """
+      extension DependencyValues {
+        public var client {
+          get {
+            self[APIClientKey.self]
+          }
+          set {
+            self[APIClientKey.self] = newValue
+          }
+        }
+
+        public nonisolated enum APIClientKey: Dependencies.DependencyKey {
+          @DependenciesMacros._DependencyEntryDefaultValue static var liveValue = Client.live
+          @DependenciesMacros._DependencyEntryDefaultValue static var testValue = Client.test
+        }
+      }
+      """
+    }
+  }
+
+  func testPublicPropertyDerivesPublicKeyName() {
+    assertMacro {
+      """
+      extension DependencyValues {
+        @DependencyEntry(liveValue: Client.live)
+        public var client = Client.test
+      }
+      """
+    } expansion: {
+      """
+      extension DependencyValues {
+        public var client {
+          get {
+            self[ClientKey.self]
+          }
+          set {
+            self[ClientKey.self] = newValue
+          }
+        }
+
+        public nonisolated enum ClientKey: Dependencies.DependencyKey {
+          @DependenciesMacros._DependencyEntryDefaultValue static var liveValue = Client.live
+          @DependenciesMacros._DependencyEntryDefaultValue static var testValue = Client.test
+        }
+      }
+      """
+    }
+  }
 }

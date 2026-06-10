@@ -20,7 +20,7 @@ extension DependencyEntryMacro: AccessorMacro {
     else {
       return []
     }
-    let keyName: TokenSyntax = "__Key_\(identifier)"
+    let keyName = keyTypeName(for: node, property: property, identifier: identifier)
     return [
       """
       get { self[\(keyName).self] }
@@ -64,6 +64,7 @@ extension DependencyEntryMacro: PeerMacro {
       return []
     }
 
+    let accessLevel = keyAccessLevel(for: node, property: property)
     var liveValueExpr: ExprSyntax?
     var previewValueExpr: ExprSyntax?
     if let arguments = node.arguments?.as(LabeledExprListSyntax.self) {
@@ -96,7 +97,7 @@ extension DependencyEntryMacro: PeerMacro {
     }
 
     let conformance = liveValueExpr != nil ? "DependencyKey" : "TestDependencyKey"
-    let keyName: TokenSyntax = "__Key_\(identifier)"
+    let keyName = keyTypeName(for: node, property: property, identifier: identifier)
 
     var members: [String] = []
     if let typeAnnotation = binding.typeAnnotation?.type.trimmed {
@@ -125,12 +126,51 @@ extension DependencyEntryMacro: PeerMacro {
 
     let body = members.joined(separator: "\n")
     let keyDecl: DeclSyntax = """
-      private nonisolated enum \(keyName): Dependencies.\(raw: conformance) {
+      \(raw: accessLevel) nonisolated enum \(keyName): Dependencies.\(raw: conformance) {
       \(raw: body)
       }
       """
     return [keyDecl]
   }
+}
+
+private func keyTypeName(
+  for node: AttributeSyntax,
+  property: VariableDeclSyntax,
+  identifier: TokenSyntax
+) -> TokenSyntax {
+  if let customKeyName = customKeyName(from: node) {
+    return .identifier(customKeyName)
+  }
+  if property.isPublic {
+    return .identifier("\(identifier.trimmedDescription.dependencyEntryTrimmedBackticks.uppercasingFirst)Key")
+  }
+  return "__Key_\(identifier)"
+}
+
+private func keyAccessLevel(
+  for node: AttributeSyntax,
+  property: VariableDeclSyntax
+) -> String {
+  if customKeyName(from: node) != nil || property.isPublic {
+    return "public"
+  }
+  return "private"
+}
+
+private func customKeyName(from node: AttributeSyntax) -> String? {
+  guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else { return nil }
+  for argument in arguments where argument.label == nil {
+    guard
+      let literal = argument.expression.as(StringLiteralExprSyntax.self),
+      literal.segments.count == 1,
+      let segment = literal.segments.first?.as(StringSegmentSyntax.self)
+    else {
+      continue
+    }
+    return segment.content.text
+  }
+  return nil
 }
 
 private func isInDependencyValuesExtension(
@@ -169,5 +209,29 @@ extension DependencyEntryDefaultValueMacro: AccessorMacro {
       return []
     }
     return ["get { \(initializer) }"]
+  }
+}
+
+private extension VariableDeclSyntax {
+  var isPublic: Bool {
+    self.modifiers.contains { $0.name.tokenKind == .keyword(.public) }
+  }
+}
+
+private extension String {
+  var dependencyEntryTrimmedBackticks: String {
+    var result = self[...]
+    if result.first == "`" {
+      result = result.dropFirst()
+    }
+    if result.last == "`" {
+      result = result.dropLast()
+    }
+    return String(result)
+  }
+
+  var uppercasingFirst: String {
+    guard let first else { return self }
+    return first.uppercased() + dropFirst()
   }
 }

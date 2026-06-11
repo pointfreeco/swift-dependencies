@@ -143,10 +143,53 @@ private func keyTypeName(
   if let customKeyName = customKeyName(from: node) {
     return .identifier(customKeyName)
   }
+  if
+    let typeAnnotation = property.bindings.first?.typeAnnotation?.type,
+    let typeName = keyTypeName(from: typeAnnotation)
+  {
+    return .identifier("\(typeName)Key")
+  }
   if property.isPublic {
     return .identifier("\(identifier.trimmedDescription.dependencyEntryTrimmedBackticks.uppercasingFirst)Key")
   }
   return "__Key_\(identifier)"
+}
+
+private func keyTypeName(from type: TypeSyntax) -> String? {
+  switch type.as(TypeSyntaxEnum.self) {
+  case let .identifierType(type):
+    return type.name.text.dependencyEntryTrimmedBackticks
+  case let .memberType(type):
+    return type.name.text.dependencyEntryTrimmedBackticks
+  case let .someOrAnyType(type):
+    return keyTypeName(from: type.constraint)
+  case let .optionalType(type):
+    return keyTypeName(from: type.wrappedType)
+  case let .implicitlyUnwrappedOptionalType(type):
+    return keyTypeName(from: type.wrappedType)
+  case let .arrayType(type):
+    return keyTypeName(from: type.element)
+  case let .dictionaryType(type):
+    guard
+      let keyType = keyTypeName(from: type.key),
+      let valueType = keyTypeName(from: type.value)
+    else {
+      return nil
+    }
+    return "\(keyType)\(valueType)"
+  case let .tupleType(type):
+    let elements = type.elements.compactMap { keyTypeName(from: $0.type) }
+    return elements.isEmpty ? nil : elements.joined()
+  case let .compositionType(type):
+    let elements = type.elements.compactMap { keyTypeName(from: $0.type) }
+    return elements.isEmpty ? nil : elements.joined()
+  case let .attributedType(type):
+    return keyTypeName(from: type.baseType)
+  case let .metatypeType(type):
+    return keyTypeName(from: type.baseType)
+  default:
+    return nil
+  }
 }
 
 private func keyAccessLevel(

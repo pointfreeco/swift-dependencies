@@ -142,14 +142,14 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client: Client {
           get {
-            self[__Key_client.self]
+            self[ClientKey.self]
           }
           set {
-            self[__Key_client.self] = newValue
+            self[ClientKey.self] = newValue
           }
         }
 
-        private nonisolated enum __Key_client: Dependencies.DependencyKey {
+        private nonisolated enum ClientKey: Dependencies.DependencyKey {
           typealias Value = Client
           static var liveValue: Value {
             Client.live
@@ -235,14 +235,14 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client: Client {
           get {
-            self[__Key_client.self]
+            self[ClientKey.self]
           }
           set {
-            self[__Key_client.self] = newValue
+            self[ClientKey.self] = newValue
           }
         }
 
-        private nonisolated enum __Key_client: Dependencies.DependencyKey {
+        private nonisolated enum ClientKey: Dependencies.DependencyKey {
           typealias Value = Client
           static var liveValue: Value {
             Client.live
@@ -316,6 +316,68 @@ final class DependencyEntryMacroTests: BaseTestCase {
       """
       extension DependencyValues {
         @DependencyEntry("APIClientKey")
+        public var client: any APIClient = MockAPIClient()
+      }
+      """
+    } expansion: {
+      """
+      extension DependencyValues {
+        public var client: any APIClient {
+          get {
+            self[APIClientKey.self]
+          }
+          set {
+            self[APIClientKey.self] = newValue
+          }
+        }
+
+        public nonisolated enum APIClientKey: Dependencies.TestDependencyKey {
+          public typealias Value = any APIClient
+          public static var testValue: Value {
+            MockAPIClient()
+          }
+        }
+      }
+      """
+    }
+  }
+
+  func testPublicPropertyWithImplicitKeyNameAndTypeAnnotation() {
+    assertMacro {
+      """
+      extension DependencyValues {
+        @DependencyEntry
+        public var client: MockAPIClient = MockAPIClient()
+      }
+      """
+    } expansion: {
+      """
+      extension DependencyValues {
+        public var client: MockAPIClient {
+          get {
+            self[MockAPIClientKey.self]
+          }
+          set {
+            self[MockAPIClientKey.self] = newValue
+          }
+        }
+
+        public nonisolated enum MockAPIClientKey: Dependencies.TestDependencyKey {
+          public typealias Value = MockAPIClient
+          public static var testValue: Value {
+            MockAPIClient()
+          }
+        }
+      }
+      """
+    }
+  }
+
+  func testPublicPropertyWithImplicitKeyNameAndExistentialTypeAnnotation() {
+    assertMacro {
+      """
+      extension DependencyValues {
+        @DependencyEntry
         public var client: any APIClient = MockAPIClient()
       }
       """

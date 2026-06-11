@@ -42,7 +42,7 @@ struct TestDependencyEntries {
 
 
 extension DependencyValues {
-  @DependencyEntry("APIClientKey")
+  @DependencyEntry("ExplicitAPIClientKey")
   public var apiClientWithExplicitKeyName: any APIClient = MockAPIClient()
 
   @DependencyEntry

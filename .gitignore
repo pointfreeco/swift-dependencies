@@ -4,3 +4,4 @@
 /Packages
 /*.xcodeproj
 xcuserdata/
+.swift-version

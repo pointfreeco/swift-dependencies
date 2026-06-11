@@ -102,26 +102,26 @@ extension DependencyEntryMacro: PeerMacro {
 
     var members: [String] = []
     if let typeAnnotation = binding.typeAnnotation?.type.trimmed {
-      members.append("\(memberAccessLevel) typealias Value = \(typeAnnotation)")
+      members.append("\(memberAccessLevel)typealias Value = \(typeAnnotation)")
       if let liveValueExpr {
-        members.append("\(memberAccessLevel) static var liveValue: Value { \(liveValueExpr) }")
+        members.append("\(memberAccessLevel)static var liveValue: Value { \(liveValueExpr) }")
       }
       if let previewValueExpr {
-        members.append("\(memberAccessLevel) static var previewValue: Value { \(previewValueExpr) }")
+        members.append("\(memberAccessLevel)static var previewValue: Value { \(previewValueExpr) }")
       }
       if let testValueExpr {
-        members.append("\(memberAccessLevel) static var testValue: Value { \(testValueExpr) }")
+        members.append("\(memberAccessLevel)static var testValue: Value { \(testValueExpr) }")
       }
     } else {
       let attribute = "@DependenciesMacros._DependencyEntryDefaultValue"
       if let liveValueExpr {
-        members.append("\(attribute) \(memberAccessLevel) static var liveValue = \(liveValueExpr)")
+        members.append("\(attribute) \(memberAccessLevel)static var liveValue = \(liveValueExpr)")
       }
       if let previewValueExpr {
-        members.append("\(attribute) \(memberAccessLevel) static var previewValue = \(previewValueExpr)")
+        members.append("\(attribute) \(memberAccessLevel)static var previewValue = \(previewValueExpr)")
       }
       if let testValueExpr {
-        members.append("\(attribute) \(memberAccessLevel) static var testValue = \(testValueExpr)")
+        members.append("\(attribute) \(memberAccessLevel)static var testValue = \(testValueExpr)")
       }
     }
 
@@ -211,7 +211,7 @@ private func memberAccessLevel(
   else {
     return ""
   }
-  return "public"
+  return "public "
 }
 
 private func customKeyName(from node: AttributeSyntax) -> String? {

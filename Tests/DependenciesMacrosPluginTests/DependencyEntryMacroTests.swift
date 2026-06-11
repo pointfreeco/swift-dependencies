@@ -282,6 +282,34 @@ final class DependencyEntryMacroTests: BaseTestCase {
     }
   }
 
+  func testPackageKeyName() {
+    assertMacro {
+      """
+      extension DependencyValues {
+        @DependencyEntry
+        package var client = Client.test
+      }
+      """
+    } expansion: {
+      """
+      extension DependencyValues {
+        package var client {
+          get {
+            self[ClientKey.self]
+          }
+          set {
+            self[ClientKey.self] = newValue
+          }
+        }
+
+        package nonisolated enum ClientKey: Dependencies.TestDependencyKey {
+          @DependenciesMacros._DependencyEntryDefaultValue package static var testValue = Client.test
+        }
+      }
+      """
+    }
+  }
+
   func testPublicPropertyDerivesPublicKeyName() {
     assertMacro {
       """

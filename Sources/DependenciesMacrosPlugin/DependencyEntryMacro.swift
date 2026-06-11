@@ -142,7 +142,7 @@ private func keyTypeName(
   property: VariableDeclSyntax,
   identifier: TokenSyntax
 ) -> TokenSyntax {
-  guard property.isPublic
+  guard property.isPublicOrPackage
   else {
     return "__Key_\(identifier)"
   }
@@ -200,22 +200,24 @@ private func keyAccessLevel(
   for node: AttributeSyntax,
   property: VariableDeclSyntax
 ) -> String {
-  guard customKeyName(from: node) != nil || property.isPublic
+  guard customKeyName(from: node) != nil || property.isPublicOrPackage
   else {
     return "private"
   }
-  return "public"
+  return property.publicOrPackage ?? "private"
 }
 
 private func memberAccessLevel(
   for node: AttributeSyntax,
   property: VariableDeclSyntax
 ) -> String {
-  guard customKeyName(from: node) != nil || property.isPublic
+  guard let accessControl = property.publicOrPackage
   else {
-    return ""
+    guard customKeyName(from: node) != nil
+    else { return "" }
+    return "public "
   }
-  return "public "
+  return "\(accessControl) "
 }
 
 private func customKeyName(from node: AttributeSyntax) -> String? {
@@ -273,8 +275,18 @@ extension DependencyEntryDefaultValueMacro: AccessorMacro {
 }
 
 extension VariableDeclSyntax {
-  fileprivate var isPublic: Bool {
-    self.modifiers.contains { $0.name.tokenKind == .keyword(.public) }
+  fileprivate var isPublicOrPackage: Bool {
+    self.modifiers.contains {
+      $0.name.tokenKind == .keyword(.public)
+      || $0.name.tokenKind == .keyword(.package)
+    }
+  }
+  fileprivate var publicOrPackage: String? {
+    self.modifiers.first {
+      $0.name.tokenKind == .keyword(.public)
+      || $0.name.tokenKind == .keyword(.package)
+    }?.name.trimmedDescription
+
   }
 }
 

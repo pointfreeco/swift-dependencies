@@ -43,14 +43,25 @@ struct TestDependencyEntries {
 
 extension DependencyValues {
   @DependencyEntry("ExplicitAPIClientKey")
-  public var apiClientWithExplicitKeyName: any APIClient = MockAPIClient()
+  public var apiClientWithExplicitKeyName: any PublicAPIClient = PublicMockAPIClient()
 
   @DependencyEntry
-  public var apiClientWithImplicitKeyName = MockAPIClient()
+  public var apiClientWithImplicitKeyName = PublicMockAPIClient()
 
   @DependencyEntry
-  public var apiClientWithTypeSpecified: any APIClient = MockAPIClient()
+  public var apiClientWithTypeSpecified: any PublicAPIClient = PublicMockAPIClient()
+
+  @DependencyEntry("PackageExplicitAPIClientKey")
+  package var packageApiClientWithExplicitKeyName: any PackageAPIClient = PackageMockAPIClient()
+
+  @DependencyEntry
+  package var packageApiClientWithImplicitKeyName = PackageMockAPIClient()
+
+  @DependencyEntry
+  package var packageApiClientWithTypeSpecified: any PackageAPIClient = PackageMockAPIClient()
 }
 
-public protocol APIClient: Sendable {}
-public struct MockAPIClient: APIClient {}
+public protocol PublicAPIClient: Sendable {}
+public struct PublicMockAPIClient: PublicAPIClient {}
+package protocol PackageAPIClient: Sendable {}
+package struct PackageMockAPIClient: PackageAPIClient {}

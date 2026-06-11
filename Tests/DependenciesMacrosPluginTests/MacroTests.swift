@@ -1,4 +1,4 @@
-import Dependencies
+public import Dependencies
 import DependenciesMacros
 import IssueReporting
 
@@ -39,3 +39,18 @@ struct TestDependencyEntries {
   @Dependency(\.entryPreviewAndTestValue) fileprivate var entryPreviewAndTestValue
   @Dependency(\.entryWithTypeAnnotation) fileprivate var entryWithTypeAnnotation
 }
+
+
+extension DependencyValues {
+  @DependencyEntry("APIClientKey")
+  public var apiClientWithExplicitKeyName: any APIClient = MockAPIClient()
+
+  @DependencyEntry
+  public var apiClientWithImplicitKeyName = MockAPIClient()
+
+  @DependencyEntry
+  public var apiClientWithTypeSpecified: any APIClient = MockAPIClient()
+}
+
+public protocol APIClient: Sendable {}
+public struct MockAPIClient: APIClient {}

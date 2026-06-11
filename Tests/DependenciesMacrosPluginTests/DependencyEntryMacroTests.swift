@@ -274,8 +274,8 @@ final class DependencyEntryMacroTests: BaseTestCase {
         }
 
         public nonisolated enum APIClientKey: Dependencies.DependencyKey {
-          @DependenciesMacros._DependencyEntryDefaultValue static var liveValue = Client.live
-          @DependenciesMacros._DependencyEntryDefaultValue static var testValue = Client.test
+          @DependenciesMacros._DependencyEntryDefaultValue public static var liveValue = Client.live
+          @DependenciesMacros._DependencyEntryDefaultValue public static var testValue = Client.test
         }
       }
       """
@@ -303,8 +303,39 @@ final class DependencyEntryMacroTests: BaseTestCase {
         }
 
         public nonisolated enum ClientKey: Dependencies.DependencyKey {
-          @DependenciesMacros._DependencyEntryDefaultValue static var liveValue = Client.live
-          @DependenciesMacros._DependencyEntryDefaultValue static var testValue = Client.test
+          @DependenciesMacros._DependencyEntryDefaultValue public static var liveValue = Client.live
+          @DependenciesMacros._DependencyEntryDefaultValue public static var testValue = Client.test
+        }
+      }
+      """
+    }
+  }
+
+  func testPublicPropertyWithExplicitKeyNameAndTypeAnnotation() {
+    assertMacro {
+      """
+      extension DependencyValues {
+        @DependencyEntry("APIClientKey")
+        public var client: any APIClient = MockAPIClient()
+      }
+      """
+    } expansion: {
+      """
+      extension DependencyValues {
+        public var client: any APIClient {
+          get {
+            self[APIClientKey.self]
+          }
+          set {
+            self[APIClientKey.self] = newValue
+          }
+        }
+
+        public nonisolated enum APIClientKey: Dependencies.TestDependencyKey {
+          public typealias Value = any APIClient
+          public static var testValue: Value {
+            MockAPIClient()
+          }
         }
       }
       """

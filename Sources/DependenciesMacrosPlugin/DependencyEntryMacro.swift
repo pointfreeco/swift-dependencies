@@ -65,6 +65,7 @@ extension DependencyEntryMacro: PeerMacro {
     }
 
     let accessLevel = keyAccessLevel(for: node, property: property)
+    let memberAccessLevel = memberAccessLevel(for: node, property: property)
     var liveValueExpr: ExprSyntax?
     var previewValueExpr: ExprSyntax?
     if let arguments = node.arguments?.as(LabeledExprListSyntax.self) {
@@ -101,26 +102,26 @@ extension DependencyEntryMacro: PeerMacro {
 
     var members: [String] = []
     if let typeAnnotation = binding.typeAnnotation?.type.trimmed {
-      members.append("typealias Value = \(typeAnnotation)")
+      members.append("\(memberAccessLevel) typealias Value = \(typeAnnotation)")
       if let liveValueExpr {
-        members.append("static var liveValue: Value { \(liveValueExpr) }")
+        members.append("\(memberAccessLevel) static var liveValue: Value { \(liveValueExpr) }")
       }
       if let previewValueExpr {
-        members.append("static var previewValue: Value { \(previewValueExpr) }")
+        members.append("\(memberAccessLevel) static var previewValue: Value { \(previewValueExpr) }")
       }
       if let testValueExpr {
-        members.append("static var testValue: Value { \(testValueExpr) }")
+        members.append("\(memberAccessLevel) static var testValue: Value { \(testValueExpr) }")
       }
     } else {
       let attribute = "@DependenciesMacros._DependencyEntryDefaultValue"
       if let liveValueExpr {
-        members.append("\(attribute) static var liveValue = \(liveValueExpr)")
+        members.append("\(attribute) \(memberAccessLevel) static var liveValue = \(liveValueExpr)")
       }
       if let previewValueExpr {
-        members.append("\(attribute) static var previewValue = \(previewValueExpr)")
+        members.append("\(attribute) \(memberAccessLevel) static var previewValue = \(previewValueExpr)")
       }
       if let testValueExpr {
-        members.append("\(attribute) static var testValue = \(testValueExpr)")
+        members.append("\(attribute) \(memberAccessLevel) static var testValue = \(testValueExpr)")
       }
     }
 
@@ -152,10 +153,22 @@ private func keyAccessLevel(
   for node: AttributeSyntax,
   property: VariableDeclSyntax
 ) -> String {
-  if customKeyName(from: node) != nil || property.isPublic {
-    return "public"
+  guard customKeyName(from: node) != nil || property.isPublic
+  else {
+    return "private"
   }
-  return "private"
+  return "public"
+}
+
+private func memberAccessLevel(
+  for node: AttributeSyntax,
+  property: VariableDeclSyntax
+) -> String {
+  guard customKeyName(from: node) != nil || property.isPublic
+  else {
+    return ""
+  }
+  return "public"
 }
 
 private func customKeyName(from node: AttributeSyntax) -> String? {

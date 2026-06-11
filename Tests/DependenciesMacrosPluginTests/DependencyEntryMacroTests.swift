@@ -315,7 +315,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
     assertMacro {
       """
       extension DependencyValues {
-        @DependencyEntry("APIClientKey")
+        @DependencyEntry("ExplicitAPIClientKey")
         public var client: any APIClient = MockAPIClient()
       }
       """
@@ -324,14 +324,14 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         public var client: any APIClient {
           get {
-            self[APIClientKey.self]
+            self[ExplicitAPIClientKey.self]
           }
           set {
-            self[APIClientKey.self] = newValue
+            self[ExplicitAPIClientKey.self] = newValue
           }
         }
 
-        public nonisolated enum APIClientKey: Dependencies.TestDependencyKey {
+        public nonisolated enum ExplicitAPIClientKey: Dependencies.TestDependencyKey {
           public typealias Value = any APIClient
           public static var testValue: Value {
             MockAPIClient()

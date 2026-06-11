@@ -142,14 +142,14 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client: Client {
           get {
-            self[ClientKey.self]
+            self[__Key_client.self]
           }
           set {
-            self[ClientKey.self] = newValue
+            self[__Key_client.self] = newValue
           }
         }
 
-        private nonisolated enum ClientKey: Dependencies.DependencyKey {
+        private nonisolated enum __Key_client: Dependencies.DependencyKey {
           typealias Value = Client
           static var liveValue: Value {
             Client.live
@@ -235,14 +235,14 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client: Client {
           get {
-            self[ClientKey.self]
+            self[__Key_client.self]
           }
           set {
-            self[ClientKey.self] = newValue
+            self[__Key_client.self] = newValue
           }
         }
 
-        private nonisolated enum ClientKey: Dependencies.DependencyKey {
+        private nonisolated enum __Key_client: Dependencies.DependencyKey {
           typealias Value = Client
           static var liveValue: Value {
             Client.live

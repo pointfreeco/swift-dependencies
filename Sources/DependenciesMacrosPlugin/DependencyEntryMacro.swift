@@ -118,7 +118,9 @@ extension DependencyEntryMacro: PeerMacro {
         members.append("\(attribute) \(memberAccessLevel)static var liveValue = \(liveValueExpr)")
       }
       if let previewValueExpr {
-        members.append("\(attribute) \(memberAccessLevel)static var previewValue = \(previewValueExpr)")
+        members.append(
+          "\(attribute) \(memberAccessLevel)static var previewValue = \(previewValueExpr)"
+        )
       }
       if let testValueExpr {
         members.append("\(attribute) \(memberAccessLevel)static var testValue = \(testValueExpr)")
@@ -140,36 +142,38 @@ private func keyTypeName(
   property: VariableDeclSyntax,
   identifier: TokenSyntax
 ) -> TokenSyntax {
+  guard property.isPublic
+  else {
+    return "__Key_\(identifier)"
+  }
   if let customKeyName = customKeyName(from: node) {
     return .identifier(customKeyName)
   }
-  if
-    let typeAnnotation = property.bindings.first?.typeAnnotation?.type,
+  if let typeAnnotation = property.bindings.first?.typeAnnotation?.type,
     let typeName = keyTypeName(from: typeAnnotation)
   {
     return .identifier("\(typeName)Key")
   }
-  if property.isPublic {
-    return .identifier("\(identifier.trimmedDescription.dependencyEntryTrimmedBackticks.uppercasingFirst)Key")
-  }
-  return "__Key_\(identifier)"
+  return .identifier(
+    "\(identifier.trimmedDescription.dependencyEntryTrimmedBackticks.uppercasingFirst)Key"
+  )
 }
 
 private func keyTypeName(from type: TypeSyntax) -> String? {
   switch type.as(TypeSyntaxEnum.self) {
-  case let .identifierType(type):
+  case .identifierType(let type):
     return type.name.text.dependencyEntryTrimmedBackticks
-  case let .memberType(type):
+  case .memberType(let type):
     return type.name.text.dependencyEntryTrimmedBackticks
-  case let .someOrAnyType(type):
+  case .someOrAnyType(let type):
     return keyTypeName(from: type.constraint)
-  case let .optionalType(type):
+  case .optionalType(let type):
     return keyTypeName(from: type.wrappedType)
-  case let .implicitlyUnwrappedOptionalType(type):
+  case .implicitlyUnwrappedOptionalType(let type):
     return keyTypeName(from: type.wrappedType)
-  case let .arrayType(type):
+  case .arrayType(let type):
     return keyTypeName(from: type.element)
-  case let .dictionaryType(type):
+  case .dictionaryType(let type):
     guard
       let keyType = keyTypeName(from: type.key),
       let valueType = keyTypeName(from: type.value)
@@ -177,15 +181,15 @@ private func keyTypeName(from type: TypeSyntax) -> String? {
       return nil
     }
     return "\(keyType)\(valueType)"
-  case let .tupleType(type):
+  case .tupleType(let type):
     let elements = type.elements.compactMap { keyTypeName(from: $0.type) }
     return elements.isEmpty ? nil : elements.joined()
-  case let .compositionType(type):
+  case .compositionType(let type):
     let elements = type.elements.compactMap { keyTypeName(from: $0.type) }
     return elements.isEmpty ? nil : elements.joined()
-  case let .attributedType(type):
+  case .attributedType(let type):
     return keyTypeName(from: type.baseType)
-  case let .metatypeType(type):
+  case .metatypeType(let type):
     return keyTypeName(from: type.baseType)
   default:
     return nil
@@ -268,14 +272,14 @@ extension DependencyEntryDefaultValueMacro: AccessorMacro {
   }
 }
 
-private extension VariableDeclSyntax {
-  var isPublic: Bool {
+extension VariableDeclSyntax {
+  fileprivate var isPublic: Bool {
     self.modifiers.contains { $0.name.tokenKind == .keyword(.public) }
   }
 }
 
-private extension String {
-  var dependencyEntryTrimmedBackticks: String {
+extension String {
+  fileprivate var dependencyEntryTrimmedBackticks: String {
     var result = self[...]
     if result.first == "`" {
       result = result.dropFirst()
@@ -286,7 +290,7 @@ private extension String {
     return String(result)
   }
 
-  var uppercasingFirst: String {
+  fileprivate var uppercasingFirst: String {
     guard let first else { return self }
     return first.uppercased() + dropFirst()
   }

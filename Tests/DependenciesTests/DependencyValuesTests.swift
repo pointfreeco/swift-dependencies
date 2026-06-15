@@ -870,6 +870,21 @@ final class DependencyValuesTests: XCTestCase {
     }
   #endif
 
+  #if DEBUG && !os(Linux) && !os(WASI) && !os(Windows)
+    func testPrepareDependencies_PreviewDependencyAccessBeforePrepare() {
+      withDependencies {
+        $0.context = .preview
+      } operation: {
+        @Dependency(\.date) var date
+        _ = date()
+        prepareDependencies {
+          $0.date = DateGenerator { Date(timeIntervalSinceReferenceDate: 42) }
+        }
+        XCTAssertEqual(date(), Date(timeIntervalSinceReferenceDate: 42))
+      }
+    }
+  #endif
+
   func testPrepareDependencies_setDependencyEndpoint() {
     prepareDependencies {
       $0[ClientWithEndpoint.self].get = { @Sendable in 42 }

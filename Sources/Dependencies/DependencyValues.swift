@@ -301,7 +301,14 @@ public struct DependencyValues: Sendable {
         let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
         guard !cachedValues.cached.keys.contains(cacheKey) else {
           if cachedValues.cached[cacheKey]?.preparationID != DependencyValues.preparationID {
-            if context != .preview {
+            if context == .preview {
+              if cachedValues.cached[cacheKey]?.preparationID == nil {
+                cachedValues.cached[cacheKey] = CachedValues.CachedValue(
+                  base: newValue,
+                  preparationID: DependencyValues.preparationID
+                )
+              }
+            } else {
               #if DEBUG
                 reportIssue(
                   {

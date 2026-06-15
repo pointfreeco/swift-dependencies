@@ -295,88 +295,79 @@ public struct DependencyValues: Sendable {
       return dependency
     }
     set {
-      if DependencyValues.isPreparing {
-        cachedValues.lock.lock()
-        defer { cachedValues.lock.unlock() }
-        let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
-        guard !cachedValues.cached.keys.contains(cacheKey) else {
-          if cachedValues.cached[cacheKey]?.preparationID != DependencyValues.preparationID {
-            if context == .preview {
-              if cachedValues.cached[cacheKey]?.preparationID == nil {
-                cachedValues.cached[cacheKey] = CachedValues.CachedValue(
-                  base: newValue,
-                  preparationID: DependencyValues.preparationID
-                )
-              }
-            } else {
-              #if DEBUG
-                reportIssue(
-                  {
-                    var dependencyDescription = ""
-                    if let fileID = DependencyValues.currentDependency.fileID,
-                      let line = DependencyValues.currentDependency.line
-                    {
-                      dependencyDescription.append(
-                        """
-                          Location:
-                            \(fileID):\(line)
-
-                        """
-                      )
-                    }
-                    dependencyDescription.append(
-                      Key.self == Key.Value.self
-                        ? """
-                          Dependency:
-                            \(typeName(Key.Value.self))
-                        """
-                        : """
-                          Key:
-                            \(typeName(Key.self))
-                          Value:
-                            \(typeName(Key.Value.self))
-                        """
-                    )
-                    var argument: String {
-                      "\(function)" == "subscript(key:)"
-                        ? "\(typeName(Key.self)).self"
-                        : "\\.\(function)"
-                    }
-                    return """
-                      @Dependency(\(argument)) has already been accessed or prepared.
-
-                      \(dependencyDescription)
-
-                      A global dependency can only be prepared a single time and cannot be \
-                      accessed beforehand. Prepare dependencies as early as possible in the \
-                      lifecycle of your application.
-
-                      To temporarily override a dependency in your application, use \
-                      'withDependencies' to do so in a well-defined scope.
-                      """
-                  }(),
-                  fileID: DependencyValues.currentDependency.fileID ?? fileID,
-                  filePath: DependencyValues.currentDependency.filePath ?? filePath,
-                  line: DependencyValues.currentDependency.line ?? line,
-                  column: DependencyValues.currentDependency.column ?? column
-                )
-              #endif
-            }
-          } else {
-            cachedValues.cached[cacheKey] = CachedValues.CachedValue(
-              base: newValue,
-              preparationID: DependencyValues.preparationID
-            )
-          }
-          return
-        }
-        cachedValues.cached[cacheKey] = CachedValues.CachedValue(
-          base: newValue,
-          preparationID: DependencyValues.preparationID
-        )
-      } else {
+      guard DependencyValues.isPreparing else {
         self.storage[ObjectIdentifier(key)] = newValue
+        return
       }
+      cachedValues.lock.lock()
+      defer { cachedValues.lock.unlock() }
+      let cacheKey = CachedValues.CacheKey(id: TypeIdentifier(key), context: context)
+      let existingValue = cachedValues.cached[cacheKey]
+      guard
+        existingValue == nil
+          || existingValue?.preparationID == DependencyValues.preparationID
+          || (context == .preview && existingValue?.preparationID == nil)
+      else {
+        if context != .preview {
+          #if DEBUG
+            reportIssue(
+              {
+                var dependencyDescription = ""
+                if let fileID = DependencyValues.currentDependency.fileID,
+                  let line = DependencyValues.currentDependency.line
+                {
+                  dependencyDescription.append(
+                    """
+                      Location:
+                        \(fileID):\(line)
+
+                    """
+                  )
+                }
+                dependencyDescription.append(
+                  Key.self == Key.Value.self
+                    ? """
+                      Dependency:
+                        \(typeName(Key.Value.self))
+                    """
+                    : """
+                      Key:
+                        \(typeName(Key.self))
+                      Value:
+                        \(typeName(Key.Value.self))
+                    """
+                )
+                var argument: String {
+                  "\(function)" == "subscript(key:)"
+                    ? "\(typeName(Key.self)).self"
+                    : "\\.\(function)"
+                }
+                return """
+                  @Dependency(\(argument)) has already been accessed or prepared.
+
+                  \(dependencyDescription)
+
+                  A global dependency can only be prepared a single time and cannot be \
+                  accessed beforehand. Prepare dependencies as early as possible in the \
+                  lifecycle of your application.
+
+                  To temporarily override a dependency in your application, use \
+                  'withDependencies' to do so in a well-defined scope.
+                  """
+              }(),
+              fileID: DependencyValues.currentDependency.fileID ?? fileID,
+              filePath: DependencyValues.currentDependency.filePath ?? filePath,
+              line: DependencyValues.currentDependency.line ?? line,
+              column: DependencyValues.currentDependency.column ?? column
+            )
+          #endif
+        }
+        return
+      }
+      cachedValues.cached[cacheKey] = CachedValues.CachedValue(
+        base: newValue,
+        preparationID: DependencyValues.preparationID
+      )
     }
   }
 

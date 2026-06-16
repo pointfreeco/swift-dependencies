@@ -257,7 +257,7 @@ public struct Dependency<Value>: _HasInitialValues {
         \.dependencies[
           key: HashableType<V>(fileID: fileID, filePath: filePath, line: line, column: column)
         ],
-         value
+        value
       )
     }
   }

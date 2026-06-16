@@ -28,6 +28,9 @@ extension DependencyEntryMacro: AccessorMacro {
       """
       set { self[\(keyName).self] = newValue }
       """,
+      """
+      _modify { yield &self[\(keyName).self] }
+      """,
     ]
   }
 }
@@ -278,13 +281,13 @@ extension VariableDeclSyntax {
   fileprivate var isPublicOrPackage: Bool {
     self.modifiers.contains {
       $0.name.tokenKind == .keyword(.public)
-      || $0.name.tokenKind == .keyword(.package)
+        || $0.name.tokenKind == .keyword(.package)
     }
   }
   fileprivate var publicOrPackage: String? {
     self.modifiers.first {
       $0.name.tokenKind == .keyword(.public)
-      || $0.name.tokenKind == .keyword(.package)
+        || $0.name.tokenKind == .keyword(.package)
     }?.name.trimmedDescription
 
   }

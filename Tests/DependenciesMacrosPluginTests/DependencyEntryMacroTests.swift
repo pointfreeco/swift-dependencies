@@ -31,6 +31,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           set {
             self[__Key_client.self] = newValue
           }
+          _modify {
+            yield &self[__Key_client.self]
+          }
         }
 
         private nonisolated enum __Key_client: Dependencies.DependencyKey {
@@ -59,6 +62,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
           set {
             self[__Key_client.self] = newValue
+          }
+          _modify {
+            yield &self[__Key_client.self]
           }
         }
 
@@ -90,6 +96,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           set {
             self[__Key_client.self] = newValue
           }
+          _modify {
+            yield &self[__Key_client.self]
+          }
         }
 
         private nonisolated enum __Key_client: Dependencies.TestDependencyKey {
@@ -119,6 +128,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           set {
             self[__Key_client.self] = newValue
           }
+          _modify {
+            yield &self[__Key_client.self]
+          }
         }
 
         private nonisolated enum __Key_client: Dependencies.TestDependencyKey {
@@ -146,6 +158,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
           set {
             self[__Key_client.self] = newValue
+          }
+          _modify {
+            yield &self[__Key_client.self]
           }
         }
 
@@ -240,6 +255,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           set {
             self[__Key_client.self] = newValue
           }
+          _modify {
+            yield &self[__Key_client.self]
+          }
         }
 
         private nonisolated enum __Key_client: Dependencies.DependencyKey {
@@ -271,6 +289,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           set {
             self[APIClientKey.self] = newValue
           }
+          _modify {
+            yield &self[APIClientKey.self]
+          }
         }
 
         public nonisolated enum APIClientKey: Dependencies.DependencyKey {
@@ -300,6 +321,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           set {
             self[ClientKey.self] = newValue
           }
+          _modify {
+            yield &self[ClientKey.self]
+          }
         }
 
         package nonisolated enum ClientKey: Dependencies.TestDependencyKey {
@@ -327,6 +351,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
           set {
             self[ClientKey.self] = newValue
+          }
+          _modify {
+            yield &self[ClientKey.self]
           }
         }
 
@@ -356,6 +383,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
           set {
             self[ExplicitAPIClientKey.self] = newValue
+          }
+          _modify {
+            yield &self[ExplicitAPIClientKey.self]
           }
         }
 
@@ -388,6 +418,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           set {
             self[MockAPIClientKey.self] = newValue
           }
+          _modify {
+            yield &self[MockAPIClientKey.self]
+          }
         }
 
         public nonisolated enum MockAPIClientKey: Dependencies.TestDependencyKey {
@@ -418,6 +451,9 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
           set {
             self[APIClientKey.self] = newValue
+          }
+          _modify {
+            yield &self[APIClientKey.self]
           }
         }
 

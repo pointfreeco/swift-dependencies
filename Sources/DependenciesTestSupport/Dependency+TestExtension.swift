@@ -130,7 +130,7 @@ extension DependencyValues {
         """
         Could not cast '\(type(of: existential as Any))' to '\(Concrete.self)'. Make sure to \
         override the dependency in your test or suite traits:
-        
+
           @Suite(
             .dependencies {
               $0.\(propertyDescription) = \(Concrete.self)(/* ... */)

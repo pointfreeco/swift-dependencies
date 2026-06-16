@@ -31,8 +31,8 @@ let package = Package(
     "Foundation",
     "FoundationNetworking",
     .default(enabledTraits: [
-      "Clocks", "CombineSchedulers", "Foundation", "FoundationNetworking"
-    ])
+      "Clocks", "CombineSchedulers", "Foundation", "FoundationNetworking",
+    ]),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.2"),

@@ -150,7 +150,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       var attributes: [String] =
         binding.typeAnnotation.flatMap {
           $0.type.as(AttributedTypeSyntax.self)?.attributes.compactMap {
-            guard case let .attribute(attribute) = $0 else { return nil }
+            guard case .attribute(let attribute) = $0 else { return nil }
             return attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
           }
         }
@@ -264,7 +264,7 @@ extension VariableDeclSyntax {
   ) -> VariableDeclSyntax {
     var attributes = self.attributes
     for index in attributes.indices.reversed() {
-      if case let .attribute(attribute) = attributes[index],
+      if case .attribute(let attribute) = attributes[index],
         attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "DependencyEndpoint"
       {
         attributes.remove(at: index)

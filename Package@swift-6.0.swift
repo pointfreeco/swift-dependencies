@@ -52,6 +52,7 @@ let package = Package(
         .define("Clocks"),
         .define("CombineSchedulers"),
         .define("Foundation"),
+        .define("FoundationNetworking"),
       ]
     ),
     .target(

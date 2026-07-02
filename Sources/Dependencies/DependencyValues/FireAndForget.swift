@@ -67,14 +67,23 @@ public struct FireAndForget: Sendable {
 
 private enum FireAndForgetKey: DependencyKey {
   public static let liveValue = FireAndForget { name, priority, operation in
-    _ = Task(name: name, priority: priority) { try await operation() }
+    #if compiler(>=6.2)
+      _ = Task(name: name, priority: priority) { try await operation() }
+    #else
+      _ = Task(priority: priority) { try await operation() }
+    #endif
   }
   public static let testValue = FireAndForget { name, priority, operation in
-    await Task(name: name, priority: priority) {
-      await withErrorReporting {
-        try await operation()
+    #if compiler(>=6.2)
+      await Task(name: name, priority: priority) {
+        await withErrorReporting { try await operation() }
       }
-    }
-    .value
+      .value
+    #else
+      await Task(priority: priority) {
+        await withErrorReporting { try await operation() }
+      }
+      .value
+    #endif
   }
 }

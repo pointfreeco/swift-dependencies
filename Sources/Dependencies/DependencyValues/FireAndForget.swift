@@ -1,3 +1,5 @@
+import IssueReporting
+
 extension DependencyValues {
   /// A dependency for firing off an unstructured task.
   ///
@@ -54,21 +56,36 @@ extension DependencyValues {
 /// See ``DependencyValues/fireAndForget`` for more information.
 public struct FireAndForget: Sendable {
   public let operation:
-    @Sendable (TaskPriority?, @Sendable @escaping () async throws -> Void) async -> Void
+    @Sendable (String?, TaskPriority?, @Sendable @escaping () async throws -> Void) async -> Void
 
   public func callAsFunction(
+    name: String? = nil,
     priority: TaskPriority? = nil,
     @_inheritActorContext _ operation: @Sendable @escaping () async throws -> Void
   ) async {
-    await self.operation(priority) { try await operation() }
+    await self.operation(name, priority) { try await operation() }
   }
 }
 
 private enum FireAndForgetKey: DependencyKey {
-  public static let liveValue = FireAndForget { priority, operation in
-    _ = Task(priority: priority) { try await operation() }
+  public static let liveValue = FireAndForget { name, priority, operation in
+    #if compiler(>=6.2)
+      _ = Task(name: name, priority: priority) { try await operation() }
+    #else
+      _ = Task(priority: priority) { try await operation() }
+    #endif
   }
-  public static let testValue = FireAndForget { priority, operation in
-    await Task(priority: priority) { try? await operation() }.value
+  public static let testValue = FireAndForget { name, priority, operation in
+    #if compiler(>=6.2)
+      await Task(name: name, priority: priority) {
+        await withErrorReporting { try await operation() }
+      }
+      .value
+    #else
+      await Task(priority: priority) {
+        await withErrorReporting { try await operation() }
+      }
+      .value
+    #endif
   }
 }

@@ -7,5 +7,4 @@
   #endif
   @_exported import ConcurrencyExtras
   @_exported import IssueReporting
-  @_exported import XCTestDynamicOverlay
 #endif

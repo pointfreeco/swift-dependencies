@@ -272,6 +272,38 @@ public macro _DependencyEntryDefaultValue() =
     type: "DependencyEntryDefaultValueMacro"
   )
 
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck(_: () -> Void) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck(_: @MainActor () -> Void) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryMainActorIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck<Root, Value: Sendable>(keyPath: KeyPath<Root, Value>) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck<Root, Value>(keyPath: KeyPath<Root, Value>) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntrySendableCheckMacro"
+  )
+
 /// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
 public struct Unimplemented: Error {
   let endpoint: String

@@ -304,6 +304,28 @@ public macro IsolationCheck<Root, Value>(keyPath: KeyPath<Root, Value>) =
     type: "DependencyEntrySendableCheckMacro"
   )
 
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro TypeCheck<Root, Value>(
+  _: KeyPath<Root, Value>,
+  liveValue: @autoclosure @MainActor () -> Value
+) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro TypeCheck<Root, Value>(
+  _: KeyPath<Root, Value>,
+  previewValue: @autoclosure @MainActor () -> Value
+) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
 /// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
 public struct Unimplemented: Error {
   let endpoint: String

@@ -30,6 +30,8 @@ final class DependencyEntryMacroTests: BaseTestCase {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
+            #sourceLocation(file: "Test.swift", line: 2)
+            #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
             return self[__Key_client.self]
           }
@@ -73,6 +75,10 @@ final class DependencyEntryMacroTests: BaseTestCase {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
+            #sourceLocation(file: "Test.swift", line: 2)
+            #TypeCheck(\DependencyValues.client, liveValue: Client.live)
+            #sourceLocation(file: "Test.swift", line: 2)
+            #TypeCheck(\DependencyValues.client, previewValue: Client.preview)
             #sourceLocation()
             return self[__Key_client.self]
           }
@@ -117,6 +123,8 @@ final class DependencyEntryMacroTests: BaseTestCase {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
+            #sourceLocation(file: "Test.swift", line: 2)
+            #TypeCheck(\DependencyValues.client, previewValue: Client.preview)
             #sourceLocation()
             return self[__Key_client.self]
           }
@@ -202,6 +210,8 @@ final class DependencyEntryMacroTests: BaseTestCase {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
+            #sourceLocation(file: "Test.swift", line: 2)
+            #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
             return self[__Key_client.self]
           }
@@ -309,6 +319,8 @@ final class DependencyEntryMacroTests: BaseTestCase {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
+            #sourceLocation(file: "Test.swift", line: 2)
+            #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
             return self[__Key_client.self]
           }
@@ -354,6 +366,8 @@ final class DependencyEntryMacroTests: BaseTestCase {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
+            #sourceLocation(file: "Test.swift", line: 2)
+            #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
             return self[APIClientKey.self]
           }
@@ -439,6 +453,8 @@ final class DependencyEntryMacroTests: BaseTestCase {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
+            #sourceLocation(file: "Test.swift", line: 2)
+            #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
             return self[ClientKey.self]
           }

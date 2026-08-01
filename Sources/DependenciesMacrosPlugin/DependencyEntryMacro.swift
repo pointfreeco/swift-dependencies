@@ -24,7 +24,7 @@ extension DependencyEntryMacro: AccessorMacro {
     return [
       """
       get {
-        \(isolationCheck(for: node, in: context))
+        \(entryChecks(for: node, identifier: identifier, in: context))
         return self[\(keyName).self]
       }
       """,
@@ -263,22 +263,61 @@ private func isInDependencyValuesExtension(
 
 private let isolationProbeName = "__dependencyEntryIsolationProbe"
 
-private func isolationCheck(
+private func entryValueArguments(
+  from node: AttributeSyntax
+) -> (liveValue: ExprSyntax?, previewValue: ExprSyntax?) {
+  var liveValueExpr: ExprSyntax?
+  var previewValueExpr: ExprSyntax?
+  if let arguments = node.arguments?.as(LabeledExprListSyntax.self) {
+    for argument in arguments {
+      switch argument.label?.text {
+      case "liveValue":
+        liveValueExpr = argument.expression
+      case "previewValue":
+        previewValueExpr = argument.expression
+      default:
+        break
+      }
+    }
+  }
+  return (liveValueExpr, previewValueExpr)
+}
+
+private func extendedType(in context: some MacroExpansionContext) -> TypeSyntax? {
+  context.lexicalContext.first?.as(ExtensionDeclSyntax.self)?.extendedType.trimmed
+}
+
+private func entryChecks(
   for node: AttributeSyntax,
+  identifier: TokenSyntax,
   in context: some MacroExpansionContext
 ) -> CodeBlockItemListSyntax {
+  var checks = ["#IsolationCheck(\(isolationProbeName))"]
+  if let extendedType = extendedType(in: context) {
+    let (liveValueExpr, previewValueExpr) = entryValueArguments(from: node)
+    if let liveValueExpr {
+      checks.append(
+        "#TypeCheck(\\\(extendedType).\(identifier), liveValue: \(liveValueExpr.trimmed))"
+      )
+    }
+    if let previewValueExpr {
+      checks.append(
+        "#TypeCheck(\\\(extendedType).\(identifier), previewValue: \(previewValueExpr.trimmed))"
+      )
+    }
+  }
   guard
     let location = context.location(of: node, at: .afterLeadingTrivia, filePathMode: .filePath)
   else {
     return """
       func \(raw: isolationProbeName)() {}
-      #IsolationCheck(\(raw: isolationProbeName))
+      \(raw: checks.joined(separator: "\n"))
       """
   }
+  let directive = "#sourceLocation(file: \(location.file), line: \(location.line))"
   return """
     func \(raw: isolationProbeName)() {}
-    #sourceLocation(file: \(location.file), line: \(location.line))
-    #IsolationCheck(\(raw: isolationProbeName))
+    \(raw: checks.map { "\(directive)\n\($0)" }.joined(separator: "\n"))
     #sourceLocation()
     """
 }
@@ -288,9 +327,7 @@ private func sendableCheck(
   identifier: TokenSyntax,
   in context: some MacroExpansionContext
 ) -> [DeclSyntax] {
-  guard
-    let extendedType = context.lexicalContext.first?.as(ExtensionDeclSyntax.self)?
-      .extendedType.trimmed
+  guard let extendedType = extendedType(in: context)
   else {
     return []
   }

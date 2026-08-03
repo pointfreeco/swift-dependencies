@@ -231,17 +231,43 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     guard hasEndpoints else { return [] }
     let access = accesses.min().flatMap { $0.token?.with(\.trailingTrivia, .space) }
     // TODO: Don't define initializers if any single endpoint is invalid
-    return [properties, properties.filter { !$0.isEndpoint }].map {
-      $0.isEmpty
-        ? "\(access)init() {}"
+    return [(properties, isolationCheck(for: node, in: context)), (properties.filter { !$0.isEndpoint }, "")].map {
+      (properties, check) in
+      properties.isEmpty
+        ? """
+        \(access)init() {\(raw: check)}
+        """
         : """
         \(access)init(
-        \(raw: $0.map { $0.declaration.bindings.trimmedDescription }.joined(separator: ",\n"))
-        ) {
-        \(raw: $0.map { "self.\($0.identifier) = \($0.identifier)" }.joined(separator: "\n"))
+        \(raw: properties.map { $0.declaration.bindings.trimmedDescription }.joined(separator: ",\n"))
+        ) {\(raw: check)
+        \(raw: properties.map { "self.\($0.identifier) = \($0.identifier)" }.joined(separator: "\n"))
         }
         """
     }
+  }
+
+  private static func isolationCheck(
+    for node: AttributeSyntax,
+    in context: some MacroExpansionContext
+  ) -> String {
+    let probeName = "__dependencyClientIsolationProbe"
+    guard
+      let location = context.location(of: node, at: .afterLeadingTrivia, filePathMode: .filePath)
+    else {
+      return """
+
+        func \(probeName)() {}
+        #IsolationCheck(client: \(probeName))
+        """
+    }
+    return """
+
+      func \(probeName)() {}
+      #sourceLocation(file: \(location.file), line: \(location.line))
+      #IsolationCheck(client: \(probeName))
+      #sourceLocation()
+      """
   }
 }
 

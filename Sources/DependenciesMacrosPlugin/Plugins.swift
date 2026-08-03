@@ -12,5 +12,6 @@ struct MacrosPlugin: CompilerPlugin {
     DependencyEntryIsolationCheckMacro.self,
     DependencyEntryMainActorIsolationCheckMacro.self,
     DependencyEntrySendableCheckMacro.self,
+    DependencyClientMainActorCheckMacro.self,
   ]
 }

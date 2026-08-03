@@ -376,6 +376,25 @@ extension DependencyEntryMainActorIsolationCheckMacro: DeclarationMacro {
   }
 }
 
+public enum DependencyClientMainActorCheckMacro {}
+
+extension DependencyClientMainActorCheckMacro: DeclarationMacro {
+  public static func expansion(
+    of node: some FreestandingMacroExpansionSyntax,
+    in context: some MacroExpansionContext
+  ) throws -> [DeclSyntax] {
+    context.diagnose(
+      Diagnostic(
+        node: node,
+        message: MacroExpansionErrorMessage(
+          "client must be 'nonisolated struct' when default isolation is '@MainActor'"
+        )
+      )
+    )
+    return []
+  }
+}
+
 public enum DependencyEntrySendableCheckMacro {}
 
 extension DependencyEntrySendableCheckMacro: DeclarationMacro {

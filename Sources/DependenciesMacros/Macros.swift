@@ -306,6 +306,22 @@ public macro IsolationCheck<Root, Value>(keyPath: KeyPath<Root, Value>) =
 
 @_documentation(visibility: private)
 @freestanding(declaration)
+public macro IsolationCheck(client: () -> Void) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck(client: @MainActor () -> Void) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyClientMainActorCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
 public macro TypeCheck<Root, Value>(
   _: KeyPath<Root, Value>,
   liveValue: @autoclosure @MainActor () -> Value

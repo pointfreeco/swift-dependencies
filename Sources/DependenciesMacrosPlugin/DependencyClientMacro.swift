@@ -257,16 +257,20 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
     else {
       return """
 
+        #if DEBUG
         func \(probeName)() {}
         #IsolationCheck(client: \(probeName))
+        #endif
         """
     }
     return """
 
+      #if DEBUG
       func \(probeName)() {}
       #sourceLocation(file: \(location.file), line: \(location.line))
       #IsolationCheck(client: \(probeName))
       #sourceLocation()
+      #endif
       """
   }
 }

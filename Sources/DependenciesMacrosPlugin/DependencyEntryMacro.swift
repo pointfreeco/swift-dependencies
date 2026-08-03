@@ -310,15 +310,19 @@ private func entryChecks(
     let location = context.location(of: node, at: .afterLeadingTrivia, filePathMode: .filePath)
   else {
     return """
+      #if DEBUG
       func \(raw: isolationProbeName)() {}
       \(raw: checks.joined(separator: "\n"))
+      #endif
       """
   }
   let directive = "#sourceLocation(file: \(location.file), line: \(location.line))"
   return """
+    #if DEBUG
     func \(raw: isolationProbeName)() {}
     \(raw: checks.map { "\(directive)\n\($0)" }.joined(separator: "\n"))
     #sourceLocation()
+    #endif
     """
 }
 
@@ -331,18 +335,26 @@ private func sendableCheck(
   else {
     return []
   }
-  let check: DeclSyntax = "#IsolationCheck(keyPath: \\\(extendedType).\(identifier))"
+  let check = "#IsolationCheck(keyPath: \\\(extendedType).\(identifier))"
   guard
-    let location = context.location(of: node, at: .afterLeadingTrivia, filePathMode: .filePath),
-    let line = location.line.as(IntegerLiteralExprSyntax.self),
-    let lineValue = Int(line.literal.text)
+    let location = context.location(of: node, at: .afterLeadingTrivia, filePathMode: .filePath)
   else {
-    return [check]
+    return [
+      """
+      #if DEBUG
+      \(raw: check)
+      #endif
+      """
+    ]
   }
   return [
-    "#sourceLocation(file: \(location.file), line: \(raw: lineValue - 1))",
-    check,
-    "#sourceLocation()",
+    """
+    #if DEBUG
+    #sourceLocation(file: \(location.file), line: \(location.line))
+    \(raw: check)
+    #sourceLocation()
+    #endif
+    """
   ]
 }
 

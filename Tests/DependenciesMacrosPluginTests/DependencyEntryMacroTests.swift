@@ -26,6 +26,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
@@ -33,6 +34,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
             #sourceLocation(file: "Test.swift", line: 2)
             #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
+            #endif
             return self[__Key_client.self]
           }
           set {
@@ -43,11 +45,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         private nonisolated enum __Key_client: Dependencies.DependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue static var liveValue = Client.live
@@ -71,6 +73,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
@@ -80,6 +83,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
             #sourceLocation(file: "Test.swift", line: 2)
             #TypeCheck(\DependencyValues.client, previewValue: Client.preview)
             #sourceLocation()
+            #endif
             return self[__Key_client.self]
           }
           set {
@@ -90,11 +94,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         private nonisolated enum __Key_client: Dependencies.DependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue static var liveValue = Client.live
@@ -119,6 +123,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
@@ -126,6 +131,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
             #sourceLocation(file: "Test.swift", line: 2)
             #TypeCheck(\DependencyValues.client, previewValue: Client.preview)
             #sourceLocation()
+            #endif
             return self[__Key_client.self]
           }
           set {
@@ -136,11 +142,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         private nonisolated enum __Key_client: Dependencies.TestDependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue static var previewValue = Client.preview
@@ -164,11 +170,13 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
             #sourceLocation()
+            #endif
             return self[__Key_client.self]
           }
           set {
@@ -179,11 +187,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         private nonisolated enum __Key_client: Dependencies.TestDependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue static var testValue = Client.test
@@ -206,6 +214,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client: Client {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
@@ -213,6 +222,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
             #sourceLocation(file: "Test.swift", line: 2)
             #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
+            #endif
             return self[__Key_client.self]
           }
           set {
@@ -223,11 +233,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         private nonisolated enum __Key_client: Dependencies.DependencyKey {
           typealias Value = Client
@@ -315,6 +325,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         var client: Client {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
@@ -322,6 +333,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
             #sourceLocation(file: "Test.swift", line: 2)
             #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
+            #endif
             return self[__Key_client.self]
           }
           set {
@@ -332,11 +344,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         private nonisolated enum __Key_client: Dependencies.DependencyKey {
           typealias Value = Client
@@ -362,6 +374,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         public var client {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
@@ -369,6 +382,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
             #sourceLocation(file: "Test.swift", line: 2)
             #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
+            #endif
             return self[APIClientKey.self]
           }
           set {
@@ -379,11 +393,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         public nonisolated enum APIClientKey: Dependencies.DependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue public static var liveValue = Client.live
@@ -407,11 +421,13 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         package var client {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
             #sourceLocation()
+            #endif
             return self[ClientKey.self]
           }
           set {
@@ -422,11 +438,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         package nonisolated enum ClientKey: Dependencies.TestDependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue package static var testValue = Client.test
@@ -449,6 +465,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         public var client {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
@@ -456,6 +473,7 @@ final class DependencyEntryMacroTests: BaseTestCase {
             #sourceLocation(file: "Test.swift", line: 2)
             #TypeCheck(\DependencyValues.client, liveValue: Client.live)
             #sourceLocation()
+            #endif
             return self[ClientKey.self]
           }
           set {
@@ -466,11 +484,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         public nonisolated enum ClientKey: Dependencies.DependencyKey {
           @DependenciesMacros._DependencyEntryDefaultValue public static var liveValue = Client.live
@@ -494,11 +512,13 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         public var client: any APIClient {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
             #sourceLocation()
+            #endif
             return self[ExplicitAPIClientKey.self]
           }
           set {
@@ -509,11 +529,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         public nonisolated enum ExplicitAPIClientKey: Dependencies.TestDependencyKey {
           public typealias Value = any APIClient
@@ -539,11 +559,13 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         public var client: MockAPIClient {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
             #sourceLocation()
+            #endif
             return self[MockAPIClientKey.self]
           }
           set {
@@ -554,11 +576,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         public nonisolated enum MockAPIClientKey: Dependencies.TestDependencyKey {
           public typealias Value = MockAPIClient
@@ -584,11 +606,13 @@ final class DependencyEntryMacroTests: BaseTestCase {
       extension DependencyValues {
         public var client: any APIClient {
           get {
+            #if DEBUG
             func __dependencyEntryIsolationProbe() {
             }
             #sourceLocation(file: "Test.swift", line: 2)
             #IsolationCheck(__dependencyEntryIsolationProbe)
             #sourceLocation()
+            #endif
             return self[APIClientKey.self]
           }
           set {
@@ -599,11 +623,11 @@ final class DependencyEntryMacroTests: BaseTestCase {
           }
         }
 
-        #sourceLocation(file: "Test.swift", line: 1)
-
+        #if DEBUG
+        #sourceLocation(file: "Test.swift", line: 2)
         #IsolationCheck(keyPath: \DependencyValues.client)
-
         #sourceLocation()
+        #endif
 
         public nonisolated enum APIClientKey: Dependencies.TestDependencyKey {
           public typealias Value = any APIClient

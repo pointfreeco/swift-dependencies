@@ -271,12 +271,3 @@ public macro _DependencyEntryDefaultValue() =
     module: "DependenciesMacrosPlugin",
     type: "DependencyEntryDefaultValueMacro"
   )
-
-/// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
-public struct Unimplemented: Error {
-  let endpoint: String
-
-  public init(_ endpoint: String) {
-    self.endpoint = endpoint
-  }
-}

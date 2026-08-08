@@ -1,9 +1,16 @@
-import Dependencies
-import Foundation
+//
+//  PreviewExample.swift
+//  swift-dependencies
+//
+//  Created by Pete Schuette on 8/8/26.
+//
+
+#if canImport(SwiftUI)
+#if Foundation
 import SwiftUI
 
 /// Displays the current date, formatted with the current calendar.
-struct CurrentDateView: View {
+private struct CurrentDateView: View {
   @Dependency(\.calendar) var calendar
   @Dependency(\.date.now) var now
 
@@ -21,16 +28,16 @@ struct CurrentDateView: View {
   }
 
   private func dateString(from date: Date) -> String {
-    formatter(dateStyle: .medium, timeStyle: .none).string(from: date)
+    formatter(dateStyle: .medium).string(from: date)
   }
 
   private func timeString(from date: Date) -> String {
-    formatter(dateStyle: .none, timeStyle: .medium).string(from: date)
+    formatter(timeStyle: .medium).string(from: date)
   }
 
   private func formatter(
-    dateStyle: DateFormatter.Style,
-    timeStyle: DateFormatter.Style
+    dateStyle: DateFormatter.Style = .none,
+    timeStyle: DateFormatter.Style = .none
   ) -> DateFormatter {
     let formatter = DateFormatter()
     formatter.calendar = calendar
@@ -81,3 +88,5 @@ private struct SampleError: Error, LocalizedError {
   // Prepared view
   CurrentDateView()
 }
+#endif
+#endif

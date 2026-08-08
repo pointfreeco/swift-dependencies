@@ -5,21 +5,8 @@
 
   /// Prepares global dependencies for an Xcode preview.
   ///
-  /// This is a convenience over ``prepareDependencies(_:)`` for use in Xcode previews. Because
-  /// ``prepareDependencies(_:)`` does not return a view, it must be bound to `let _` in order to
-  /// play nicely with result builders:
-  ///
-  /// ```swift
-  /// #Preview {
-  ///   let _ = prepareDependencies {
-  ///     $0.defaultDatabase = try! DatabaseQueue(/* ... */)
-  ///   }
-  ///   FeatureView()
-  /// }
-  /// ```
-  ///
-  /// This helper returns a view instead, and so it can be used directly in a preview's view
-  /// builder:
+  /// Call this at the top of a preview's view builder to override dependencies for every view the
+  /// preview renders:
   ///
   /// ```swift
   /// #Preview {
@@ -30,19 +17,19 @@
   /// }
   /// ```
   ///
-  /// Any error thrown while preparing dependencies is rendered in the preview as a
-  /// ``PreviewErrorView`` rather than trapping, which is why the example above can use `try`
-  /// instead of `try!`. To render the error differently, use
+  /// It returns a view, so it composes directly into the preview alongside the views under
+  /// development. Any error thrown while preparing is handed to a ``PreviewErrorView`` and rendered
+  /// in place rather than trapping, which is why the example above can use `try` instead of `try!`.
+  /// To render the error with your own view, use
   /// ``preparePreviewDependencies(_:errorView:fileID:filePath:line:column:)``.
   ///
   /// > Important: A dependency key can be prepared at most a single time, and _must_ be prepared
   /// > before it has been accessed. If you attempt to prepare a dependency that has previously been
   /// > overridden or accessed, a runtime warning will be emitted.
   ///
-  /// > Note: This helper only prepares dependencies when the current ``DependencyValues/context``
-  /// > is ``DependencyContext/preview``. If it is invoked from any other context a runtime warning
-  /// > will be emitted and dependencies will be left untouched. To prepare dependencies for the
-  /// > lifetime of your application, use ``prepareDependencies(_:)`` instead.
+  /// > Note: Dependencies are only prepared when the current ``DependencyValues/context`` is
+  /// > ``DependencyContext/preview``. If this is invoked from any other context a runtime warning
+  /// > is emitted and dependencies are left untouched.
   ///
   /// - Parameters:
   ///   - updateValues: A closure for updating the current dependency values for the lifetime of the
@@ -71,9 +58,8 @@
 
   /// Prepares global dependencies for an Xcode preview, displaying any error with a custom view.
   ///
-  /// This is a variant of ``preparePreviewDependencies(_:fileID:filePath:line:column:)`` that lets
-  /// you render errors thrown while preparing dependencies however you like, rather than with the
-  /// default ``PreviewErrorView``:
+  /// Call this at the top of a preview's view builder to override dependencies for every view the
+  /// preview renders, and supply a view builder to render any error thrown while preparing:
   ///
   /// ```swift
   /// #Preview {
@@ -86,8 +72,16 @@
   /// }
   /// ```
   ///
-  /// See the documentation of ``preparePreviewDependencies(_:fileID:filePath:line:column:)`` for
-  /// more information.
+  /// Because the error is handed to `errorView` and rendered in place rather than trapping, the
+  /// closure above can use `try` instead of `try!`.
+  ///
+  /// > Important: A dependency key can be prepared at most a single time, and _must_ be prepared
+  /// > before it has been accessed. If you attempt to prepare a dependency that has previously been
+  /// > overridden or accessed, a runtime warning will be emitted.
+  ///
+  /// > Note: Dependencies are only prepared when the current ``DependencyValues/context`` is
+  /// > ``DependencyContext/preview``. If this is invoked from any other context a runtime warning
+  /// > is emitted and dependencies are left untouched.
   ///
   /// - Parameters:
   ///   - updateValues: A closure for updating the current dependency values for the lifetime of the
@@ -173,69 +167,5 @@
       .foregroundColor(.white)
     }
   }
-
-// MARK: - Preview examples
-
-fileprivate struct CurrentDateView: View {
-  @Dependency(\.calendar) var calendar
-  @Dependency(\.date) var now
-  
-  var body: some View {
-    Text(dateString(from: now()))
-    Text(timeString(from: now()))
-  }
-  
-  func dateString(from date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    formatter.timeStyle = .none
-    return formatter.string(from: date)
-  }
-  
-  func timeString(from date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .none
-    formatter.timeStyle = .medium
-    return formatter.string(from: date)
-  }
-}
-
-fileprivate struct PrepareError: Error, LocalizedError {
-  var errorDescription: String? {
-    """
-    An error was thrown during the prepare step!
-    
-    Display the localized description of the error in line. 
-    """
-  }
-}
-
-#Preview {
-  preparePreviewDependencies {
-    let timeZone = TimeZone(identifier: "America/New_York")!
-    var components = DateComponents()
-    components.year = 1969
-    components.month = 8
-    components.day = 15
-    components.hour = 17
-    components.minute = 07
-    var calendar = Calendar(identifier: .gregorian)
-  
-    $0.timeZone = timeZone
-    $0.date.now = calendar.date(from: components)!
-  }
-
-  // Prepared view
-  CurrentDateView()
-}
-
-#Preview {
-  preparePreviewDependencies { _ in
-    throw PrepareError()
-  }
-
-  // Prepared view
-  CurrentDateView()
-}
 
 #endif

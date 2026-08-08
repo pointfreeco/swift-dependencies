@@ -226,6 +226,21 @@ when the `fetchUser` endpoint throws an error, you can update the preview like s
 }
 ```
 
+> Tip: ``preparePreviewDependencies(_:fileID:filePath:line:column:)`` does the same thing, but
+> returns a view rather than a value, which means you do not need `let _`:
+>
+> ```swift
+> #Preview {
+>   preparePreviewDependencies {
+>     $0.apiClient.fetchUser = { _ in throw SomeError() }
+>   }
+>   FeatureView(model: FeatureModel())
+> }
+> ```
+>
+> It also renders any error thrown while preparing dependencies directly in the preview instead of
+> trapping.
+
 ## Accessing a @Dependency from pre-structured concurrency
 
 Because dependencies are held in a task local, they only automatically propagate within structured

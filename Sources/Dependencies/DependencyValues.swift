@@ -503,12 +503,6 @@ public final class CachedValues: @unchecked Sendable {
     cached = [:]
   }
 
-  /// Removes every value cached for the ``DependencyContext/preview`` context, leaving live and
-  /// test values untouched.
-  ///
-  /// A single process renders every preview in a file, and previews share one cache, which means a
-  /// dependency prepared by one preview would otherwise stick around and be seen by the next. This
-  /// gives each preview a clean slate to prepare into.
   func resetPreviewCache() {
     lock.lock()
     defer { lock.unlock() }

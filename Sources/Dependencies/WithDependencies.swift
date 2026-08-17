@@ -60,10 +60,6 @@ import IssueReporting
 /// }
 /// ```
 ///
-/// > Tip: In previews you can use ``previewDependencies(_:fileID:filePath:line:column:)``
-/// > instead, which returns a view and so does not need `let _`, and which renders any error
-/// > thrown while preparing dependencies directly in the preview.
-///
 /// > Note: It is technically possible to use ``prepareDependencies(_:)`` in tests:
 /// >
 /// >```swift

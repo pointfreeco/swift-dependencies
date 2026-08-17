@@ -79,9 +79,3 @@ This library addresses all of the points above, and much, _much_ more.
 - ``DependencyValues``
 - ``DependencyKey``
 - ``DependencyContext``
-
-### Xcode previews
-
-- ``previewDependencies(_:fileID:filePath:line:column:)``
-- ``previewDependencies(_:errorView:fileID:filePath:line:column:)``
-- ``PreviewErrorView``

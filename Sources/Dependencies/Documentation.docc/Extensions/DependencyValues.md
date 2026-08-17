@@ -13,8 +13,8 @@
 - ``withDependencies(_:operation:)-4uz6m``
 - ``withDependencies(from:operation:fileID:filePath:line:column:)``
 - ``prepareDependencies(_:)``
-- ``preparePreviewDependencies(_:fileID:filePath:line:column:)``
-- ``preparePreviewDependencies(_:errorView:fileID:filePath:line:column:)``
+- ``previewDependencies(_:fileID:filePath:line:column:)``
+- ``previewDependencies(_:errorView:fileID:filePath:line:column:)``
 
 ### Escaping contexts
 

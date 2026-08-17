@@ -226,12 +226,12 @@ when the `fetchUser` endpoint throws an error, you can update the preview like s
 }
 ```
 
-> Tip: ``preparePreviewDependencies(_:fileID:filePath:line:column:)`` does the same thing, but
-> returns a view rather than a value, which means you do not need `let _`:
+> Tip: ``previewDependencies(_:fileID:filePath:line:column:)`` prepares dependencies the same way,
+> but returns a view rather than a value, which means you do not need `let _`:
 >
 > ```swift
 > #Preview {
->   preparePreviewDependencies {
+>   previewDependencies {
 >     $0.apiClient.fetchUser = { _ in throw SomeError() }
 >   }
 >   FeatureView(model: FeatureModel())
@@ -240,6 +240,18 @@ when the `fetchUser` endpoint throws an error, you can update the preview like s
 >
 > It also renders any error thrown while preparing dependencies directly in the preview instead of
 > trapping.
+>
+> One more difference matters when a file holds several previews. A single process renders all of
+> them and they share one set of dependencies, so with `prepareDependencies` the first preview you
+> render wins and every preview after it silently inherits those values.
+> `previewDependencies` discards what a previously rendered preview prepared before it prepares its
+> own, so each preview starts from a clean slate.
+>
+> Re-evaluating a preview does not re-prepare it, though. SwiftUI recomputes a preview's body every
+> time its `@Previewable` state changes, and re-preparing there would replace a stateful dependency,
+> such as an in-memory database, with a fresh one on every interaction. Only the first evaluation of
+> a given call site prepares, which means edits to the values in the closure take effect once the
+> preview restarts rather than immediately.
 
 ## Accessing a @Dependency from pre-structured concurrency
 

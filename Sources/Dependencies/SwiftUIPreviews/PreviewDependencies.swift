@@ -14,42 +14,6 @@
 
   private let lastPreparationSite = LockIsolated<PreparationSite?>(nil)
 
-  /// Prepares global dependencies for an Xcode preview.
-  ///
-  /// ```swift
-  /// #Preview {
-  ///   previewDependencies {
-  ///     $0.defaultDatabase = try DatabaseQueue(/* ... */)
-  ///   }
-  ///   FeatureView()
-  /// }
-  /// ```
-  ///
-  /// - Parameters:
-  ///   - updateValues: A closure for updating the current dependency values for the lifetime of the
-  ///     preview.
-  ///   - fileID: The source `#fileID` associated with the preparation.
-  ///   - filePath: The source `#filePath` associated with the preparation.
-  ///   - line: The source `#line` associated with the preparation.
-  ///   - column: The source `#column` associated with the preparation.
-  /// - Returns: A view that displays any error thrown while preparing dependencies.
-  public func previewDependencies<R>(
-    _ updateValues: (inout DependencyValues) throws -> R,
-    fileID: StaticString = #fileID,
-    filePath: StaticString = #filePath,
-    line: UInt = #line,
-    column: UInt = #column
-  ) -> some View {
-    previewDependencies(
-      updateValues,
-      errorView: { PreviewErrorView($0) },
-      fileID: fileID,
-      filePath: filePath,
-      line: line,
-      column: column
-    )
-  }
-
   /// Prepares global dependencies for an Xcode preview, displaying any error with a custom view.
   ///
   /// ```swift
@@ -75,7 +39,7 @@
   @ViewBuilder
   public func previewDependencies<R, ErrorView: View>(
     _ updateValues: (inout DependencyValues) throws -> R,
-    @ViewBuilder errorView: (any Error) -> ErrorView,
+    @ViewBuilder errorView: (any Error) -> ErrorView = { PreviewErrorView($0) },
     fileID: StaticString = #fileID,
     filePath: StaticString = #filePath,
     line: UInt = #line,

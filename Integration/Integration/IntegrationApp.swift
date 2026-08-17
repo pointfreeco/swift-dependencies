@@ -51,3 +51,14 @@ struct IntegrationContextView: View {
 ) {
   IntegrationContextView()
 }
+
+#Preview(
+  "Third",
+  traits: .dependencies { _ in
+    struct Failure: Error {}
+    print(#line, "Third")
+    throw Failure()
+  }
+) {
+  IntegrationContextView()
+}

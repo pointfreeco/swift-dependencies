@@ -14,15 +14,14 @@
 
   private let lastPreparationSite = LockIsolated<PreparationSite?>(nil)
 
-  /// Prepares global dependencies for an Xcode preview, displaying any error with a custom view.
+  /// Prepares global dependencies for an Xcode preview.
   ///
   /// ```swift
   /// #Preview {
   ///   previewDependencies {
   ///     $0.defaultDatabase = try DatabaseQueue(/* ... */)
-  ///   } errorView: { error in
-  ///     Text("Failed to prepare preview: \(error)")
   ///   }
+  ///
   ///   FeatureView()
   /// }
   /// ```
@@ -30,11 +29,7 @@
   /// - Parameters:
   ///   - updateValues: A closure for updating the current dependency values for the lifetime of the
   ///     preview.
-  ///   - errorView: A view builder that is handed any error thrown by `updateValues`.
-  ///   - fileID: The source `#fileID` associated with the preparation.
-  ///   - filePath: The source `#filePath` associated with the preparation.
-  ///   - line: The source `#line` associated with the preparation.
-  ///   - column: The source `#column` associated with the preparation.
+  ///   - errorView: (optional) view builder to render errors thrown from`updateValues`.
   /// - Returns: A view that displays any error thrown while preparing dependencies.
   @ViewBuilder
   public func previewDependencies<R, ErrorView: View>(

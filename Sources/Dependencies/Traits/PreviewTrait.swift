@@ -19,6 +19,14 @@
     /// }
     /// ```
     ///
+    /// Before applying the overrides, this trait resets all cached dependencies back to their
+    /// defaults so that multiple previews in a single file do not interfere with each other. For
+    /// this reason, use at most one `.dependencies` trait per preview: a second trait's reset
+    /// would discard the first trait's overrides.
+    ///
+    /// If the closure throws, the error is rendered directly in the preview instead of crashing
+    /// it.
+    ///
     /// - Parameter updateValuesForPreview: A closure for updating the current dependency values
     ///   for the lifetime of the preview.
     public static func dependencies(

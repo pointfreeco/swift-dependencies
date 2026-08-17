@@ -174,40 +174,46 @@ data provided to it, making it easier for you to iterate on your feature's logic
 
 You can also always override dependencies for the preview if you want to test out a specific 
 configuration of data. For example, if you want to test the empty state of your feature when the 
-API client returns an empty array, you can do so like this:
+API client returns an empty array, you can use the 
+``DeveloperToolsSupport/PreviewTrait/dependencies(_:)`` preview trait:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.apiClient.fetchUsers = { _ in [] }
-      } operation: {
-        FeatureModel()
-      }
-    )
+#Preview(
+  traits: .dependencies {
+    $0.apiClient.fetchUsers = { _ in [] }
   }
+) {
+  FeatureView(model: FeatureModel())
 }
 ```
 
 Or if you want to preview how your feature deals with errors returned from the API:
 
 ```swift
-struct Feature_Previews: PreviewProvider {
-  static var previews: some View {
-    FeatureView(
-      model: withDependencies {
-        $0.apiClient.fetchUser = { _ in
-          struct SomeError: Error {}
-          throw SomeError()
-        }
-      } operation: {
-        FeatureModel()
-      }
-    )
+#Preview(
+  traits: .dependencies {
+    $0.apiClient.fetchUser = { _ in
+      struct SomeError: Error {}
+      throw SomeError()
+    }
   }
+) {
+  FeatureView(model: FeatureModel())
 }
 ```
+
+> Note: The `.dependencies` preview trait requires iOS 18, macOS 15, tvOS 18, watchOS 11, or
+> visionOS 2. If your deployment target is earlier than that, you can invoke
+> ``prepareDependencies(_:)`` from the body of the preview, instead:
+>
+> ```swift
+> #Preview {
+>   let _ = prepareDependencies {
+>     $0.apiClient.fetchUsers = { _ in [] }
+>   }
+>   FeatureView(model: FeatureModel())
+> }
+> ```
 
 ## Separating interface and implementation
 

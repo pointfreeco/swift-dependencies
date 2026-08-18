@@ -1,4 +1,5 @@
 import Dependencies
+import DependenciesMacros
 import SwiftUI
 
 @main
@@ -12,16 +13,9 @@ struct IntegrationApp: App {
   }
 }
 
-private enum IntegrationContextKey: DependencyKey {
-  static let liveValue = "Live"
-  static let previewValue = "Preview"
-  static let testValue = "Test"
-}
 extension DependencyValues {
-  var integrationContext: String {
-    get { self[IntegrationContextKey.self] }
-    set { self[IntegrationContextKey.self] = newValue }
-  }
+  @DependencyEntry(liveValue: "Live", previewValue: "Preview")
+  var integrationContext = "Test"
 }
 
 struct IntegrationContextView: View {

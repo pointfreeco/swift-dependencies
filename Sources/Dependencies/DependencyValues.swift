@@ -306,8 +306,9 @@ public struct DependencyValues: Sendable {
       guard
         existingValue == nil
           || existingValue?.preparationID == DependencyValues.preparationID
-          || context == .preview 
+          || (context == .preview && existingValue?.preparationID == nil)
       else {
+        if context != .preview {
           #if DEBUG
             reportIssue(
               {
@@ -360,6 +361,7 @@ public struct DependencyValues: Sendable {
               column: DependencyValues.currentDependency.column ?? column
             )
           #endif
+        }
         return
       }
       cachedValues.cached[cacheKey] = CachedValues.CachedValue(
@@ -588,7 +590,7 @@ public final class CachedValues: @unchecked Sendable {
         case .preview:
           if !CachedValues.isAccessingCachedDependencies {
             value = CachedValues.$isAccessingCachedDependencies.withValue(true) {
-              Key.previewValue
+              return Key.previewValue
             }
           } else {
             value = Key.previewValue

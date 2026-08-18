@@ -48,8 +48,22 @@ import IssueReporting
 /// > before it has been accessed. If you attempt to prepare a dependency that has previously been
 /// > overridden or accessed, a runtime warning will be emitted.
 ///
-/// You can also use ``prepareDependencies(_:)`` in Xcode previews, but you do have to use
-/// `let _` in order to play nicely with result builders:
+/// In Xcode previews, prefer the ``DeveloperToolsSupport/PreviewTrait/dependencies(_:)`` preview
+/// trait:
+///
+/// ```swift
+/// #Preview(
+///   traits: .dependencies {
+///     $0.defaultDatabase = try DatabaseQueue(/* ... */)
+///   }
+/// ) {
+///   FeatureView()
+/// }
+/// ```
+///
+/// If your deployment target is earlier than the trait supports (iOS 18, macOS 15, tvOS 18,
+/// watchOS 11, visionOS 2), you can use ``prepareDependencies(_:)`` in the preview's body, but
+/// you do have to use `let _` in order to play nicely with result builders:
 ///
 /// ```swift
 /// #Preview {

@@ -35,11 +35,11 @@ struct IntegrationContextView: View {
 #Preview(
   "First",
   traits: .dependencies {
-    $0.integrationContext = "Uno"
+    // First dependency set takes precedence over later overrides (just like SwiftUI view modifiers)
+    $0.integrationContext = "First"
   },
   .dependencies {
-    // Previously prepared dependencies can be overridden
-    $0.integrationContext = "First"
+    $0.integrationContext = "Primera"
   },
 ) {
   IntegrationContextView()
@@ -51,8 +51,9 @@ struct IntegrationContextView: View {
     $0.integrationContext = "Second"
   },
   .dependencies {
+    // Accessing a dependency does not prevent overriding it.
     let _ = $0.integrationContext
-  }
+  },
 ) {
   IntegrationContextView()
 }

@@ -76,7 +76,7 @@
   }
 
   private struct DependenciesPreviewModifier: PreviewModifier {
-    @Environment(\.dependenciesCount) var dependenciesCount
+    @Environment(\.cacheIsReset) var cacheIsReset
     let operation: (inout DependencyValues) throws -> Void
 
     func body(content: Content, context: ()) -> some View {
@@ -96,11 +96,11 @@
           .opacity(0.75)
         }
       }
-      .environment(\.dependenciesCount, dependenciesCount + 1)
+      .environment(\.cacheIsReset, true)
     }
 
     func prepareDependencies() -> (any Error)? {
-      if dependenciesCount == 0 {
+      if !cacheIsReset {
         DependencyValues._current.cachedValues.resetCache()
       }
       do {
@@ -113,6 +113,6 @@
   }
 
   extension EnvironmentValues {
-    @Entry fileprivate var dependenciesCount = 0
+    @Entry fileprivate var cacheIsReset = false
   }
 #endif

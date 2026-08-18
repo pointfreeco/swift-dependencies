@@ -29,11 +29,11 @@ struct IntegrationContextView: View {
 #Preview(
   "First",
   traits: .dependencies {
-    $0.integrationContext = "First"
+    $0.integrationContext = "Primera"
   },
   .dependencies {
     // Dependencies can be overridden a second time.
-    $0.integrationContext = "Primera"
+    $0.integrationContext = "First"
   },
 ) {
   IntegrationContextView()

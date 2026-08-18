@@ -61,3 +61,11 @@ struct IntegrationContextView: View {
 ) {
   IntegrationContextView()
 }
+
+#Preview(
+  "Fourth",
+  traits: .dependency(\.integrationContext, "Fourth"),
+  .dependency(\.integrationContext, "Cuarta"),
+) {
+  IntegrationContextView()
+}

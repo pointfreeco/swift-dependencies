@@ -1,31 +1,5 @@
 public import ConcurrencyExtras
 
-#if canImport(SwiftUI)
-  public import SwiftUI
-#endif
-
-// MARK: - Deprecated after 1.9.2
-
-#if canImport(SwiftUI) && compiler(>=6)
-  @available(iOS 18, macOS 15, tvOS 18, watchOS 11, visionOS 2, *)
-  extension PreviewTrait where T == Preview.ViewTraits {
-    @available(*, deprecated, message: "Use '.dependencies' instead.")
-    public static func dependency<Value>(
-      _ keyPath: any WritableKeyPath<DependencyValues, Value> & Sendable,
-      _ value: @autoclosure @escaping @Sendable () throws -> Value
-    ) -> PreviewTrait {
-      .dependencies { $0[keyPath: keyPath] = try value() }
-    }
-
-    @available(*, deprecated, message: "Use '.dependencies' instead.")
-    public static func dependency<Value: TestDependencyKey>(
-      _ value: @autoclosure @escaping @Sendable () throws -> Value
-    ) -> PreviewTrait where Value == Value.Value {
-      .dependencies { $0[Value.self] = try value() }
-    }
-  }
-#endif
-
 // MARK: - Deprecated after 0.4.2
 
 extension AsyncStream {

@@ -23,7 +23,10 @@ extension DependencyEntryMacro: AccessorMacro {
     let keyName = keyTypeName(for: node, property: property, identifier: identifier)
     return [
       """
-      get { self[\(keyName).self] }
+      get {
+        \(entryChecks(for: node, identifier: identifier, in: context))
+        return self[\(keyName).self]
+      }
       """,
       """
       set { self[\(keyName).self] = newValue }
@@ -136,7 +139,7 @@ extension DependencyEntryMacro: PeerMacro {
       \(raw: body)
       }
       """
-    return [keyDecl]
+    return sendableCheck(for: node, identifier: identifier, in: context) + [keyDecl]
   }
 }
 
@@ -256,6 +259,171 @@ private func isInDependencyValuesExtension(
     name = nil
   }
   return name == "DependencyValues"
+}
+
+private let isolationProbeName = "__dependencyEntryIsolationProbe"
+
+private func entryValueArguments(
+  from node: AttributeSyntax
+) -> (liveValue: ExprSyntax?, previewValue: ExprSyntax?) {
+  var liveValueExpr: ExprSyntax?
+  var previewValueExpr: ExprSyntax?
+  if let arguments = node.arguments?.as(LabeledExprListSyntax.self) {
+    for argument in arguments {
+      switch argument.label?.text {
+      case "liveValue":
+        liveValueExpr = argument.expression
+      case "previewValue":
+        previewValueExpr = argument.expression
+      default:
+        break
+      }
+    }
+  }
+  return (liveValueExpr, previewValueExpr)
+}
+
+private func extendedType(in context: some MacroExpansionContext) -> TypeSyntax? {
+  context.lexicalContext.first?.as(ExtensionDeclSyntax.self)?.extendedType.trimmed
+}
+
+private func entryChecks(
+  for node: AttributeSyntax,
+  identifier: TokenSyntax,
+  in context: some MacroExpansionContext
+) -> CodeBlockItemListSyntax {
+  var checks = ["#IsolationCheck(\(isolationProbeName))"]
+  if let extendedType = extendedType(in: context) {
+    let (liveValueExpr, previewValueExpr) = entryValueArguments(from: node)
+    if let liveValueExpr {
+      checks.append(
+        "#TypeCheck(\\\(extendedType).\(identifier), liveValue: \(liveValueExpr.trimmed))"
+      )
+    }
+    if let previewValueExpr {
+      checks.append(
+        "#TypeCheck(\\\(extendedType).\(identifier), previewValue: \(previewValueExpr.trimmed))"
+      )
+    }
+  }
+  guard
+    let location = context.location(of: node, at: .afterLeadingTrivia, filePathMode: .filePath)
+  else {
+    return """
+      #if DEBUG
+      func \(raw: isolationProbeName)() {}
+      \(raw: checks.joined(separator: "\n"))
+      #endif
+      """
+  }
+  let directive = "#sourceLocation(file: \(location.file), line: \(location.line))"
+  return """
+    #if DEBUG
+    func \(raw: isolationProbeName)() {}
+    \(raw: checks.map { "\(directive)\n\($0)" }.joined(separator: "\n"))
+    #sourceLocation()
+    #endif
+    """
+}
+
+private func sendableCheck(
+  for node: AttributeSyntax,
+  identifier: TokenSyntax,
+  in context: some MacroExpansionContext
+) -> [DeclSyntax] {
+  guard let extendedType = extendedType(in: context)
+  else {
+    return []
+  }
+  let check = "#IsolationCheck(keyPath: \\\(extendedType).\(identifier))"
+  guard
+    let location = context.location(of: node, at: .afterLeadingTrivia, filePathMode: .filePath)
+  else {
+    return [
+      """
+      #if DEBUG
+      \(raw: check)
+      #endif
+      """
+    ]
+  }
+  return [
+    """
+    #if DEBUG
+    #sourceLocation(file: \(location.file), line: \(location.line))
+    \(raw: check)
+    #sourceLocation()
+    #endif
+    """
+  ]
+}
+
+public enum DependencyEntryIsolationCheckMacro {}
+
+extension DependencyEntryIsolationCheckMacro: DeclarationMacro {
+  public static func expansion(
+    of node: some FreestandingMacroExpansionSyntax,
+    in context: some MacroExpansionContext
+  ) throws -> [DeclSyntax] {
+    []
+  }
+}
+
+public enum DependencyEntryMainActorIsolationCheckMacro {}
+
+extension DependencyEntryMainActorIsolationCheckMacro: DeclarationMacro {
+  public static func expansion(
+    of node: some FreestandingMacroExpansionSyntax,
+    in context: some MacroExpansionContext
+  ) throws -> [DeclSyntax] {
+    context.diagnose(
+      Diagnostic(
+        node: node,
+        message: MacroExpansionErrorMessage(
+          "entry must be 'nonisolated var' when default isolation is '@MainActor'"
+        )
+      )
+    )
+    return []
+  }
+}
+
+public enum DependencyClientMainActorCheckMacro {}
+
+extension DependencyClientMainActorCheckMacro: DeclarationMacro {
+  public static func expansion(
+    of node: some FreestandingMacroExpansionSyntax,
+    in context: some MacroExpansionContext
+  ) throws -> [DeclSyntax] {
+    context.diagnose(
+      Diagnostic(
+        node: node,
+        message: MacroExpansionErrorMessage(
+          "client must be 'nonisolated struct' when default isolation is '@MainActor'"
+        )
+      )
+    )
+    return []
+  }
+}
+
+public enum DependencyEntrySendableCheckMacro {}
+
+extension DependencyEntrySendableCheckMacro: DeclarationMacro {
+  public static func expansion(
+    of node: some FreestandingMacroExpansionSyntax,
+    in context: some MacroExpansionContext
+  ) throws -> [DeclSyntax] {
+    context.diagnose(
+      Diagnostic(
+        node: node,
+        message: MacroExpansionErrorMessage(
+          "entry value must be 'Sendable'"
+        )
+      )
+    )
+    return []
+  }
 }
 
 public enum DependencyEntryDefaultValueMacro {}

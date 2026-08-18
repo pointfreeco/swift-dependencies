@@ -30,28 +30,20 @@
     /// - Parameter updateValuesForPreview: A closure for updating the current dependency values
     ///   for the lifetime of the preview.
     public static func dependencies(
-      _ updateValuesForPreview: (inout DependencyValues) throws -> Void
+      _ updateValuesForPreview: @escaping (inout DependencyValues) throws -> Void
     ) -> PreviewTrait {
-      let error: (any Error)? = {
-        do {
-          DependencyValues._current.cachedValues.resetCache()
-          try prepareDependencies(updateValuesForPreview)
-          return nil
-        } catch {
-          return error
-        }
-      }()
-      return .modifier(DependenciesPreviewModifier(error: error))
+      .modifier(DependenciesPreviewModifier(operation: updateValuesForPreview))
     }
   }
 
   private struct DependenciesPreviewModifier: PreviewModifier {
-    let error: (any Error)?
+    @Environment(\.dependenciesCount) var dependenciesCount
+    let operation: (inout DependencyValues) throws -> Void
 
     func body(content: Content, context: ()) -> some View {
       ZStack {
         content
-        if let error {
+        if let error = prepareDependencies() {
           VStack {
             Text("Preview Trait Failure")
               .font(.headline.bold())
@@ -65,6 +57,23 @@
           .opacity(0.75)
         }
       }
+      .environment(\.dependenciesCount, dependenciesCount + 1)
     }
+
+    func prepareDependencies() -> (any Error)? {
+      if dependenciesCount == 0 {
+        DependencyValues._current.cachedValues.resetCache()
+      }
+      do {
+        try Dependencies.prepareDependencies(operation)
+        return nil
+      } catch {
+        return error
+      }
+    }
+  }
+
+  extension EnvironmentValues {
+    @Entry fileprivate var dependenciesCount = 0
   }
 #endif

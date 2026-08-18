@@ -35,9 +35,12 @@ struct IntegrationContextView: View {
 #Preview(
   "First",
   traits: .dependencies {
+    $0.integrationContext = "Uno"
+  },
+  .dependencies {
+    // Previously prepared dependencies can be overridden
     $0.integrationContext = "First"
-    print(#line, $0.integrationContext)
-  }
+  },
 ) {
   IntegrationContextView()
 }
@@ -46,7 +49,9 @@ struct IntegrationContextView: View {
   "Second",
   traits: .dependencies {
     $0.integrationContext = "Second"
-    print(#line, $0.integrationContext)
+  },
+  .dependencies {
+    let _ = $0.integrationContext
   }
 ) {
   IntegrationContextView()
@@ -56,7 +61,6 @@ struct IntegrationContextView: View {
   "Third",
   traits: .dependencies { _ in
     struct Failure: Error {}
-    print(#line, "Third")
     throw Failure()
   }
 ) {

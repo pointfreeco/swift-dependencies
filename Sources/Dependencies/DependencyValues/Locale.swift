@@ -81,31 +81,36 @@
     /// // Make assertions with model...
     /// ```
     public var preferredLocales: [Locale] {
-      get { self[PreferredLocalesKey.self]() }
-      set {
-        #if canImport(Darwin)
-          self[PreferredLocalesKey.self] = { newValue }
-        #else
-          let newValue = UncheckedSendable(newValue)
-          self[PreferredLocalesKey.self] = { newValue.wrappedValue }
-        #endif
-      }
+      get { self[PreferredLocalesKey.self].preferredLocales }
+      set { self[PreferredLocalesKey.self] = ConstantLocales(preferredLocales: newValue) }
     }
 
     private enum LocaleKey: DependencyKey {
-      #if canImport(Darwin)
-        static let liveValue = Locale.autoupdatingCurrent
-      #else
-        // NB: 'Locale' sendability is not yet available in a 'swift-corelibs-foundation' release
-        static let liveValue = UncheckedSendable(Locale.autoupdatingCurrent)
-      #endif
+      static var liveValue: Locale { .autoupdatingCurrent }
     }
 
     private enum PreferredLocalesKey: DependencyKey {
-      static let liveValue: @Sendable () -> [Locale] = {
+      static var liveValue: any PreferredLocales {
+        SystemLocales()
+      }
+    }
+
+    private protocol PreferredLocales: Sendable {
+      var preferredLocales: [Locale] { get }
+    }
+
+    private struct SystemLocales: PreferredLocales {
+      var preferredLocales: [Locale] {
         Locale.preferredLanguages.compactMap {
           Locale(identifier: $0)
         }
+      }
+    }
+
+    private struct ConstantLocales: PreferredLocales {
+      var preferredLocales: [Locale]
+      init(preferredLocales: [Locale]) {
+        self.preferredLocales = preferredLocales
       }
     }
   }

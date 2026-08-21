@@ -1,5 +1,4 @@
 #if Foundation
-  import ConcurrencyExtras
   public import Foundation
 
   extension DependencyValues {
@@ -70,7 +69,7 @@
     /// ```
     public var preferredLocales: [Locale] {
       get { self[PreferredLocalesKey.self].preferredLocales }
-      set { self[PreferredLocalesKey.self] = ConstantLocales(preferredLocales: newValue) }
+      set { self[PreferredLocalesKey.self] = PreferredLocales(constantLocales: newValue) }
     }
 
     private enum LocaleKey: DependencyKey {
@@ -78,27 +77,18 @@
     }
 
     private enum PreferredLocalesKey: DependencyKey {
-      static var liveValue: any PreferredLocales {
-        SystemLocales()
+      static var liveValue: PreferredLocales {
+        PreferredLocales()
       }
     }
 
-    private protocol PreferredLocales: Sendable {
-      var preferredLocales: [Locale] { get }
-    }
-
-    private struct SystemLocales: PreferredLocales {
+    private struct PreferredLocales: Sendable {
+      var constantLocales: [Locale]?
       var preferredLocales: [Locale] {
-        Locale.preferredLanguages.compactMap {
-          Locale(identifier: $0)
-        }
-      }
-    }
-
-    private struct ConstantLocales: PreferredLocales {
-      var preferredLocales: [Locale]
-      init(preferredLocales: [Locale]) {
-        self.preferredLocales = preferredLocales
+        constantLocales
+          ?? Locale.preferredLanguages.compactMap {
+            Locale(identifier: $0)
+          }
       }
     }
   }

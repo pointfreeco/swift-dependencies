@@ -33,20 +33,8 @@
     /// // Make assertions with model...
     /// ```
     public var locale: Locale {
-      get {
-        #if canImport(Darwin)
-          self[LocaleKey.self]
-        #else
-          self[LocaleKey.self].wrappedValue
-        #endif
-      }
-      set {
-        #if canImport(Darwin)
-          self[LocaleKey.self] = newValue
-        #else
-          self[LocaleKey.self].wrappedValue = newValue
-        #endif
-      }
+      get { self[LocaleKey.self] }
+      set { self[LocaleKey.self] = newValue }
     }
 
     /// The preferred locales that features should use for content-language selection.

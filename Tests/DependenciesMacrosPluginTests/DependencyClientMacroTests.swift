@@ -54,6 +54,52 @@ final class DependencyClientMacroTests: BaseTestCase {
     }
   }
 
+  func testEndpointsBeforeNonEndpoints() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint1: () -> Void
+        var endpoint2: () -> Void
+        var identifier: String
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var endpoint1: () -> Void
+        @DependencyEndpoint
+        var endpoint2: () -> Void
+        var identifier: String
+
+        init(
+          endpoint1: @escaping () -> Void,
+          endpoint2: @escaping () -> Void,
+          identifier: String
+        ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self.identifier = identifier
+          self.endpoint1 = endpoint1
+          self.endpoint2 = endpoint2
+        }
+
+        init(
+          identifier: String
+        ) {
+          self.identifier = identifier
+        }
+      }
+      """
+    }
+  }
+
   func testEndpointMacroAlreadyApplied() {
     assertMacro {
       """
@@ -114,8 +160,8 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
           self.config = config
+          self.endpoint = endpoint
         }
 
         init(
@@ -1164,8 +1210,8 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
           self.value = value
+          self.endpoint = endpoint
         }
 
         init(

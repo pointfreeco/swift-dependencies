@@ -241,7 +241,7 @@ public enum DependencyClientMacro: MemberAttributeMacro, MemberMacro {
         \(access)init(
         \(raw: properties.map { $0.declaration.bindings.trimmedDescription }.joined(separator: ",\n"))
         ) {\(raw: check)
-        \(raw: (properties.filter { !$0.isEndpoint } + properties.filter(\.isEndpoint)).map { "self.\($0.identifier) = \($0.identifier)" }.joined(separator: "\n"))
+        \(raw: properties.map { "self.\($0.isEndpoint ? "_" : "")\($0.identifier) = \($0.identifier)" }.joined(separator: "\n"))
         }
         """
     }

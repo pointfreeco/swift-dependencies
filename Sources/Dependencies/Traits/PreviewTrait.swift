@@ -1,5 +1,4 @@
 #if canImport(SwiftUI) && compiler(>=6)
-  import ConcurrencyExtras
   public import SwiftUI
 
   @available(iOS 18, macOS 15, tvOS 18, watchOS 11, visionOS 2, *)
@@ -77,41 +76,24 @@
   }
 
   private struct DependenciesPreviewModifier: PreviewModifier {
-    // NB: Dependencies must be prepared before the preview's view builder is evaluated, as doing
-    //     so can eagerly resolve dependencies (e.g. '@FetchAll' resolving '\.defaultDatabase' in
-    //     the view's initializer). Traits are constructed before the preview's body is evaluated,
-    //     and are reconstructed each time a preview is selected, so dependencies are prepared
-    //     right here in the initializer. The first trait constructed for a preview resets the
-    //     dependency cache so that one preview does not bleed into another, and 'body' marks the
-    //     end of that preview's trait construction.
-    private static let state = LockIsolated(State())
+    private static var isCacheReset = false
+    private let error: (any Error)?
 
-    private struct State {
-      var traitCount = 0
-      var error: (any Error)?
-    }
-
-    init(operation: @escaping (inout DependencyValues) throws -> Void) {
-      let operation = UncheckedSendable(operation)
-      Self.state.withValue { state in
-        if state.traitCount == 0 {
-          DependencyValues._current.cachedValues.resetCache()
-          state.error = nil
-        }
-        state.traitCount += 1
-        do {
-          try Dependencies.prepareDependencies(operation.value)
-        } catch {
-          state.error = state.error ?? error
-        }
+    init(operation: (inout DependencyValues) throws -> Void) {
+      defer { Self.isCacheReset = true }
+      if !Self.isCacheReset {
+        DependencyValues._current.cachedValues.resetCache()
+      }
+      do {
+        try Dependencies.prepareDependencies(operation)
+        error = nil
+      } catch {
+        self.error = error
       }
     }
 
-    func body(content: Content, context: ()) -> some View {
-      let error = Self.state.withValue { state in
-        defer { state.traitCount = 0 }
-        return state.error
-      }
+    func body(content: Content, context: Void) -> some View {
+      Self.isCacheReset = false
       return ZStack {
         content
         if let error {

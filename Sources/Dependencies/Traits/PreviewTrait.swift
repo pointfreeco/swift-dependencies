@@ -1,4 +1,5 @@
 #if canImport(SwiftUI) && compiler(>=6)
+  import Foundation
   public import SwiftUI
 
   @available(iOS 18, macOS 15, tvOS 18, watchOS 11, visionOS 2, *)
@@ -76,16 +77,17 @@
   }
 
   private struct DependenciesPreviewModifier: PreviewModifier {
-    private static var isCacheReset = false
+    private static var preparationID: UUID?
     private let error: (any Error)?
 
     init(operation: (inout DependencyValues) throws -> Void) {
-      defer { Self.isCacheReset = true }
-      if !Self.isCacheReset {
+      let preparationID = Self.preparationID ?? UUID()
+      if Self.preparationID == nil {
         DependencyValues._current.cachedValues.resetCache()
+        Self.preparationID = preparationID
       }
       do {
-        try Dependencies.prepareDependencies(operation)
+        try Dependencies.prepareDependencies(preparationID: preparationID, operation)
         error = nil
       } catch {
         self.error = error
@@ -93,7 +95,7 @@
     }
 
     func body(content: Content, context: Void) -> some View {
-      Self.isCacheReset = false
+      Self.preparationID = nil
       return ZStack {
         content
         if let error {

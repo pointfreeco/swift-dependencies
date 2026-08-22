@@ -96,13 +96,20 @@ import IssueReporting
 public func prepareDependencies<R>(
   _ updateValues: (inout DependencyValues) throws -> R
 ) rethrows -> R {
+  try prepareDependencies(preparationID: UUID(), updateValues)
+}
+
+func prepareDependencies<R>(
+  preparationID: UUID,
+  _ updateValues: (inout DependencyValues) throws -> R
+) rethrows -> R {
   var dependencies = DependencyValues._current
   #if canImport(SwiftUI)
     if Thread.isPreviewAppEntryPoint {
       dependencies = DependencyValues()
     }
   #endif
-  return try DependencyValues.$preparationID.withValue(UUID()) {
+  return try DependencyValues.$preparationID.withValue(preparationID) {
     #if DEBUG
       try DependencyValues.$isSetting.withValue(true) {
         try updateValues(&dependencies)

@@ -63,7 +63,6 @@ let package = Package(
         ),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ],
       swiftSettings: [
         .enableUpcomingFeature("MemberImportVisibility")
@@ -91,7 +90,6 @@ let package = Package(
       dependencies: [
         "DependenciesMacrosPlugin",
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
     .macro(

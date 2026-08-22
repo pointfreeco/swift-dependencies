@@ -1,4 +1,5 @@
 #if canImport(SwiftUI) && compiler(>=6)
+  import Foundation
   public import SwiftUI
 
   @available(iOS 18, macOS 15, tvOS 18, watchOS 11, visionOS 2, *)
@@ -76,13 +77,28 @@
   }
 
   private struct DependenciesPreviewModifier: PreviewModifier {
-    @Environment(\.cacheIsReset) var cacheIsReset
-    let operation: (inout DependencyValues) throws -> Void
+    private static var preparationID: UUID?
+    private let error: (any Error)?
 
-    func body(content: Content, context: ()) -> some View {
-      ZStack {
+    init(operation: (inout DependencyValues) throws -> Void) {
+      let preparationID = Self.preparationID ?? UUID()
+      if Self.preparationID == nil {
+        DependencyValues._current.cachedValues.resetCache()
+        Self.preparationID = preparationID
+      }
+      do {
+        try Dependencies.prepareDependencies(preparationID: preparationID, operation)
+        error = nil
+      } catch {
+        self.error = error
+      }
+    }
+
+    func body(content: Content, context: Void) -> some View {
+      Self.preparationID = nil
+      return ZStack {
         content
-        if let error = prepareDependencies() {
+        if let error {
           VStack {
             Text("Preview Trait Failure")
               .font(.headline.bold())
@@ -96,23 +112,6 @@
           .opacity(0.75)
         }
       }
-      .environment(\.cacheIsReset, true)
     }
-
-    func prepareDependencies() -> (any Error)? {
-      if !cacheIsReset {
-        DependencyValues._current.cachedValues.resetCache()
-      }
-      do {
-        try Dependencies.prepareDependencies(operation)
-        return nil
-      } catch {
-        return error
-      }
-    }
-  }
-
-  extension EnvironmentValues {
-    @Entry fileprivate var cacheIsReset = false
   }
 #endif

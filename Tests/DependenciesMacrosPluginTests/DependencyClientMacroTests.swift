@@ -41,13 +41,59 @@ final class DependencyClientMacroTests: BaseTestCase {
           #sourceLocation()
           #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
           config: Bool = false
         ) {
           self.config = config
+        }
+      }
+      """
+    }
+  }
+
+  func testEndpointsBeforeNonEndpoints() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint1: () -> Void
+        var endpoint2: () -> Void
+        var identifier: String
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var endpoint1: () -> Void
+        @DependencyEndpoint
+        var endpoint2: () -> Void
+        var identifier: String
+
+        init(
+          endpoint1: @escaping () -> Void,
+          endpoint2: @escaping () -> Void,
+          identifier: String
+        ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint1 = endpoint1
+          self._endpoint2 = endpoint2
+          self.identifier = identifier
+        }
+
+        init(
+          identifier: String
+        ) {
+          self.identifier = identifier
         }
       }
       """
@@ -77,7 +123,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -114,7 +160,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
           self.config = config
         }
 
@@ -156,7 +202,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #sourceLocation()
           #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -197,7 +243,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #sourceLocation()
           #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -238,7 +284,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #sourceLocation()
           #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -279,7 +325,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #sourceLocation()
           #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -320,7 +366,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #sourceLocation()
           #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         private init(
@@ -359,7 +405,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.config = config
+          self._config = config
         }
 
         init() {
@@ -393,7 +439,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -429,7 +475,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -465,7 +511,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         public init() {
@@ -501,7 +547,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -535,7 +581,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         package init() {
@@ -569,7 +615,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -607,7 +653,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #sourceLocation()
           #endif
           self.name = name
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -652,7 +698,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -698,7 +744,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -740,7 +786,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -784,7 +830,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -830,7 +876,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -866,7 +912,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -904,7 +950,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #sourceLocation()
           #endif
           self.id = id
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -962,7 +1008,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init() {
@@ -1012,7 +1058,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.fetch = fetch
+          self._fetch = fetch
         }
 
         init() {
@@ -1063,7 +1109,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.fetch = fetch
+          self._fetch = fetch
         }
 
         init() {
@@ -1108,7 +1154,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.fetch = fetch
+          self._fetch = fetch
         }
 
         init() {
@@ -1164,7 +1210,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.endpoint = endpoint
+          self._endpoint = endpoint
           self.value = value
         }
 
@@ -1253,8 +1299,8 @@ final class DependencyClientMacroTests: BaseTestCase {
           #IsolationCheck(client: __dependencyClientIsolationProbe)
           #sourceLocation()
           #endif
-          self.foo = foo
-          self.bar = bar
+          self._foo = foo
+          self._bar = bar
         }
 
         public init() {
@@ -1292,7 +1338,7 @@ final class DependencyClientMacroTests: BaseTestCase {
           #sourceLocation()
           #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(

@@ -1,4 +1,5 @@
 #if canImport(SwiftUI) && compiler(>=6)
+  import Foundation
   public import SwiftUI
 
   @available(iOS 18, macOS 15, tvOS 18, watchOS 11, visionOS 2, *)
@@ -21,9 +22,14 @@
     ///   - value: A dependency value to override for the lifetime of the preview.
     public static func dependency<Value>(
       _ keyPath: any WritableKeyPath<DependencyValues, Value> & Sendable,
-      _ value: @autoclosure @escaping () throws -> Value
+      _ value: @autoclosure () throws -> Value,
+      fileID: StaticString = #fileID,
+      line: UInt = #line,
+      column: UInt = #column
     ) -> PreviewTrait {
-      .dependencies { $0[keyPath: keyPath] = try value() }
+      .dependencies(fileID: fileID, line: line, column: column) {
+        $0[keyPath: keyPath] = try value()
+      }
     }
 
     /// A trait that overrides a preview's dependency.
@@ -42,9 +48,14 @@
     ///
     /// - Parameter value: A dependency value to override for the lifetime of the preview.
     public static func dependency<Value: TestDependencyKey>(
-      _ value: @autoclosure @escaping () throws -> Value
+      _ value: @autoclosure () throws -> Value,
+      fileID: StaticString = #fileID,
+      line: UInt = #line,
+      column: UInt = #column
     ) -> PreviewTrait where Value == Value.Value {
-      .dependencies { $0[Value.self] = try value() }
+      .dependencies(fileID: fileID, line: line, column: column) {
+        $0[Value.self] = try value()
+      }
     }
 
     /// A trait that overrides a preview's dependencies.
@@ -69,20 +80,60 @@
     /// - Parameter updateValuesForPreview: A closure for updating the current dependency values
     ///   for the lifetime of the preview.
     public static func dependencies(
-      _ updateValuesForPreview: @escaping (inout DependencyValues) throws -> Void
+      fileID: StaticString = #fileID,
+      line: UInt = #line,
+      column: UInt = #column,
+      _ updateValuesForPreview: (inout DependencyValues) throws -> Void
     ) -> PreviewTrait {
-      .modifier(DependenciesPreviewModifier(operation: updateValuesForPreview))
+      .modifier(
+        DependenciesPreviewModifier(
+          previewID: PreviewID(fileID: "\(fileID)", line: line, column: column),
+          operation: updateValuesForPreview
+        )
+      )
     }
   }
 
-  private struct DependenciesPreviewModifier: PreviewModifier {
-    @Environment(\.cacheIsReset) var cacheIsReset
-    let operation: (inout DependencyValues) throws -> Void
+  private struct PreviewID: Hashable {
+    let fileID: String
+    let line: UInt
+    let column: UInt
+  }
 
-    func body(content: Content, context: ()) -> some View {
-      ZStack {
+  private struct DependenciesPreviewModifier: PreviewModifier {
+    private struct Preparation {
+      let id = UUID()
+      let previewID: PreviewID
+      var hasRendered = false
+    }
+    private static var preparation: Preparation?
+    private let error: (any Error)?
+
+    init(previewID: PreviewID, operation: (inout DependencyValues) throws -> Void) {
+      let preparation: Preparation
+      if let currentPreparation = Self.preparation,
+        currentPreparation.previewID == previewID,
+        !currentPreparation.hasRendered
+      {
+        preparation = currentPreparation
+      } else {
+        DependencyValues._current.cachedValues.resetCache()
+        preparation = Preparation(previewID: previewID)
+        Self.preparation = preparation
+      }
+      do {
+        try Dependencies.prepareDependencies(preparationID: preparation.id, operation)
+        error = nil
+      } catch {
+        self.error = error
+      }
+    }
+
+    func body(content: Content, context: Void) -> some View {
+      Self.preparation?.hasRendered = true
+      return ZStack {
         content
-        if let error = prepareDependencies() {
+        if let error {
           VStack {
             Text("Preview Trait Failure")
               .font(.headline.bold())
@@ -96,23 +147,6 @@
           .opacity(0.75)
         }
       }
-      .environment(\.cacheIsReset, true)
     }
-
-    func prepareDependencies() -> (any Error)? {
-      if !cacheIsReset {
-        DependencyValues._current.cachedValues.resetCache()
-      }
-      do {
-        try Dependencies.prepareDependencies(operation)
-        return nil
-      } catch {
-        return error
-      }
-    }
-  }
-
-  extension EnvironmentValues {
-    @Entry fileprivate var cacheIsReset = false
   }
 #endif

@@ -1,5 +1,6 @@
 import Dependencies
 import DependenciesMacros
+import IssueReporting
 
 @DependencyClient private struct ClientWithClosuresBeforeNonClosures {
   var endpoint1: () async throws -> Int

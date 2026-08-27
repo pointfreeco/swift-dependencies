@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.3
 
 import CompilerPluginSupport
 import PackageDescription
@@ -25,12 +25,21 @@ let package = Package(
       targets: ["DependenciesTestSupport"]
     ),
   ],
+  traits: [
+    "Clocks",
+    "CombineSchedulers",
+    "Foundation",
+    "FoundationNetworking",
+    .default(enabledTraits: [
+      "Clocks", "CombineSchedulers", "Foundation", "FoundationNetworking",
+    ]),
+  ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.2"),
     .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.4"),
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.13.0"),
-    .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"605.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"605.0.0"),
   ],
   targets: [
     .target(
@@ -42,16 +51,21 @@ let package = Package(
     .target(
       name: "Dependencies",
       dependencies: [
-        .product(name: "Clocks", package: "swift-clocks"),
-        .product(name: "CombineSchedulers", package: "combine-schedulers"),
+        .product(
+          name: "Clocks",
+          package: "swift-clocks",
+          condition: .when(traits: ["Clocks"])
+        ),
+        .product(
+          name: "CombineSchedulers",
+          package: "combine-schedulers",
+          condition: .when(traits: ["CombineSchedulers"])
+        ),
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ],
       swiftSettings: [
-        .define("Clocks"),
-        .define("CombineSchedulers"),
-        .define("Foundation"),
-        .define("FoundationNetworking"),
+        .enableUpcomingFeature("MemberImportVisibility")
       ]
     ),
     .target(

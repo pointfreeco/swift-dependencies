@@ -36,7 +36,7 @@ let package = Package(
     .target(
       name: "DependenciesTestObserver",
       dependencies: [
-        .product(name: "IssueReporting", package: "swift-issue-reporting")
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
       ]
     ),
     .target(
@@ -59,7 +59,7 @@ let package = Package(
       dependencies: [
         "Dependencies",
         .product(name: "ConcurrencyExtras", package: "swift-concurrency-extras"),
-        .product(name: "IssueReportingTestSupport", package: "swift-issue-reporting"),
+        .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
       ]
     ),
     .testTarget(
@@ -67,7 +67,7 @@ let package = Package(
       dependencies: [
         "Dependencies",
         "DependenciesTestSupport",
-        .product(name: "IssueReportingTestSupport", package: "swift-issue-reporting"),
+        .product(name: "IssueReportingTestSupport", package: "xctest-dynamic-overlay"),
       ],
       exclude: ["Dependencies.xctestplan"]
     ),

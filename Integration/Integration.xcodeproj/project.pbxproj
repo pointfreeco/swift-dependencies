@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CADADD2C3034ED6500BE4D6B /* DependenciesMacros in Frameworks */ = {isa = PBXBuildFile; productRef = CADADD2B3034ED6500BE4D6B /* DependenciesMacros */; };
 		CAF21DD029B66D7500368A47 /* IntegrationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF21DCF29B66D7500368A47 /* IntegrationApp.swift */; };
 		CAF21DD429B66D7600368A47 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CAF21DD329B66D7600368A47 /* Assets.xcassets */; };
 		CAF21DD729B66D7600368A47 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CAF21DD629B66D7600368A47 /* Preview Assets.xcassets */; };
@@ -39,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CADADD2C3034ED6500BE4D6B /* DependenciesMacros in Frameworks */,
 				CAF21DFC29B66DAB00368A47 /* Dependencies in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -124,6 +126,7 @@
 			name = Integration;
 			packageProductDependencies = (
 				CAF21DFB29B66DAB00368A47 /* Dependencies */,
+				CADADD2B3034ED6500BE4D6B /* DependenciesMacros */,
 			);
 			productName = Integration;
 			productReference = CAF21DCC29B66D7500368A47 /* Integration.app */;
@@ -361,7 +364,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -390,7 +393,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -473,6 +476,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		CADADD2B3034ED6500BE4D6B /* DependenciesMacros */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DependenciesMacros;
+		};
 		CAF21DFB29B66DAB00368A47 /* Dependencies */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Dependencies;

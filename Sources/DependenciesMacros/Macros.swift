@@ -272,6 +272,76 @@ public macro _DependencyEntryDefaultValue() =
     type: "DependencyEntryDefaultValueMacro"
   )
 
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck(_: () -> Void) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck(_: @MainActor () -> Void) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryMainActorIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck<Root, Value: Sendable>(keyPath: KeyPath<Root, Value>) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck<Root, Value>(keyPath: KeyPath<Root, Value>) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntrySendableCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck(client: () -> Void) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro IsolationCheck(client: @MainActor () -> Void) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyClientMainActorCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro TypeCheck<Root, Value>(
+  _: KeyPath<Root, Value>,
+  liveValue: @autoclosure @MainActor () -> Value
+) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro TypeCheck<Root, Value>(
+  _: KeyPath<Root, Value>,
+  previewValue: @autoclosure @MainActor () -> Value
+) =
+  #externalMacro(
+    module: "DependenciesMacrosPlugin",
+    type: "DependencyEntryIsolationCheckMacro"
+  )
+
 /// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
 public struct Unimplemented: Error {
   let endpoint: String

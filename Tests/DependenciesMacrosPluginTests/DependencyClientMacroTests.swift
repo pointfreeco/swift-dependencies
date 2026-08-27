@@ -33,14 +33,67 @@ final class DependencyClientMacroTests: BaseTestCase {
           config: Bool = false,
           endpoint: @escaping () -> Void
         ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
           config: Bool = false
         ) {
           self.config = config
+        }
+      }
+      """
+    }
+  }
+
+  func testEndpointsBeforeNonEndpoints() {
+    assertMacro {
+      """
+      @DependencyClient
+      struct Client {
+        var endpoint1: () -> Void
+        var endpoint2: () -> Void
+        var identifier: String
+      }
+      """
+    } expansion: {
+      """
+      struct Client {
+        @DependencyEndpoint
+        var endpoint1: () -> Void
+        @DependencyEndpoint
+        var endpoint2: () -> Void
+        var identifier: String
+
+        init(
+          endpoint1: @escaping () -> Void,
+          endpoint2: @escaping () -> Void,
+          identifier: String
+        ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint1 = endpoint1
+          self._endpoint2 = endpoint2
+          self.identifier = identifier
+        }
+
+        init(
+          identifier: String
+        ) {
+          self.identifier = identifier
         }
       }
       """
@@ -63,7 +116,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -93,7 +153,14 @@ final class DependencyClientMacroTests: BaseTestCase {
           endpoint: @escaping () -> Void,
           config: @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
           self.config = config
         }
 
@@ -127,8 +194,15 @@ final class DependencyClientMacroTests: BaseTestCase {
           config: Swift.Bool = false,
           endpoint: @escaping () -> Void
         ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -161,8 +235,15 @@ final class DependencyClientMacroTests: BaseTestCase {
           config: Swift.Double = 1.0,
           endpoint: @escaping () -> Void
         ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -195,8 +276,15 @@ final class DependencyClientMacroTests: BaseTestCase {
           config: Swift.Int = 1,
           endpoint: @escaping () -> Void
         ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -229,8 +317,15 @@ final class DependencyClientMacroTests: BaseTestCase {
           config: Swift.String = "Blob",
           endpoint: @escaping () -> Void
         ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -263,8 +358,15 @@ final class DependencyClientMacroTests: BaseTestCase {
           config: Bool,
           endpoint: @escaping () -> Void
         ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         private init(
@@ -296,7 +398,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           config: @escaping () -> Void
         ) {
-          self.config = config
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._config = config
         }
 
         init() {
@@ -323,7 +432,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @escaping () -> Int
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -352,7 +468,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -381,7 +504,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         public init(
           endpoint: @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         public init() {
@@ -410,7 +540,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -437,7 +574,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         package init(
           endpoint: @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         package init() {
@@ -464,7 +608,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @Sendable @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -494,8 +645,15 @@ final class DependencyClientMacroTests: BaseTestCase {
           name: String? = nil,
           endpoint: @Sendable @escaping () -> Void
         ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
           self.name = name
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -533,7 +691,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @Sendable @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -572,7 +737,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @Sendable @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -607,7 +779,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @Sendable @escaping () throws -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -644,7 +823,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @Sendable @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -683,7 +869,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @Sendable @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -712,7 +905,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @Sendable @escaping () -> Void
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -742,8 +942,15 @@ final class DependencyClientMacroTests: BaseTestCase {
           id: UUID,
           endpoint: @Sendable @escaping () -> Void
         ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
           self.id = id
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(
@@ -794,7 +1001,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           endpoint: @Sendable @escaping () -> Int
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
         }
 
         init() {
@@ -837,7 +1051,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           fetch: @escaping (_ id: Int) throws -> String
         ) {
-          self.fetch = fetch
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._fetch = fetch
         }
 
         init() {
@@ -881,7 +1102,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           fetch: @escaping (_ id: Int) throws -> String
         ) {
-          self.fetch = fetch
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._fetch = fetch
         }
 
         init() {
@@ -919,7 +1147,14 @@ final class DependencyClientMacroTests: BaseTestCase {
         init(
           fetch: @escaping (Int) throws -> String
         ) {
-          self.fetch = fetch
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._fetch = fetch
         }
 
         init() {
@@ -968,7 +1203,14 @@ final class DependencyClientMacroTests: BaseTestCase {
           endpoint: @escaping () -> Void,
           value: <#Type#> = Value()
         ) {
-          self.endpoint = endpoint
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._endpoint = endpoint
           self.value = value
         }
 
@@ -1050,8 +1292,15 @@ final class DependencyClientMacroTests: BaseTestCase {
           foo: @escaping () -> String,
           bar: @escaping () -> String
         ) {
-          self.foo = foo
-          self.bar = bar
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
+          self._foo = foo
+          self._bar = bar
         }
 
         public init() {
@@ -1081,8 +1330,15 @@ final class DependencyClientMacroTests: BaseTestCase {
           config: Bool = false,
           endpoint: @escaping () -> Void
         ) {
+          #if DEBUG
+          func __dependencyClientIsolationProbe() {
+          }
+          #sourceLocation(file: "Test.swift", line: 1)
+          #IsolationCheck(client: __dependencyClientIsolationProbe)
+          #sourceLocation()
+          #endif
           self.config = config
-          self.endpoint = endpoint
+          self._endpoint = endpoint
         }
 
         init(

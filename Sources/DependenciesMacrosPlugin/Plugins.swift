@@ -9,5 +9,9 @@ struct MacrosPlugin: CompilerPlugin {
     DependencyEndpointIgnoredMacro.self,
     DependencyEntryMacro.self,
     DependencyEntryDefaultValueMacro.self,
+    DependencyEntryIsolationCheckMacro.self,
+    DependencyEntryMainActorIsolationCheckMacro.self,
+    DependencyEntrySendableCheckMacro.self,
+    DependencyClientMainActorCheckMacro.self,
   ]
 }

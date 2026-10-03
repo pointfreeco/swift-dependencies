@@ -37,6 +37,7 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.2"),
     .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.4"),
+    .package(url: "https://github.com/pointfreeco/swift-compilation-testing", branch: "simplification"),
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-issue-reporting", from: "2.1.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"605.0.0"),
@@ -82,6 +83,15 @@ let package = Package(
         "Dependencies",
         "DependenciesTestSupport",
         .product(name: "IssueReportingTestSupport", package: "swift-issue-reporting"),
+      ],
+      exclude: ["Dependencies.xctestplan"]
+    ),
+    .testTarget(
+      name: "DependenciesCompilationTests",
+      dependencies: [
+        "Dependencies",
+        "DependenciesMacros",
+        .product(name: "CompilationTesting", package: "swift-compilation-testing"),
       ],
       exclude: ["Dependencies.xctestplan"]
     ),

@@ -31,10 +31,17 @@
     /// [test-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/testclock
     /// [swift-clocks]: https://github.com/pointfreeco/swift-clocks
     /// [unimplemented-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/unimplementedclock
-    public var continuousClock: any NonsendingClock<Duration> {
-      get { self[ContinuousClockKey.self] }
-      set { self[ContinuousClockKey.self] = newValue }
-    }
+    #if Clocks2
+      public var continuousClock: any NonsendingClock<Duration> {
+        get { self[ContinuousClockKey.self] }
+        set { self[ContinuousClockKey.self] = newValue }
+      }
+    #else
+      public var continuousClock: any Clock<Duration> {
+        get { self[ContinuousClockKey.self] }
+        set { self[ContinuousClockKey.self] = newValue }
+      }
+    #endif
 
     /// The current clock that features should use when a `SuspendingClock` would be appropriate.
     ///
@@ -64,19 +71,36 @@
     /// [test-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/testclock
     /// [swift-clocks]: https://github.com/pointfreeco/swift-clocks
     /// [unimplemented-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/unimplementedclock
-    public var suspendingClock: any NonsendingClock<Duration> {
-      get { self[SuspendingClockKey.self] }
-      set { self[SuspendingClockKey.self] = newValue }
-    }
+    #if Clocks2
+      public var suspendingClock: any NonsendingClock<Duration> {
+        get { self[SuspendingClockKey.self] }
+        set { self[SuspendingClockKey.self] = newValue }
+      }
+    #else
+      public var suspendingClock: any Clock<Duration> {
+        get { self[SuspendingClockKey.self] }
+        set { self[SuspendingClockKey.self] = newValue }
+      }
+    #endif
 
     private enum ContinuousClockKey: DependencyKey {
-      static let liveValue: any NonsendingClock<Duration> = ContinuousClock()
-      static let testValue: any NonsendingClock<Duration> = UnimplementedClock(.continuous)
+      #if Clocks2
+        static let liveValue: any NonsendingClock<Duration> = ContinuousClock()
+        static let testValue: any NonsendingClock<Duration> = UnimplementedClock(.continuous)
+      #else
+        static let liveValue: any Clock<Duration> = ContinuousClock()
+        static let testValue: any Clock<Duration> = UnimplementedClock(.continuous)
+      #endif
     }
 
     private enum SuspendingClockKey: DependencyKey {
-      static let liveValue: any NonsendingClock<Duration> = SuspendingClock()
-      static let testValue: any NonsendingClock<Duration> = UnimplementedClock(.suspending)
+      #if Clocks2
+        static let liveValue: any NonsendingClock<Duration> = SuspendingClock()
+        static let testValue: any NonsendingClock<Duration> = UnimplementedClock(.suspending)
+      #else
+        static let liveValue: any Clock<Duration> = SuspendingClock()
+        static let testValue: any Clock<Duration> = UnimplementedClock(.suspending)
+      #endif
     }
   }
 #endif

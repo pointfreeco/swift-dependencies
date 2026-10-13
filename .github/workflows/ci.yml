@@ -14,13 +14,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  macos-15:
-    name: macOS 15
-    runs-on: macos-15
+  macos-26:
+    name: macOS 26
+    runs-on: macos-26
     strategy:
       matrix:
         config: ['debug', 'release']
-        xcode: ['26.6.0', '27.0.0']
+        xcode: ['26.6']
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}

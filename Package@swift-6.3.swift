@@ -36,7 +36,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/combine-schedulers", from: "1.0.2"),
-    .package(url: "https://github.com/pointfreeco/swift-clocks", from: "1.0.4"),
+    .package(url: "https://github.com/pointfreeco/swift-clocks", /*"1.0.0..<3.0.0"*/ branch: "clocks-2-more"),
     .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.13.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"605.0.0"),

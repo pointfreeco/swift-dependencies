@@ -63,7 +63,7 @@ jobs:
     strategy:
       matrix:
         config: ['debug']
-        swift: ['6.3', '6.4']
+        swift: ['6.3']
     steps:
       - uses: actions/checkout@v4
       - name: Build Swift Package on Android

@@ -31,7 +31,7 @@
     /// [test-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/testclock
     /// [swift-clocks]: https://github.com/pointfreeco/swift-clocks
     /// [unimplemented-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/unimplementedclock
-    #if Clocks2
+    #if canImport(Clocks2)
       public var continuousClock: any NonsendingClock<Duration> {
         get { self[ContinuousClockKey.self] }
         set { self[ContinuousClockKey.self] = newValue }
@@ -71,7 +71,7 @@
     /// [test-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/testclock
     /// [swift-clocks]: https://github.com/pointfreeco/swift-clocks
     /// [unimplemented-clock]: https://swiftpackageindex.com/pointfreeco/swift-clocks/main/documentation/clocks/unimplementedclock
-    #if Clocks2
+    #if canImport(Clocks2)
       public var suspendingClock: any NonsendingClock<Duration> {
         get { self[SuspendingClockKey.self] }
         set { self[SuspendingClockKey.self] = newValue }
@@ -84,7 +84,7 @@
     #endif
 
     private enum ContinuousClockKey: DependencyKey {
-      #if Clocks2
+      #if canImport(Clocks2)
         static let liveValue: any NonsendingClock<Duration> = ContinuousClock()
         static let testValue: any NonsendingClock<Duration> = UnimplementedClock(.continuous)
       #else
@@ -94,7 +94,7 @@
     }
 
     private enum SuspendingClockKey: DependencyKey {
-      #if Clocks2
+      #if canImport(Clocks2)
         static let liveValue: any NonsendingClock<Duration> = SuspendingClock()
         static let testValue: any NonsendingClock<Duration> = UnimplementedClock(.suspending)
       #else

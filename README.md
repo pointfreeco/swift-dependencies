@@ -2,6 +2,7 @@
 
 A dependency management library inspired by SwiftUI's "environment."
 
+[![](https://img.shields.io/badge/documentation-gray?logo=swift&logoColor=white)](https://swiftpackageindex.com/pointfreeco/swift-dependencies/main/documentation/dependencies)
 [![CI](https://github.com/pointfreeco/swift-dependencies/actions/workflows/ci.yml/badge.svg)](https://github.com/pointfreeco/swift-dependencies/actions/workflows/ci.yml)
 [![Slack](https://img.shields.io/badge/slack-chat-informational.svg?label=Slack&logo=slack)](http://pointfree.co/slack-invite)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-dependencies%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/pointfreeco/swift-dependencies)
@@ -168,15 +169,12 @@ and `UUID()`, and we'd have to wait for real world time to pass, making the test
 But, controllable dependencies aren't only useful for tests. They can also be used in Xcode
 previews. Suppose the feature above makes use of a clock to sleep for an amount of time before
 something happens in the view. If you don't want to literally wait for time to pass in order to see
-how the view changes, you can override the clock dependency to be an "immediate" clock using
-`prepareDependencies`:
+how the view changes, you can override the clock dependency to be an "immediate" clock using the
+`.dependencies` preview trait:
 
 ```swift
-#Preview {
-  let _ = prepareDependencies {
-    $0.continuousClock = ImmediateClock()
-  }
-  // All access of '@Dependency(\.continuousClock)' in this preview will 
+#Preview(traits: .dependencies { $0.continuousClock = ImmediateClock() }) {
+  // All access of '@Dependency(\.continuousClock)' in this preview will
   // use an immediate clock.
   FeatureView(model: FeatureModel())
 }

@@ -33,6 +33,7 @@
 - ``notificationCenter``
 - ``openURL``
 - ``precondition``
+- ``preferredLocales``
 - ``suspendingClock``
 - ``timeZone``
 - ``urlSession``

@@ -99,13 +99,12 @@ final class FeatureModel {
 
 That small change makes this feature much friendlier to Xcode previews and testing.
 
-For previews, you can use ``prepareDependencies(_:)`` to override the
-``DependencyValues/continuousClock`` dependency to be an "immediate" clock, which is a clock that
-does not actually sleep for any amount of time:
+For previews, you can use the ``DeveloperToolsSupport/PreviewTrait/dependencies(_:)`` preview
+trait to override the ``DependencyValues/continuousClock`` dependency to be an "immediate" clock,
+which is a clock that does not actually sleep for any amount of time:
 
 ```swift
-#Preview {
-  let _ = prepareDependencies { $0.continuousClock = ImmediateClock() }
+#Preview(traits: .dependencies { $0.continuousClock = ImmediateClock() }) {
   FeatureView(model: FeatureModel())
 }
 ```

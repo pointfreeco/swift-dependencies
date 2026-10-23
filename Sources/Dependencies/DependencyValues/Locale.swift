@@ -32,29 +32,64 @@
     /// // Make assertions with model...
     /// ```
     public var locale: Locale {
-      get {
-        #if canImport(Darwin)
-          self[LocaleKey.self]
-        #else
-          self[LocaleKey.self].wrappedValue
-        #endif
-      }
-      set {
-        #if canImport(Darwin)
-          self[LocaleKey.self] = newValue
-        #else
-          self[LocaleKey.self].wrappedValue = newValue
-        #endif
-      }
+      get { self[LocaleKey.self] }
+      set { self[LocaleKey.self] = newValue }
+    }
+
+    /// The preferred locales that features should use for content-language selection.
+    ///
+    /// By default, locales created from `Locale.preferredLanguages` are supplied. Unlike ``locale``,
+    /// which represents the locale to use for formatting and regional conventions, this ordered
+    /// list represents the user's preferred content languages. When used in tests, access will call
+    /// to `reportIssue` when invoked, unless explicitly overridden.
+    ///
+    /// You can access the preferred locales from a feature by introducing a ``Dependency`` property
+    /// wrapper to the property:
+    ///
+    /// ```swift
+    /// @Observable
+    /// final class FeatureModel {
+    ///   @ObservationIgnored
+    ///   @Dependency(\.preferredLocales) var preferredLocales
+    ///   // ...
+    /// }
+    /// ```
+    ///
+    /// To override the preferred locales in tests, use ``withValues(_:assert:)-1egh6``:
+    ///
+    /// ```swift
+    /// // Provision model with overridden dependencies
+    /// let model = withDependencies {
+    ///   $0.preferredLocales = [Locale(identifier: "es-ES")]
+    /// } operation: {
+    ///   FeatureModel()
+    /// }
+    ///
+    /// // Make assertions with model...
+    /// ```
+    public var preferredLocales: [Locale] {
+      get { self[PreferredLocalesKey.self].preferredLocales }
+      set { self[PreferredLocalesKey.self] = PreferredLocales(constantLocales: newValue) }
     }
 
     private enum LocaleKey: DependencyKey {
-      #if canImport(Darwin)
-        static let liveValue = Locale.autoupdatingCurrent
-      #else
-        // NB: 'Locale' sendability is not yet available in a 'swift-corelibs-foundation' release
-        static let liveValue = UncheckedSendable(Locale.autoupdatingCurrent)
-      #endif
+      static var liveValue: Locale { .autoupdatingCurrent }
+    }
+
+    private enum PreferredLocalesKey: DependencyKey {
+      static var liveValue: PreferredLocales {
+        PreferredLocales()
+      }
+    }
+
+    private struct PreferredLocales: Sendable {
+      var constantLocales: [Locale]?
+      var preferredLocales: [Locale] {
+        constantLocales
+          ?? Locale.preferredLanguages.compactMap {
+            Locale(identifier: $0)
+          }
+      }
     }
   }
 #endif

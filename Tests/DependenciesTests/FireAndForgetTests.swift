@@ -1,5 +1,6 @@
 import ConcurrencyExtras
 import Dependencies
+import Testing
 import XCTest
 
 final class FireAndForgetTests: XCTestCase {
@@ -82,4 +83,16 @@ final class FireAndForgetTests: XCTestCase {
       }
     }
   #endif
+}
+
+@Test func failure() async {
+  @Dependency(\.fireAndForget) var fireAndForget
+  struct Failure: Error {}
+  await withKnownIssue {
+    await fireAndForget {
+      throw Failure()
+    }
+  } matching: {
+    $0.description.contains("Failure()")
+  }
 }

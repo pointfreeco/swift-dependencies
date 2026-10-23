@@ -1,9 +1,10 @@
 #if FoundationNetworking && !os(WASI)
-  public import Foundation
   import IssueReporting
 
   #if canImport(FoundationNetworking)
     public import FoundationNetworking
+  #else
+    public import Foundation
   #endif
 
   extension DependencyValues {

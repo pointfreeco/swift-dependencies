@@ -98,7 +98,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       if functionType.effectSpecifiers?.hasThrowsClause == true {
         unimplementedDefault.statements.append(
           """
-          throw DependenciesMacros.Unimplemented("\(raw: unescapedIdentifier)")
+          throw Dependencies.UnimplementedDependencyEndpoint("\(raw: unescapedIdentifier)")
           """
         )
       } else if functionType.isVoid {
@@ -121,7 +121,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
     }
     unimplementedDefault.statements.insert(
       #"""
-      IssueReporting.reportIssue("Unimplemented: '\(Self.self).\#(raw: unescapedIdentifier)'")
+      Dependencies._reportIssue("Unimplemented: '\(Self.self).\#(raw: unescapedIdentifier)'")
       """#,
       at: unimplementedDefault.statements.startIndex
     )

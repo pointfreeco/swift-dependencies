@@ -17,7 +17,7 @@ public func _reportIssue(
 }
 
 /// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
-public struct UnimplementedDependencyEndpoint: Error {
+public struct Unimplemented: Error {
   let endpoint: String
 
   public init(_ endpoint: String) {

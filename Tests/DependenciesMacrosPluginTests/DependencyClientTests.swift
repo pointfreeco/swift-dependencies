@@ -1,5 +1,4 @@
 #if canImport(ObjectiveC)
-  import Dependencies
   import DependenciesMacros
   import IssueReporting
   import XCTest
@@ -17,9 +16,9 @@
       do {
         let _ = try client.fetch()
         XCTFail("Client.fetch should throw an error.")
-      } catch is Dependencies.UnimplementedDependencyEndpoint {
+      } catch is DependenciesMacros.Unimplemented {
       } catch {
-        XCTFail("Expected UnimplementedDependencyEndpoint, got \(error).")
+        XCTFail("Expected DependenciesMacros.Unimplemented, got \(error).")
       }
     }
 

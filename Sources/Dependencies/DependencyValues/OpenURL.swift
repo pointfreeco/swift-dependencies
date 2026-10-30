@@ -1,4 +1,7 @@
 #if canImport(SwiftUI)
+  #if os(macOS)
+    import AppKit
+  #endif
   public import Foundation
   import IssueReporting
   import SwiftUI
@@ -14,31 +17,49 @@
 
   @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
   private enum OpenURLKey: DependencyKey {
-    static let liveValue = OpenURLEffect { url in
-      let stream = AsyncStream<Bool> { continuation in
-        let task = Task { @MainActor in
-          #if os(watchOS)
-            EnvironmentValues().openURL(url)
-            continuation.yield(true)
-            continuation.finish()
-          #else
-            EnvironmentValues().openURL(url) { canOpen in
-              continuation.yield(canOpen)
+    #if os(macOS)
+      static let liveValue = OpenURLPlatform.liveValue()
+    #else
+      static let liveValue = OpenURLEffect { url in
+        let stream = AsyncStream<Bool> { continuation in
+          let task = Task { @MainActor in
+            #if os(watchOS)
+              EnvironmentValues().openURL(url)
+              continuation.yield(true)
               continuation.finish()
-            }
-          #endif
+            #else
+              EnvironmentValues().openURL(url) { canOpen in
+                continuation.yield(canOpen)
+                continuation.finish()
+              }
+            #endif
+          }
+          continuation.onTermination = { @Sendable _ in
+            task.cancel()
+          }
         }
-        continuation.onTermination = { @Sendable _ in
-          task.cancel()
-        }
+        return await stream.first(where: { _ in true }) ?? false
       }
-      return await stream.first(where: { _ in true }) ?? false
-    }
+    #endif
     static let testValue = OpenURLEffect { _ in
       reportIssue(#"Unimplemented: @Dependency(\.openURL)"#)
       return false
     }
   }
+
+  #if os(macOS)
+    enum OpenURLPlatform {
+      static func liveValue(
+        using workspaceOpen: @escaping @MainActor @Sendable (URL) -> Bool = {
+          NSWorkspace.shared.open($0)
+        }
+      ) -> OpenURLEffect {
+        OpenURLEffect { url in
+          await workspaceOpen(url)
+        }
+      }
+    }
+  #endif
 
   public struct OpenURLEffect: Sendable {
     private let handler: @Sendable (URL) async -> Bool

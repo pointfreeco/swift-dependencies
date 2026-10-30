@@ -16,7 +16,9 @@
       do {
         let _ = try client.fetch()
         XCTFail("Client.fetch should throw an error.")
+      } catch is DependenciesMacros.Unimplemented {
       } catch {
+        XCTFail("Expected DependenciesMacros.Unimplemented, got \(error).")
       }
     }
 

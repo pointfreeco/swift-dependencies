@@ -341,12 +341,3 @@ public macro TypeCheck<Root, Value>(
     module: "DependenciesMacrosPlugin",
     type: "DependencyEntryIsolationCheckMacro"
   )
-
-/// The error thrown by "unimplemented" closures produced by ``DependencyEndpoint(method:)``
-public struct Unimplemented: Error {
-  let endpoint: String
-
-  public init(_ endpoint: String) {
-    self.endpoint = endpoint
-  }
-}

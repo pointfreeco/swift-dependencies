@@ -1,6 +1,5 @@
 public import Dependencies
 import DependenciesMacros
-import IssueReporting
 
 private enum PackageACL {
   @DependencyClient

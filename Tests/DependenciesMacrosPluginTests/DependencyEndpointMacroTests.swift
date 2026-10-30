@@ -34,7 +34,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Void = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -62,7 +62,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Bool = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
           return false
         }
       }
@@ -112,7 +112,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Bool = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
           return <#Bool#>
         }
       }
@@ -162,7 +162,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: (Int, Bool, String) -> Bool = { _, _, _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
           return <#Bool#>
         }
       }
@@ -191,7 +191,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () throws -> Bool = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
           throw DependenciesMacros.Unimplemented("endpoint")
         }
       }
@@ -220,7 +220,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _apiRequest: @Sendable (ServerRoute.Api.Route) async throws -> (Data, URLResponse) = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).apiRequest'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).apiRequest'")
           throw DependenciesMacros.Unimplemented("apiRequest")
         }
       }
@@ -249,7 +249,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> () = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -277,7 +277,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Int? = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
           return nil
         }
       }
@@ -306,7 +306,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Optional<Int> = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
           return nil
         }
       }
@@ -335,7 +335,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: @Sendable (Int) -> Void = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -368,7 +368,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: @Sendable (String, _ id: Int, _ progress: Float) async -> Void = { _, _, _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -401,7 +401,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: @MainActor @Sendable (_ id: Int) async -> Void = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -434,7 +434,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: @Sendable (_ id: Int) async -> Void = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -466,7 +466,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: (_ id: Int) -> Void = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -498,7 +498,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Void = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -550,7 +550,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: (_ id: Int) -> Void = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -595,7 +595,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
 
       private var _return: () throws -> Int = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).return'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).return'")
           throw DependenciesMacros.Unimplemented("return")
       }
       """#
@@ -624,7 +624,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
       }
 
       private var _return: (_ id: Int) throws -> Int = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).return'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).return'")
           throw DependenciesMacros.Unimplemented("return")
       }
       """#
@@ -679,7 +679,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _doAThing: (_ value: Int) -> String = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).doAThing'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).doAThing'")
           return "Hello, world"
           }
       }
@@ -714,7 +714,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _doAThing: (_ a: inout Int, _ b: Int, _ c: inout Bool) -> String = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).doAThing'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).doAThing'")
           return "Hello, world"
           }
       }
@@ -747,7 +747,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _bar: (_ a: @autoclosure () -> Int, _ b: () -> Int, _ c: @autoclosure () -> Int) -> Void = { _, _, _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).bar'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).bar'")
         }
       }
       """#
@@ -817,7 +817,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _foo: () -> Void = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).foo'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).foo'")
           return {
             fatalError()
           }()
@@ -832,7 +832,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _bar: () -> String = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).bar'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).bar'")
           return {
             fatalError("Goodbye")
           }()
@@ -871,7 +871,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _foo: () throws -> Void = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).foo'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).foo'")
           throw DependenciesMacros.Unimplemented("foo")
         } {
             willSet {
@@ -904,7 +904,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Void = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -936,7 +936,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: (_ id: Int) -> Void = { _ in
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#
@@ -964,7 +964,7 @@ final class DependencyEndpointMacroTests: BaseTestCase {
         }
 
         private var _endpoint: () -> Void = {
-          IssueReporting.reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
         }
       }
       """#

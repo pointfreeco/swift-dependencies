@@ -63,6 +63,38 @@
         #expect(value == 1)
       #endif
     }
+    
+    @Test
+    func cacheTargetedKeypathReset_liveContext() {
+      withDependencies {
+        $0.context = .live
+      } operation: {
+        @Dependency(Client.self) var client
+        var value = client.increment()
+        #expect(value == 1)
+        value = client.increment()
+        #expect(value == 2)
+        DependencyValues.reset(\.client)
+        value = client.increment()
+        #expect(value == 1)
+      }
+    }
+    
+    @Test
+    func cacheTargetedTypeReset_liveContext() {
+      withDependencies {
+        $0.context = .live
+      } operation: {
+        @Dependency(Client.self) var client
+        var value = client.increment()
+        #expect(value == 1)
+        value = client.increment()
+        #expect(value == 2)
+        DependencyValues.reset(Client.self)
+        value = client.increment()
+        #expect(value == 1)
+      }
+    }
 
     @Test(.dependency(\.date.now, Date(timeIntervalSinceReferenceDate: 0)))
     func trait() {
@@ -108,9 +140,17 @@
     }
   }
 
-  private struct Client: TestDependencyKey {
+  private struct Client: DependencyKey {
     var increment: @Sendable () -> Int
+    static var liveValue: Client {
+      getClient()
+    }
+    
     static var testValue: Client {
+      getClient()
+    }
+    
+    static func getClient() -> Client {
       let count = LockIsolated(0)
       return Self {
         count.withValue {
@@ -118,6 +158,12 @@
           return $0
         }
       }
+    }
+  }
+  private extension DependencyValues {
+    var client: Client {
+      get { self[Client.self] }
+      set { self[Client.self] = newValue }
     }
   }
 

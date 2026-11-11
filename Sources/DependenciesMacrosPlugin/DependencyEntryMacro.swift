@@ -3,6 +3,10 @@ public import SwiftSyntax
 import SwiftSyntaxBuilder
 public import SwiftSyntaxMacros
 
+#if !canImport(SwiftSyntax600)
+  import SwiftSyntaxMacroExpansion
+#endif
+
 public enum DependencyEntryMacro {}
 
 extension DependencyEntryMacro: AccessorMacro {

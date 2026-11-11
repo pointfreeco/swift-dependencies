@@ -158,6 +158,14 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       if attributes.count > 1 {
         attributes.removeAll(where: { $0 == "Sendable" })
       }
+      var isolation = ""
+      #if canImport(SwiftSyntax602)
+        if let specifier = binding.typeAnnotation?.type.as(AttributedTypeSyntax.self)?.specifiers
+          .lazy.compactMap({ $0.as(NonisolatedTypeSpecifierSyntax.self) }).first
+        {
+          isolation = "\(specifier.trimmedDescription) "
+        }
+      #endif
 
       var parameters = functionType.parameters
       for (offset, i) in parameters.indices.enumerated() {
@@ -180,7 +188,7 @@ public enum DependencyEndpointMacro: AccessorMacro, PeerMacro {
       decls.append(
         """
         \(raw: attributes.map { "@\($0) " }.joined())\
-        \(access)func \(try node.methodArgument ?? identifier)(\(parameters))\
+        \(access)\(raw: isolation)func \(try node.methodArgument ?? identifier)(\(parameters))\
         \(functionType.effectSpecifiers)\(functionType.returnClause) {
         \(raw: effectSpecifiers)self.\(identifier)(\(raw: appliedParameters))
         }

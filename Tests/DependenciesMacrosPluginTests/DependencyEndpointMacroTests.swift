@@ -441,6 +441,107 @@ final class DependencyEndpointMacroTests: BaseTestCase {
     }
   }
 
+  #if canImport(SwiftSyntax602)
+    func testNonisolatedNonsending() {
+      assertMacro {
+        """
+        struct Client {
+          @DependencyEndpoint
+          public var endpoint: nonisolated(nonsending) @Sendable (_ id: Int) async -> Void
+        }
+        """
+      } expansion: {
+        #"""
+        struct Client {
+          public var endpoint: nonisolated(nonsending) @Sendable (_ id: Int) async -> Void {
+            get {
+              _endpoint
+            }
+            set {
+              _endpoint = newValue
+            }
+          }
+
+          @Sendable
+            public nonisolated(nonsending) func endpoint(id p0: Int) async -> Void {
+            await self.endpoint(p0)
+          }
+
+          private var _endpoint: nonisolated(nonsending) @Sendable (_ id: Int) async -> Void = { _ in
+            DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          }
+        }
+        """#
+      }
+    }
+
+    func testNonisolatedNonsending_MethodName() {
+      assertMacro {
+        """
+        struct Client {
+          @DependencyEndpoint(method: "myEndpoint")
+          var endpoint: nonisolated(nonsending) @Sendable (Int) async -> Void
+        }
+        """
+      } expansion: {
+        #"""
+        struct Client {
+          var endpoint: nonisolated(nonsending) @Sendable (Int) async -> Void {
+            get {
+              _endpoint
+            }
+            set {
+              _endpoint = newValue
+            }
+          }
+
+          @Sendable nonisolated(nonsending) func myEndpoint(_ p0: Int) async -> Void {
+            await self.endpoint(p0)
+          }
+
+          private var _endpoint: nonisolated(nonsending) @Sendable (Int) async -> Void = { _ in
+            DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).endpoint'")
+          }
+        }
+        """#
+      }
+    }
+
+    func testNonisolatedNonsending_Throwing() {
+      assertMacro {
+        """
+        struct Client {
+          @DependencyEndpoint
+          public var fetch: nonisolated(nonsending) @Sendable (_ id: Int) async throws -> String
+        }
+        """
+      } expansion: {
+        #"""
+        struct Client {
+          public var fetch: nonisolated(nonsending) @Sendable (_ id: Int) async throws -> String {
+            get {
+              _fetch
+            }
+            set {
+              _fetch = newValue
+            }
+          }
+
+          @Sendable
+            public nonisolated(nonsending) func fetch(id p0: Int) async throws -> String {
+            try await self.fetch(p0)
+          }
+
+          private var _fetch: nonisolated(nonsending) @Sendable (_ id: Int) async throws -> String = { _ in
+            DependenciesMacros._reportIssue("Unimplemented: '\(Self.self).fetch'")
+            throw DependenciesMacros.Unimplemented("fetch")
+          }
+        }
+        """#
+      }
+    }
+  #endif
+
   func testMethodName() {
     assertMacro {
       """
